@@ -10,9 +10,9 @@ const {
   phoneValidation,
   emailPhoneAndOtpValidation,
 } = require("../joi_validations/validate");
-const { getError, getSuccessData, clean, timeExpired } = require("../helpers");
-const { send_message } = require("../twilio");
-const Mailer = require("../Mailer");
+const { getError, getSuccessData, clean, timeExpired } = require("../helper_functions/helpers");
+const { send_message } = require("../twilio/twilio");
+const Mailer = require("../node_mailer/mailer");
 
 //
 router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
