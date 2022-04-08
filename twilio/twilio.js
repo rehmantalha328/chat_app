@@ -19,7 +19,6 @@ const send_message = ({ body, number }) => {
     from: myNumber,
     to: number,
   });
-  // }
 };
 
 module.exports = { send_message };
