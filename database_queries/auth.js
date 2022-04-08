@@ -7,7 +7,7 @@ function getUserFromId(id) {
       user_id: id,
     },
   });
-}
+};
 
 function getUserFromphone(phone) {
   return prisma.user.findFirst({
@@ -15,9 +15,18 @@ function getUserFromphone(phone) {
       phone,
     },
   });
-}
+};
+
+function chkExistingUserName(username) {
+  return prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+};
 
 module.exports = {
   getUserFromphone,
   getUserFromId,
+  chkExistingUserName
 };

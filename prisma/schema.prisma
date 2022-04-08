@@ -16,8 +16,8 @@ model User {
   username                     String?          @db.VarChar(255)
   password                     String?          @db.VarChar(255)
   Otp                          Int?
-  // online_status                Boolean?         @default(false)
-  // online_status_time           DateTime?        @updatedAt
+  // online_status             Boolean?         @default(false)
+  // online_status_time        DateTime?        @updatedAt
   created_at                   DateTime         @default(now())
   updated_at                   DateTime         @updatedAt
   my_created_groups            Groups[]
