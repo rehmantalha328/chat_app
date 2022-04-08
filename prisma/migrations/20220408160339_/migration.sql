@@ -1,14 +1,16 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "User" (
+    "user_id" TEXT NOT NULL,
+    "phone" VARCHAR(255) NOT NULL,
+    "username" VARCHAR(255),
+    "password" VARCHAR(255),
+    "Otp" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "Otp_verified" BOOLEAN DEFAULT false,
 
-  - Added the required column `updated_at` to the `User` table without a default value. This is not possible if the table is not empty.
-
-*/
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "online_status" BOOLEAN DEFAULT false,
-ADD COLUMN     "online_status_time" TIMESTAMP(3),
-ADD COLUMN     "updated_at" TIMESTAMP(3) NOT NULL,
-ALTER COLUMN "Otp" DROP NOT NULL;
+    CONSTRAINT "User_pkey" PRIMARY KEY ("user_id")
+);
 
 -- CreateTable
 CREATE TABLE "Groups" (
@@ -26,8 +28,9 @@ CREATE TABLE "Groups" (
 CREATE TABLE "Group_members" (
     "id" TEXT NOT NULL,
     "group_id" TEXT NOT NULL,
-    "creator_id" TEXT NOT NULL,
     "member_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Group_members_pkey" PRIMARY KEY ("id")
 );
@@ -40,6 +43,8 @@ CREATE TABLE "Group_messages" (
     "group_id" TEXT NOT NULL,
     "message_body" TEXT,
     "attatchment" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Group_messages_pkey" PRIMARY KEY ("id")
 );
