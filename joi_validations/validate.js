@@ -1,3 +1,6 @@
+const { MessageType } = require("@prisma/client");
+const Joi = require("joi");
+
 function emailValidation(data) {
   const emailSchema = Joi.object({
     email: Joi.string().email().required(),
@@ -35,8 +38,8 @@ function emailPhoneAndOtpValidation(data) {
 }
 
 module.exports = {
-    emailValidation,
-    emailPhoneAndOtpValidation,
-    phoneAndOtpValidation,
-    phoneValidation,
-}
+  emailValidation,
+  emailPhoneAndOtpValidation,
+  phoneAndOtpValidation,
+  phoneValidation,
+};

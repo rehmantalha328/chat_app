@@ -10,7 +10,12 @@ const {
   phoneValidation,
   emailPhoneAndOtpValidation,
 } = require("../joi_validations/validate");
-const { getError, getSuccessData, clean, timeExpired } = require("../helper_functions/helpers");
+const {
+  getError,
+  getSuccessData,
+  clean,
+  timeExpired,
+} = require("../helper_functions/helpers");
 const { send_message } = require("../twilio/twilio");
 const Mailer = require("../node_mailer/mailer");
 
@@ -18,7 +23,7 @@ const Mailer = require("../node_mailer/mailer");
 router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   const { error, value } = phoneValidation(req.body);
   if (error) return res.status(404).send(getError(error.details[0].message));
-  const phone = "+" + clean(value.phone); 
+  const phone = "+" + clean(value.phone);
   // return res.send(value);
 
   try {
@@ -37,16 +42,11 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("Phone can only starts with +92 or +234."));
 
-    const PhoneExists = await prisma.users.findFirst({
+    const PhoneExists = await prisma.user.findFirst({
       where: {
         phone,
-        is_registered: true,
       },
     });
-    if (PhoneExists)
-      return res
-        .status(404)
-        .send(getError("This phone number is already registered"));
 
     const random = rn.generator({
       min: 1111,
@@ -54,31 +54,25 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
       integer: true,
     })();
 
-    const existingOtp = await prisma.otpVerify.findFirst({
-      where: {
-        user_identifier: phone,
-      },
-    });
-
     const messageSent = await send_message({
       body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
       number: phone,
     });
     if (messageSent) {
-      if (existingOtp) {
-        await prisma.otpVerify.update({
+      if (PhoneExists) {
+        await prisma.user.update({
           where: {
-            id: existingOtp.id,
+            id: PhoneExists.user_id,
           },
           data: {
-            otp: random,
+            Otp: random,
           },
         });
       } else {
-        await prisma.otpVerify.create({
+        await prisma.user.create({
           data: {
-            user_identifier: phone,
-            otp: random,
+            Otp: random,
+            phone,
           },
         });
       }
@@ -89,6 +83,8 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
             "Otp sent to your phone, which is valid only for 5 minutes"
           )
         );
+    } else {
+      return res.status(404).send(getError("Please try again"));
     }
   } catch (err) {
     if (err && err.message) {
