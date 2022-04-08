@@ -37,7 +37,9 @@ function signUpValidation(data) {
 function emailPhoneAndOtpValidation(data) {
   const phoneEmailAndOtpSchema = Joi.object({
     email: Joi.string().email().required(),
-    phone: Joi.string().required(),
+    phone: Joi.string()
+      .length(10)
+      .pattern(/^[0-9]+$/),
     otp: Joi.number().integer().greater(1111).less(9999).required().messages({
       "number.greater": "otp must be 4 digit number.",
       "number.less": "otp must be 4 digit number.",

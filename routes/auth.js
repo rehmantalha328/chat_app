@@ -16,7 +16,10 @@ const {
   deleteUploadedImage,
   clean,
 } = require("../helper_functions/helpers");
-const { getUserFromphone,chkExistingUserName } = require("../database_queries/auth");
+const {
+  getUserFromphone,
+  chkExistingUserName,
+} = require("../database_queries/auth");
 const uploadImage = require("../middlewares/imageMulter");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const { AdminApproval, AccountTypes } = require("@prisma/client");
@@ -26,7 +29,6 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
-      // deleteUploadedImage(req);
       return res.status(404).send(getError(error.details[0].message));
     }
     const { username: _username, password } = value;
@@ -42,22 +44,20 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
       return res.status(404).send(getError("phone number doest not Exist."));
     }
     if (chkphone?.Otp_verified == false) {
-      return res.status(404).send(getError("Please verify your phone number first."));
-      
-    }
-      const createUser = await prisma.user.update({
-        where: {
-          user_id: chkphone?.user_id,
-        },
-        data: {
-          password,
-          username,
-        },
-      });
       return res
-        .status(200)
-        .send(getSuccessData(await createToken(createUser)));
-  
+        .status(404)
+        .send(getError("Please verify your phone number first."));
+    }
+    const createUser = await prisma.user.update({
+      where: {
+        user_id: chkphone?.user_id,
+      },
+      data: {
+        password,
+        username,
+      },
+    });
+    return res.status(200).send(getSuccessData(await createToken(createUser)));
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
@@ -97,14 +97,25 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     let username = req.body.username;
     let phone = req.body.phone;
     let password = req.body.password;
-    if (!username || !phone) {
-      return res.status(404).send(getError("username of password required"));
+    if (!username && !phone) {
+      return res
+        .status(404)
+        .send(getError("username or phone number required"));
+    }
+    if (!username && !phone) {
+      return res
+        .status(404)
+        .send(getError("username or phone number required"));
     }
     if (!password) {
       return res.status(404).send(getError("password required"));
     }
     var finduser;
     if (phone) {
+      const chkphone = await getUserFromphone(phone);
+      if (!chkphone) {
+        return res.status(404).send(getError("phone number incorrect"));
+      }
       finduser = await prisma.user.findFirst({
         where: {
           phone,
@@ -118,6 +129,9 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
           password,
         },
       });
+    }
+    if (!finduser) {
+      return res.status(404).send(getError("password incorrect"));
     }
     return res.status(200).send(getSuccessData(await createToken(finduser)));
   } catch (catchError) {
