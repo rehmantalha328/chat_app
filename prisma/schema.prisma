@@ -16,15 +16,15 @@ model User {
   username                     String?          @db.VarChar(255)
   password                     String?          @db.VarChar(255)
   Otp                          Int?
-  online_status                Boolean?         @default(false)
-  online_status_time           DateTime?        @updatedAt
+  // online_status                Boolean?         @default(false)
+  // online_status_time           DateTime?        @updatedAt
   created_at                   DateTime         @default(now())
   updated_at                   DateTime         @updatedAt
-  Otp_verified                 Boolean?         @default(false)
   my_created_groups            Groups[]
   my_joined_groups             Group_members[]  @relation("member")
   i_send_messages_in_groups    Group_messages[] @relation("group_message_sender")
   i_recieve_messages_in_groups Group_messages[] @relation("group_message_reciever")
+  Otp_verified                 Boolean?         @default(false)
 }
 
 model Groups {
