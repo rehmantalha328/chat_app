@@ -26,36 +26,43 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
-      deleteUploadedImage(req);
+      // deleteUploadedImage(req);
       return res.status(404).send(getError(error.details[0].message));
     }
-
-    const { username, password } = value;
+    const { username: _username, password } = value;
     const phone = "+" + clean(value.phone);
-
     // Converting Value to lower case
-    const username = username.toLowerCase();
-
-    const chkusername = await getUserFromphone(username);
-    if (!chkusername) {
-      return res.status(404).send(getError("Email doest not Exist."));
+    const username = _username.toLowerCase();
+    const chkphone = await getUserFromphone(phone);
+    if (!chkphone) {
+      return res.status(404).send(getError("phone number doest not Exist."));
     }
-    if (chkusername.is_registered == true) {
-      return res.status(404).send(getError("Email already taken."));
-    }
-
     // END
-    const createUser = await prisma.user.update({
+    const chkusername = await prisma.user.findFirst({
       where: {
-        phone: chkusername.phone,
-      },
-      data: {
-        password,
         username,
       },
     });
-    if (createUser) {
-      console.log("user created:::", createUser);
+    if (chkusername) {
+      return res.status(404).send(getError("Username already taken"));
+    }
+    const finduser = await prisma.user.findFirst({
+      where: {
+        phone: phone,
+        Otp_verified: true,
+      },
+    });
+
+    if (finduser) {
+      const createUser = await prisma.user.update({
+        where: {
+          user_id: finduser?.phone,
+        },
+        data: {
+          password,
+          username,
+        },
+      });
       return res
         .status(200)
         .send(getSuccessData(await createToken(createUser)));

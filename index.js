@@ -7,6 +7,7 @@ const server = http.createServer(app);
 var cors = require("cors");
 
 const otpVerification = require("./routes/otpVerification");
+const signUpUser = require("./routes/auth");
 
 const { setUpSocket } = require("./socket/socket");
 setUpSocket(server);
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 
-app.use("/api", [otpVerification]);
+app.use("/api", [otpVerification, signUpUser]);
 
 server.listen(PORT, async () => {
   console.log(`Server is Listening on PORT ${PORT}`);
