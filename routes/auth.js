@@ -5,7 +5,6 @@ const trimRequest = require("trim-request");
 const fs = require("fs");
 const {
   signUpValidation,
-  simpleLoginValidation,
   checkEmailValidation,
   referalIdValidation,
 } = require("../joi_validations/validate");
@@ -109,37 +108,32 @@ router.post("/chkReferalId", trimRequest.all, async (req, res) => {
 // SIMPLE LOGIN
 router.post("/simpleLogin", trimRequest.all, async (req, res) => {
   try {
-    const { error, value } = simpleLoginValidation(req.body);
-    if (error) return res.status(404).send(getError(error.details[0].message));
-    const { email: _email, password, fcm_token } = value;
-    const email = _email.toLowerCase();
-    const chkEmail = await getUserFromEmail(email);
-    if (chkEmail?.admin_approval === AdminApproval.PENDING) {
-      return res.status(404).send(getError("Please wait to approved!"));
+    let username = req.body.username;
+    let phone = req.body.phone;
+    let password = req.body.password;
+    if (!username || !phone) {
+      return res.status(404).send(getError("username of password required"));
     }
-    if (chkEmail?.admin_approval === AdminApproval.BLOCKED) {
-      return res
-        .status(404)
-        .send(getError("Sorry.. you are blocked by admin!"));
+    if (!password) {
+      return res.status(404).send(getError("password required"));
     }
-    if (chkEmail?.logged_in_service == "SOCIAL")
-      return res.status(404).send(getError("Email already taken."));
-    if (chkEmail?.is_registered != true || chkEmail?.user_email != email) {
-      return res.status(404).send(getError("Email does not exist"));
+    var finduser;
+    if (phone) {
+      finduser = await prisma.user.findFirst({
+        where: {
+          phone,
+          password,
+        },
+      });
+    } else {
+      finduser = await prisma.user.findFirst({
+        where: {
+          username,
+          password,
+        },
+      });
     }
-    if (chkEmail.user_password != password) {
-      return res.status(404).send(getError("Invalid Password"));
-    }
-    const updateFcmToken = await prisma.users.update({
-      where: {
-        user_id: chkEmail.user_id,
-      },
-      data: {
-        fcm_token,
-      },
-    });
-    const user = chkEmail;
-    return res.status(200).send(getSuccessData(await createToken(user)));
+    return res.status(200).send(getSuccessData(await createToken(finduser)));
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
