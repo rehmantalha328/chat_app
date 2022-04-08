@@ -145,7 +145,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
     },
     data: {
       Otp: 0,
-      otp,
+      Otp_verified: true,
     },
   });
 
