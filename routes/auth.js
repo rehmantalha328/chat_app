@@ -20,7 +20,6 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-const uploadImage = require("../middlewares/imageMulter");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const { AdminApproval, AccountTypes } = require("@prisma/client");
 
