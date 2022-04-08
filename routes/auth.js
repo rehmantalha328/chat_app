@@ -8,7 +8,6 @@ const {
   checkEmailValidation,
   referalIdValidation,
 } = require("../joi_validations/validate");
-// 
 const {
   getError,
   getSuccessData,
