@@ -26,72 +26,71 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   const phone = "+" + clean(value.phone);
   // return res.send(value);
 
-  try {
-    if (phone.startsWith("+92")) {
-      if (phone.length != 13)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 character long."));
-    } else if (phone.startsWith("+234")) {
-      if (phone.length != 14)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 or 11  character long."));
-    } else
+  // try {
+  if (phone.startsWith("+92")) {
+    if (phone.length != 13)
       return res
         .status(404)
-        .send(getError("Phone can only starts with +92 or +234."));
+        .send(getError("Phone should be 10 character long."));
+  } else if (phone.startsWith("+234")) {
+    if (phone.length != 14)
+      return res
+        .status(404)
+        .send(getError("Phone should be 10 or 11  character long."));
+  } else
+    return res
+      .status(404)
+      .send(getError("Phone can only starts with +92 or +234."));
+  const random = rn.generator({
+    min: 1111,
+    max: 9999,
+    integer: true,
+  })();
 
-    const PhoneExists = await prisma.user.findFirst({
+  const PhoneExists = await prisma.user.findFirst({
+    where: {
+      phone,
+    },
+  });
+  if (PhoneExists) {
+    await prisma.user.update({
       where: {
+        user_id: PhoneExists.user_id,
+      },
+      data: {
+        Otp: random,
+      },
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        Otp: random,
         phone,
       },
     });
-
-    const random = rn.generator({
-      min: 1111,
-      max: 9999,
-      integer: true,
-    })();
-
-    const messageSent = await send_message({
-      body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
-      number: phone,
-    });
-    if (messageSent) {
-      if (PhoneExists) {
-        await prisma.user.update({
-          where: {
-            id: PhoneExists.user_id,
-          },
-          data: {
-            Otp: random,
-          },
-        });
-      } else {
-        await prisma.user.create({
-          data: {
-            Otp: random,
-            phone,
-          },
-        });
-      }
-      return res
-        .status(200)
-        .send(
-          getSuccessData(
-            "Otp sent to your phone, which is valid only for 5 minutes"
-          )
-        );
-    } else {
-      return res.status(404).send(getError("Please try again"));
-    }
-  } catch (err) {
-    if (err && err.message) {
-      return res.status(404).send(getError(err.message));
-    }
-    return res.status(404).send(getError(err));
   }
+  const messageSent = await send_message({
+    body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
+    number: phone,
+  });
+  console.log(messageSent);
+  if (messageSent) {
+    return res
+      .status(200)
+      .send(
+        getSuccessData(
+          "Otp sent to your phone, which is valid only for 5 minutes"
+        )
+      );
+  } else {
+    return res.status(404).send(getError("Please try again"));
+  }
+  // } catch (err) {
+  //   if (err && err.message) {
+  //     return res.status(404).send(getError(err.message));
+  //   }
+  //   return res.status(404).send(getError(err));
+  // }
 });
 
 router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
@@ -101,84 +100,59 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   const { otp } = value;
   const phone = "+" + clean(value.phone);
 
-  try {
-    if (phone.startsWith("+92")) {
-      if (phone.length != 13)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 character long."));
-    } else if (phone.startsWith("+234")) {
-      if (phone.length != 14)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 or 11  character long."));
-    } else
+  // try {
+  if (phone.startsWith("+92")) {
+    if (phone.length != 13)
       return res
         .status(404)
-        .send(getError("Phone can only starts with +92 or +234."));
-
-    const PhoneExists = await prisma.users.findFirst({
-      where: {
-        phone,
-        is_registered: true,
-      },
-    });
-    if (PhoneExists)
+        .send(getError("Phone should be 10 character long."));
+  } else if (phone.startsWith("+234")) {
+    if (phone.length != 14)
       return res
         .status(404)
-        .send(getError("This phone number is already registered"));
+        .send(getError("Phone should be 10 or 11  character long."));
+  } else
+    return res
+      .status(404)
+      .send(getError("Phone can only starts with +92 or +234."));
 
-    const existingOtp = await prisma.otpVerify.findFirst({
-      where: {
-        user_identifier: phone,
-      },
-    });
+  const PhoneExists = await prisma.user.findFirst({
+    where: {
+      phone,
+    },
+  });
+  if (!PhoneExists)
+    return res
+      .status(404)
+      .send(getError("This phone number is not registered"));
 
-    if (!existingOtp)
-      return res
-        .status(404)
-        .send(getError("sorry no otp issued to this phone."));
+  const existingOtp = await prisma.user.findFirst({
+    where: {
+      phone,
+      Otp: otp,
+    },
+  });
 
-    if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
-      await prisma.otpVerify.delete({
-        where: {
-          id: existingOtp.id,
-        },
-      });
-      return res.status(404).send(getError("Otp Expired."));
-    }
+  if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
 
-    // if (existingOtp.otp != otp)
-    //   return res.status(404).send(getError("Otp does not match."));
-
-    const existingUser = await prisma.users.findFirst({
-      where: {
-        phone,
-      },
-    });
-
-    if (!existingUser) {
-      await prisma.users.create({
-        data: {
-          phone,
-        },
-      });
-    }
-    if (existingUser && existingUser.is_registered == true)
-      return res
-        .status(404)
-        .send(getError("This phone number is already registered"));
-
-    await prisma.otpVerify.delete({
-      where: {
-        id: existingOtp.id,
-      },
-    });
-
-    return res.status(200).send(getSuccessData("Phone successfully verified"));
-  } catch (err) {
-    return res.status(404).send(getError(err));
+  if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+    return res.status(404).send(getError("Otp Expired."));
   }
+
+  await prisma.user.update({
+    where: {
+      user_id: existingOtp.user_id,
+    },
+    data: {
+      Otp: 0,
+      Otp_verified: true,
+    },
+  });
+
+  return res.status(200).send(getSuccessData("Phone successfully verified"));
+  // } catch (err) {
+  //   return res.status(500).send(getError(err));
+  // }
 });
 
 router.post("/request_email_otp", trimRequest.all, async (req, res) => {

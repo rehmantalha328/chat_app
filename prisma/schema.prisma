@@ -24,6 +24,9 @@ model User {
   my_joined_groups   Group_members[] @relation("member")
   i_send_messages_in_groups Group_messages[] @relation("group_message_sender")
   i_recieve_messages_in_groups Group_messages [] @relation("group_message_reciever")
+  Otp_verified      Boolean?  @default(false)
+  // online_status_time DateTime? @updatedAt
+  // updated_at         DateTime  @updatedAt
 }
 
 model Groups {
