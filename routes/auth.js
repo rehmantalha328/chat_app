@@ -19,8 +19,7 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
-const { AdminApproval, AccountTypes } = require("@prisma/client");
+// const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
 // SIMPLE SIGNUP USER
 router.post("/signUpUser", [trimRequest.all], async (req, res) => {
@@ -129,7 +128,7 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
       });
     }
     if (!finduser) {
-      return res.status(404).send(getError("password incorrect"));
+      return res.status(404).send(getError("Invalid Credentials"));
     }
     return res.status(200).send(getSuccessData(await createToken(finduser)));
   } catch (catchError) {

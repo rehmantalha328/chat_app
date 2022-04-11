@@ -23,7 +23,7 @@ model User {
   my_created_groups            Groups[]
   my_joined_groups             Group_members[]  @relation("member")
   i_send_messages_in_groups    Group_messages[] @relation("group_message_sender")
-  i_recieve_messages_in_groups Group_messages[] @relation("group_message_reciever")
+  // i_recieve_messages_in_groups Group_messages[] @relation("group_message_reciever")
   Otp_verified                 Boolean?         @default(false)
 }
 
@@ -52,13 +52,13 @@ model Group_members {
 model Group_messages {
   id           String   @id @default(cuid())
   sender_id    String
-  reciever_id  String
+  // reciever_id  String
   group_id     String
   message_body String?
   attatchment  String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   sender       User     @relation(fields: [sender_id], references: [user_id], name: "group_message_sender")
-  reciever     User     @relation(fields: [reciever_id], references: [user_id], name: "group_message_reciever")
+  // reciever     User     @relation(fields: [reciever_id], references: [user_id], name: "group_message_reciever")
   group        Groups   @relation(fields: [group_id], references: [group_id])
 }
