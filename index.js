@@ -42,6 +42,7 @@ app.use("/api", [otpVerification, signUpUser]);
 
 // Authenticated Routes
 app.use("/api", verify, [chat]);
+// END
 
 server.listen(PORT, async () => {
   console.log(`Server is Listening on PORT ${PORT}`);

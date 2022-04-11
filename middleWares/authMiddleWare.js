@@ -6,7 +6,7 @@ const { getUserFromId } = require("../database_queries/auth");
 module.exports = async function (req, res, next) {
     const token = req.header("auth-token");
     if (!token) return res.status(404).send(getError("Access Denied"));
-    try {
+    // try {
         const verified = jwt.verify(token, getEnv("JWT_SECRET"));
         const { _id: id } = verified;
         const user = await getUserFromId(id);
@@ -14,11 +14,11 @@ module.exports = async function (req, res, next) {
         // console.log(user);
         req.user = user;
         next();
-    }
-    catch (err) {
-        if (err & err.message) {
-            return res.status(404).send(getError(err.message));
-        }
-        return res.status(404).send(getError("Invalid Token!."));
-    }
+    // }
+    // catch (err) {
+    //     if (err & err.message) {
+    //         return res.status(404).send(getError(err.message));
+    //     }
+    //     return res.status(404).send(getError(err));
+    // }
 };
