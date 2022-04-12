@@ -134,7 +134,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
     });
     console.log("12");
 
-    if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
+    // if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
 
     // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
     //   return res.status(404).send(getError("Otp Expired."));
