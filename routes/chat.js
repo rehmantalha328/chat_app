@@ -152,6 +152,13 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
     include: {
       group: {
         include: {
+          group_creator: {
+            select: {
+              user_id: true,
+              username: true,
+              phone: true,
+            }
+          },
           last_message_sender: {
             select: {
               user_id: true,

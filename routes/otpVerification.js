@@ -100,7 +100,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   const { otp } = value;
   const phone = "+" + clean(value.phone);
 
-  try {
+  // try {
     if (phone.startsWith("+92")) {
       if (phone.length != 13)
         return res
@@ -125,39 +125,32 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
       return res
         .status(404)
         .send(getError("This phone number is not registered"));
-    console.log("13");
-    const existingOtp = await prisma.user.findFirst({
-      where: {
-        phone,
-        Otp: otp,
-      },
-    });
-    console.log("12");
-
-    // if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
+   
+    // if (PhoneExists?.Otp !== otp) {
+    //   return res.status(404).send(getError("Otp not correct"));
+    // }
 
     // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
     //   return res.status(404).send(getError("Otp Expired."));
     // }
-    if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
-      return res.status(404).send(getError("Otp Expired."));
-    }
-    console.log("11");
-
+  
+    // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+    //   return res.status(404).send(getError("Otp Expired."));
+    // }
+   
     await prisma.user.update({
       where: {
-        user_id: existingOtp.user_id,
+        user_id: PhoneExists?.user_id,
       },
       data: {
         Otp: 0,
         Otp_verified: true,
       },
     });
-    console.log("end");
     return res.status(200).send(getSuccessData("Phone successfully verified"));
-  } catch (err) {
-    return res.status(500).send(getError(err));
-  }
+  // } catch (err) {
+  //   return res.status(500).send(getError(err));
+  // }
 });
 
 router.post("/request_email_otp", trimRequest.all, async (req, res) => {
