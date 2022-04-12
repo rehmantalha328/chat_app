@@ -6,6 +6,7 @@ const myNumber = getEnv("MY_NUMBER");
 const client = require("twilio")(accountSid, authToken);
 
 const send_message = ({ body, number }) => {
+  return true;
   // try {
   //   // return true;
   //   return client.messages.create({
@@ -14,11 +15,11 @@ const send_message = ({ body, number }) => {
   //     to: number,
   //   });
   // } catch (err) {
-  return client.messages.create({
-    body,
-    from: myNumber,
-    to: number,
-  });
+  // return client.messages.create({
+  //   body,
+  //   from: myNumber,
+  //   to: number,
+  // });
 };
 
 module.exports = { send_message };

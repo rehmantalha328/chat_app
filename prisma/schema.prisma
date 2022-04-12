@@ -21,26 +21,32 @@ model User {
   created_at                DateTime         @default(now())
   updated_at                DateTime         @updatedAt
   my_created_groups         Groups[]
+  my_last_message           Groups[]         @relation("last_message_sender")
   my_joined_groups          Group_members[]  @relation("member")
   i_send_messages_in_groups Group_messages[] @relation("group_message_sender")
   Otp_verified              Boolean?         @default(false)
 }
 
 model Groups {
-  group_id          String           @id @default(cuid())
-  creator_id        String
-  group_name        String           @db.VarChar(255)
-  group_description String           @db.VarChar(255)
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
-  group_creator     User             @relation(fields: [creator_id], references: [user_id])
-  group_members     Group_members[]
-  groupMessages     Group_messages[]
+  group_id            String           @id @default(cuid())
+  creator_id          String
+  group_name          String           @db.VarChar(255)
+  group_description   String           @db.VarChar(255)
+  last_message        String?
+  last_message_time   String?
+  last_message_from   String?
+  last_message_id     String?
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  last_message_sender User?            @relation(fields: [last_message_from], references: [user_id], name: "last_message_sender")
+  group_creator       User             @relation(fields: [creator_id], references: [user_id])
+  group_members       Group_members[]
+  groupMessages       Group_messages[]
 }
 
 model Group_members {
   id         String   @id @default(cuid())
-  group_id   String  
+  group_id   String
   member_id  String
   is_admin   Boolean  @default(false)
   created_at DateTime @default(now())
