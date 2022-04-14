@@ -24,6 +24,44 @@ const {
 // SIMPLE SIGNUP USER
 router.post("/signUpUser", [trimRequest.all], async (req, res) => {
   try {
+    if (!req.body.phone) {
+      return res.status(404).send(getError("please send phone number"));
+    }
+    if (!req.body.password) {
+      return res.status(404).send(getError("please send password"));
+    }
+    const phone = "+" + clean(req.body.phone);
+    const chkphone = await getUserFromphone(phone);
+    if (!chkphone) {
+      return res.status(404).send(getError("phone number doest not Exist."));
+    }
+    if (chkphone?.Otp_verified == false) {
+      return res
+        .status(404)
+        .send(getError("Please verify your phone number first."));
+    }
+    const createUser = await prisma.user.update({
+      where: {
+        user_id: chkphone?.user_id,
+      },
+      data: {
+        password,
+      },
+    });
+    return res
+      .status(200)
+      .send(getSuccessData("password updated successfully"));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+});
+
+// UpdatePassword USER
+router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
+  try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
