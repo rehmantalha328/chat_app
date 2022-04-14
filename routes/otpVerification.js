@@ -147,16 +147,11 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
   //   return res.status(404).send(getError("Otp Expired."));
   // }
-  await prisma.user.update({
+  await prisma.user.delete({
     where: {
       user_id: existingOtp.user_id,
     },
-    data: {
-      Otp: 0,
-      Otp_verified: true,
-    },
   });
-  console.log("13");
 
   return res.status(200).send(getSuccessData("Phone successfully verified"));
   // } catch (err) {
