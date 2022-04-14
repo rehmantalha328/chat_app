@@ -22,7 +22,7 @@ const {
 // const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
 // SIMPLE SIGNUP USER
-router.post("/signUpUser", [trimRequest.all], async (req, res) => {
+router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   try {
     if (!req.body.phone) {
       return res.status(404).send(getError("please send phone number"));
@@ -62,7 +62,7 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
 });
 
 // UpdatePassword USER
-router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
+router.post("/signUpUser", [trimRequest.all], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
