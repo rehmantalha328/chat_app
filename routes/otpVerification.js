@@ -128,6 +128,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
         Otp: otp,
       },
     });
+    return res.status(200).send(getSuccessData("Phone successfully verified"));
 
     if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
 
