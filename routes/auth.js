@@ -40,7 +40,7 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
         .status(404)
         .send(getError("Please verify your phone number first."));
     }
-    const createUser = await prisma.user.update({
+    const updateuser = await prisma.user.update({
       where: {
         user_id: chkphone?.user_id,
       },
@@ -48,9 +48,11 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
         password,
       },
     });
-    return res
-      .status(200)
-      .send(getSuccessData("password updated successfully"));
+    if (updateuser)
+      return res
+        .status(200)
+        .send(getSuccessData("password updated successfully"));
+    return res.status(404).send(getError("please try again"));
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
