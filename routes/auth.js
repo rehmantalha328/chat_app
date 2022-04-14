@@ -19,7 +19,6 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-// const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
 // SIMPLE SIGNUP USER
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
