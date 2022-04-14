@@ -27,7 +27,6 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   if (error) return res.status(404).send(getError(error.details[0].message));
   const phone = "+" + clean(value.phone);
   // return res.send(value);
-
   try {
     if (phone.startsWith("+92")) {
       if (phone.length != 13)
@@ -39,6 +38,11 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         return res
           .status(404)
           .send(getError("Phone should be 10 or 11  character long."));
+    } else if (phone.startsWith("+34")) {
+      if (phone.length != 12)
+        return res
+          .status(404)
+          .send(getError("Phone should be 9 or 10  character long."));
     } else
       return res
         .status(404)
@@ -50,14 +54,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     })();
     const PhoneExists = await getUserFromphone(phone);
     if (PhoneExists) {
-      await prisma.user.update({
-        where: {
-          user_id: PhoneExists.user_id,
-        },
-        data: {
-          Otp: random,
-        },
-      });
+      return res
+        .status(404)
+        .send(getSuccessData("Phone number already verified"));
     } else {
       await prisma.user.create({
         data: {
@@ -70,7 +69,6 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
       body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
       number: phone,
     });
-    console.log(messageSent);
     if (messageSent) {
       return res
         .status(200)
@@ -108,6 +106,11 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
         return res
           .status(404)
           .send(getError("Phone should be 10 or 11  character long."));
+    } else if (phone.startsWith("+34")) {
+      if (phone.length != 12)
+        return res
+          .status(404)
+          .send(getError("Phone should be 9 or 10  character long."));
     } else
       return res
         .status(404)
@@ -172,6 +175,11 @@ router.post(
           return res
             .status(404)
             .send(getError("Phone should be 10 or 11  character long."));
+      } else if (phone.startsWith("+34")) {
+        if (phone.length != 12)
+          return res
+            .status(404)
+            .send(getError("Phone should be 9 or 10  character long."));
       } else
         return res
           .status(404)
