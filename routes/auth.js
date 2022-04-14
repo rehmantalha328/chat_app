@@ -45,7 +45,7 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
         user_id: chkphone?.user_id,
       },
       data: {
-        password,
+        password: req.body.password,
       },
     });
     if (updateuser)
