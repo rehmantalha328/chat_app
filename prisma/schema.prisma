@@ -18,6 +18,7 @@ model User {
   password                  String?          @db.VarChar(255)
   Otp                       Int?
   Otp_verified              Boolean?         @default(false)
+  profile_img              String?         @db.VarChar(255)
   // online_status          Boolean?         @default(false)
   // online_status_time     DateTime?        @updatedAt
   created_at                DateTime         @default(now())

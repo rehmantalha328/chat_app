@@ -100,6 +100,7 @@ const deleteUploadedImage = (req) => {
 
 const deleteSingleImage = (req) => {
   try {
+    console.log("req.file: ", req.file);
     const path = req?.file?.path;
     fs.unlinkSync(path);
   } catch (error) {
