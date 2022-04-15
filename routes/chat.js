@@ -85,66 +85,6 @@ router.post("/groupChat", trimRequest.all, async (req, res) => {
 
 router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
   let user_id = req.user.user_id;
-  // const getMyGroups = await prisma.user.findMany({
-  //   where: {
-  //     user_id,
-  //   },
-  //   select: {
-  //     my_created_groups: {
-  //       select: {
-  //         group_id: true,
-  //         group_name: true,
-  //         group_description: true,
-  //         group_members: {
-  //           select: {
-  //             member: {
-  //               select: {
-  //                 username: true,
-  //                 phone: true,
-  //               },
-  //             },
-  //           },
-  //         },
-  //         groupMessages: {
-  //           select: {
-  //             id: true,
-  //             attatchment: true,
-  //             message_body: true,
-  //           },
-  //         },
-  //       },
-  //     },
-  //     my_joined_groups: {
-  //       select: {
-  //         group: {
-  //           select: {
-  //             group_id: true,
-  //             group_name: true,
-  //             groupMessages: {
-  //               select: {
-  //                 id: true,
-  //                 attatchment: true,
-  //                 message_body: true,
-  //               },
-  //             },
-  //             group_members: {
-  //               select: {
-  //                 member: {
-  //                   select: {
-  //                     user_id: true,
-  //                     username: true,
-  //                     phone: true,
-  //                   },
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
-
   const getMyGroups = await prisma.group_members.findMany({
     where: {
       member_id: user_id,
@@ -157,6 +97,18 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
               user_id: true,
               username: true,
               phone: true,
+            }
+          },
+          group_members: {
+            select: {
+              is_admin: true,
+              member: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  phone: true,
+                }
+              }
             }
           },
           last_message_sender: {
