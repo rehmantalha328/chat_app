@@ -54,6 +54,27 @@ const setUpSocket = (server) => {
   });
 };
 
+const sendMessageToGroup = (sender_id, reciever, message) => {
+  console.log("sender::", sender_id);
+  console.log("reciever::", reciever);
+  console.log("message::", message);
+  // return true;
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    reciever?.forEach((user) => {
+      const reciever_id = user?.member?.user_id;
+      const chkReciever = findReciever(reciever_id);
+      if (chkReciever) {
+        io.to(chkReciever.socketId).emit("newGroupMessage", {
+          sender_id,
+          message,
+          message_time: new Date().toLocaleTimeString(),
+        });
+      }
+    });
+  }
+};
+
 const sendMediaMessage = (sender_id, reciever_id, media, message_type) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
@@ -175,4 +196,5 @@ module.exports = {
   showNotifications,
   sendBlockStatusByAdmin,
   sendNotificationCounter,
+  sendMessageToGroup,
 };

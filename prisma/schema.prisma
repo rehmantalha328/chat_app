@@ -26,6 +26,7 @@ model User {
   my_joined_groups          Group_members[]  @relation("member")
   i_send_messages_in_groups Group_messages[] @relation("group_message_sender")
   my_last_message           Groups[]         @relation("last_message_sender")
+  // Group_msg_seen            Group_msg_seen[]
 }
 
 model Groups {
@@ -68,3 +69,9 @@ model Group_messages {
   sender       User     @relation(fields: [sender_id], references: [user_id], name: "group_message_sender")
   group        Groups   @relation(fields: [group_id], references: [group_id])
 }
+
+// model Group_msg_seen {
+//   id      String  @id @default(cuid())
+//   user_id String?
+//   seen_by User?   @relation(fields: [user_id], references: [user_id])
+// }

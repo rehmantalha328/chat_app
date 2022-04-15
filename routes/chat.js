@@ -5,6 +5,7 @@ const trimRequest = require("trim-request");
 const fs = require("fs");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 const { route } = require("./auth");
+const { sendMessageToGroup } = require("../socket/socket");
 // const {
 // } = require("../database_queries/auth");
 
@@ -72,9 +73,30 @@ router.post("/groupChat", trimRequest.all, async (req, res) => {
         last_message_id: createMessage?.id,
         last_message_from: sender_id,
       },
-    }); 
-    console.log(updateLastMessage);
-    return res.send(getSuccessData(createMessage));
+    });
+    const getUsersFromGroup = await prisma.groups.findFirst({
+      where: {
+        group_id,
+      },
+      include: {
+        group_members: {
+          select: {
+            member: {
+              select: {
+                user_id: true,
+                username: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const reciever = getUsersFromGroup?.group_members?.filter(
+      (user) => user?.member?.user_id !== sender_id
+    );
+    sendMessageToGroup(sender_id, reciever, message);
+    return res.status(200).send(getSuccessData(createMessage));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
@@ -97,7 +119,7 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
               user_id: true,
               username: true,
               phone: true,
-            }
+            },
           },
           group_members: {
             select: {
@@ -107,9 +129,9 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
                   user_id: true,
                   username: true,
                   phone: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           last_message_sender: {
             select: {
