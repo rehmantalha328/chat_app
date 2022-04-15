@@ -18,7 +18,7 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-const imagemulter = require("../middleWares/imageMulter");
+// const imagemulter = require("../middleWares/imageMulter");
 
 // SIMPLE SIGNUP USER
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
@@ -65,19 +65,19 @@ router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
   // try {
   const { error, value } = signUpValidation(req.body);
   if (error) {
-    deleteSingleImage(req);
+    // deleteSingleImage(req);
     return res.status(404).send(getError(error.details[0].message));
   }
-  if (req.file_error) {
-    console.log("!req.file_error");
-    deleteSingleImage(req);
-    return res.status(404).send(req.file_error);
-  }
-  if (!req.file) {
-    console.log("!req.file");
-    deleteSingleImage(req);
-    return res.status(404).send(getError("Please Select Your Profile."));
-  }
+  // if (req.file_error) {
+  //   console.log("!req.file_error");
+  //   deleteSingleImage(req);
+  //   return res.status(404).send(req.file_error);
+  // }
+  // if (!req.file) {
+  //   console.log("!req.file");
+  //   deleteSingleImage(req);
+  //   return res.status(404).send(getError("Please Select Your Profile."));
+  // }
   const { username: _username, password } = value;
   const phone = "+" + clean(value.phone);
   const username = _username.toLowerCase();
@@ -93,7 +93,7 @@ router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
       password,
       username,
       phone,
-      profile_img: req.file.filename,
+      // profile_img: req.file.filename,
     },
   });
   return res.status(200).send(getSuccessData(await createToken(createUser)));
