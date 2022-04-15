@@ -29,20 +29,20 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   // return res.send(value);
 
   try {
-    if (phone.startsWith("+92")) {
-      if (phone.length != 13)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 character long."));
-    } else if (phone.startsWith("+234")) {
-      if (phone.length != 14)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 or 11  character long."));
-    } else
-      return res
-        .status(404)
-        .send(getError("Phone can only starts with +92 or +234."));
+    // if (phone.startsWith("+92")) {
+    //   if (phone.length != 13)
+    //     return res
+    //       .status(404)
+    //       .send(getError("Phone should be 10 character long."));
+    // } else if (phone.startsWith("+234")) {
+    //   if (phone.length != 14)
+    //     return res
+    //       .status(404)
+    //       .send(getError("Phone should be 10 or 11  character long."));
+    // } else
+    //   return res
+    //     .status(404)
+    //     .send(getError("Phone can only starts with +92 or +234."));
     const random = rn.generator({
       min: 1111,
       max: 9999,
@@ -98,20 +98,20 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   const phone = "+" + clean(value.phone);
 
   try {
-    if (phone.startsWith("+92")) {
-      if (phone.length != 13)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 character long."));
-    } else if (phone.startsWith("+234")) {
-      if (phone.length != 14)
-        return res
-          .status(404)
-          .send(getError("Phone should be 10 or 11  character long."));
-    } else
-      return res
-        .status(404)
-        .send(getError("Phone can only starts with +92 or +234."));
+    // if (phone.startsWith("+92")) {
+    //   if (phone.length != 13)
+    //     return res
+    //       .status(404)
+    //       .send(getError("Phone should be 10 character long."));
+    // } else if (phone.startsWith("+234")) {
+    //   if (phone.length != 14)
+    //     return res
+    //       .status(404)
+    //       .send(getError("Phone should be 10 or 11  character long."));
+    // } else
+    //   return res
+    //     .status(404)
+    //     .send(getError("Phone can only starts with +92 or +234."));
 
     const PhoneExists = await prisma.user.findFirst({
       where: {
@@ -162,20 +162,25 @@ router.post(
     const phone = "+" + clean(value.phone);
 
     try {
-      if (phone.startsWith("+92")) {
-        if (phone.length != 13)
-          return res
-            .status(404)
-            .send(getError("Phone should be 10 character long."));
-      } else if (phone.startsWith("+234")) {
-        if (phone.length != 14)
-          return res
-            .status(404)
-            .send(getError("Phone should be 10 or 11  character long."));
-      } else
-        return res
-          .status(404)
-          .send(getError("Phone can only starts with +92 or +234."));
+      // if (phone.startsWith("+92")) {
+      //   if (phone.length != 13)
+      //     return res
+      //       .status(404)
+      //       .send(getError("Phone should be 10 character long."));
+      // } else if (phone.startsWith("+234")) {
+      //   if (phone.length != 14)
+      //     return res
+      //       .status(404)
+      //       .send(getError("Phone should be 10 or 11  character long."));
+      // } else if (phone.startsWith("+34")) {
+      //   if (phone.length != 12)
+      //     return res
+      //       .status(404)
+      //       .send(getError("Phone should be 10 or 11  character long."));
+      // } else
+      //   return res
+      //     .status(404)
+      //     .send(getError("Phone can only starts with +92, +34 or +234."));
       const random = rn.generator({
         min: 1111,
         max: 9999,
