@@ -20,29 +20,32 @@ const {
   timeExpired,
 } = require("../helper_functions/helpers");
 const { send_message } = require("../twilio/twilio");
-const Mailer = require("../node_mailer/mailer");
 
 router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   const { error, value } = phoneValidation(req.body);
   if (error) return res.status(404).send(getError(error.details[0].message));
   const phone = "+" + clean(value.phone);
   // return res.send(value);
-
   try {
-    // if (phone.startsWith("+92")) {
-    //   if (phone.length != 13)
-    //     return res
-    //       .status(404)
-    //       .send(getError("Phone should be 10 character long."));
-    // } else if (phone.startsWith("+234")) {
-    //   if (phone.length != 14)
-    //     return res
-    //       .status(404)
-    //       .send(getError("Phone should be 10 or 11  character long."));
-    // } else
-    //   return res
-    //     .status(404)
-    //     .send(getError("Phone can only starts with +92 or +234."));
+    if (phone.startsWith("+92")) {
+      if (phone.length != 13)
+        return res
+          .status(404)
+          .send(getError("Phone should be 10 character long."));
+    } else if (phone.startsWith("+234")) {
+      if (phone.length != 14)
+        return res
+          .status(404)
+          .send(getError("Phone should be 10 or 11  character long."));
+    } else if (phone.startsWith("+34")) {
+      if (phone.length != 12)
+        return res
+          .status(404)
+          .send(getError("Phone should be 9 or 10  character long."));
+    } else
+      return res
+        .status(404)
+        .send(getError("Phone can only starts with +92 or +234."));
     const random = rn.generator({
       min: 1111,
       max: 9999,
@@ -50,14 +53,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     })();
     const PhoneExists = await getUserFromphone(phone);
     if (PhoneExists) {
-      await prisma.user.update({
-        where: {
-          user_id: PhoneExists.user_id,
-        },
-        data: {
-          Otp: random,
-        },
-      });
+      return res
+        .status(404)
+        .send(getSuccessData("Phone number already verified"));
     } else {
       await prisma.user.create({
         data: {
@@ -70,7 +68,6 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
       body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
       number: phone,
     });
-    console.log(messageSent);
     if (messageSent) {
       return res
         .status(200)
@@ -97,60 +94,71 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   const { otp } = value;
   const phone = "+" + clean(value.phone);
 
-  try {
-    // if (phone.startsWith("+92")) {
-    //   if (phone.length != 13)
-    //     return res
-    //       .status(404)
-    //       .send(getError("Phone should be 10 character long."));
-    // } else if (phone.startsWith("+234")) {
-    //   if (phone.length != 14)
-    //     return res
-    //       .status(404)
-    //       .send(getError("Phone should be 10 or 11  character long."));
-    // } else
-    //   return res
-    //     .status(404)
-    //     .send(getError("Phone can only starts with +92 or +234."));
-
-    const PhoneExists = await prisma.user.findFirst({
-      where: {
-        phone,
-      },
-    });
-    if (!PhoneExists)
+  // try {
+  if (phone.startsWith("+92")) {
+    if (phone.length != 13)
       return res
         .status(404)
-        .send(getError("This phone number is not registered"));
-    const existingOtp = await prisma.user.findFirst({
-      where: {
-        phone,
-        Otp: otp,
-      },
-    });
-    return res.status(200).send(getSuccessData("Phone successfully verified"));
-
-    if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
-
-    // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
-    //   return res.status(404).send(getError("Otp Expired."));
-    // }
-    if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
-      return res.status(404).send(getError("Otp Expired."));
-    }
-    await prisma.user.update({
-      where: {
-        user_id: existingOtp.user_id,
-      },
-      data: {
-        Otp: 0,
-        Otp_verified: true,
-      },
-    });
-    return res.status(200).send(getSuccessData("Phone successfully verified"));
-  } catch (err) {
-    return res.status(500).send(getError(err));
+        .send(getError("Phone should be 10 character long."));
+  } else if (phone.startsWith("+234")) {
+    if (phone.length != 14)
+      return res
+        .status(404)
+        .send(getError("Phone should be 10 or 11  character long."));
+  } else if (phone.startsWith("+34")) {
+    if (phone.length != 12)
+      return res
+        .status(404)
+        .send(getError("Phone should be 9 or 10  character long."));
+  } else
+    return res
+      .status(404)
+      .send(getError("Phone can only starts with +92 or +234."));
+  console.log(phone);
+  const PhoneExists = await prisma.user.findFirst({
+    where: {
+      phone,
+    },
+  });
+  if (!PhoneExists) {
+    return res
+      .status(404)
+      .send(getError("This phone number is not registered"));
   }
+  console.log({
+    phone,
+    otp,
+  });
+  const existingOtp = await prisma.user.findFirst({
+    where: {
+      phone,
+      // Otp: otp,
+    },
+  });
+  console.log("121");
+  console.log(existingOtp);
+
+  // if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
+
+  // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+  //   return res.status(404).send(getError("Otp Expired."));
+  // }
+  // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+  //   return res.status(404).send(getError("Otp Expired."));
+  // }
+  await prisma.user.delete({
+    where: {
+      user_id: existingOtp.user_id,
+    },
+  });
+
+  return res.status(200).send(getSuccessData("Phone successfully verified"));
+  // } catch (err) {
+  //   if (err && err.message) {
+  //     return res.status(500).send(getError(err.message));
+  //   }
+  //   return res.status(500).send(getError(err));
+  // }
 });
 
 router.post(
@@ -162,25 +170,25 @@ router.post(
     const phone = "+" + clean(value.phone);
 
     try {
-      // if (phone.startsWith("+92")) {
-      //   if (phone.length != 13)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 10 character long."));
-      // } else if (phone.startsWith("+234")) {
-      //   if (phone.length != 14)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 10 or 11  character long."));
-      // } else if (phone.startsWith("+34")) {
-      //   if (phone.length != 12)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 10 or 11  character long."));
-      // } else
-      //   return res
-      //     .status(404)
-      //     .send(getError("Phone can only starts with +92, +34 or +234."));
+      if (phone.startsWith("+92")) {
+        if (phone.length != 13)
+          return res
+            .status(404)
+            .send(getError("Phone should be 10 character long."));
+      } else if (phone.startsWith("+234")) {
+        if (phone.length != 14)
+          return res
+            .status(404)
+            .send(getError("Phone should be 10 or 11  character long."));
+      } else if (phone.startsWith("+34")) {
+        if (phone.length != 12)
+          return res
+            .status(404)
+            .send(getError("Phone should be 9 or 10  character long."));
+      } else
+        return res
+          .status(404)
+          .send(getError("Phone can only starts with +92 or +234."));
       const random = rn.generator({
         min: 1111,
         max: 9999,
@@ -225,6 +233,85 @@ router.post(
       }
       return res.status(404).send(getError(err));
     }
+  }
+);
+
+router.post(
+  "/forgotpassowrd_verify_phone_otp",
+  trimRequest.all,
+  async (req, res) => {
+    const { error, value } = phoneAndOtpValidation(req.body);
+    if (error) return res.status(404).send(getError(error.details[0].message));
+
+    const { otp } = value;
+    const phone = "+" + clean(value.phone);
+
+    // try {
+    if (phone.startsWith("+92")) {
+      if (phone.length != 13)
+        return res
+          .status(404)
+          .send(getError("Phone should be 10 character long."));
+    } else if (phone.startsWith("+234")) {
+      if (phone.length != 14)
+        return res
+          .status(404)
+          .send(getError("Phone should be 10 or 11  character long."));
+    } else if (phone.startsWith("+34")) {
+      if (phone.length != 12)
+        return res
+          .status(404)
+          .send(getError("Phone should be 9 or 10  character long."));
+    } else
+      return res
+        .status(404)
+        .send(getError("Phone can only starts with +92 or +234."));
+    console.log(phone);
+    const PhoneExists = await prisma.user.findFirst({
+      where: {
+        phone,
+      },
+    });
+    if (!PhoneExists) {
+      return res
+        .status(404)
+        .send(getError("This phone number is not registered"));
+    }
+    console.log({
+      phone,
+      otp,
+    });
+    const existingOtp = await prisma.user.findFirst({
+      where: {
+        phone,
+        // Otp: otp,
+      },
+    });
+
+    // if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
+
+    // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+    //   return res.status(404).send(getError("Otp Expired."));
+    // }
+    // if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
+    //   return res.status(404).send(getError("Otp Expired."));
+    // }
+    await prisma.user.update({
+      where: {
+        user_id: PhoneExists?.user_id,
+      },
+      data: {
+        Otp_verified: true,
+      },
+    });
+
+    return res.status(200).send(getSuccessData("Phone successfully verified"));
+    // } catch (err) {
+    //   if (err && err.message) {
+    //     return res.status(500).send(getError(err.message));
+    //   }
+    //   return res.status(500).send(getError(err));
+    // }
   }
 );
 

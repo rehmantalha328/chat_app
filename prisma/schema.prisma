@@ -14,17 +14,18 @@ model User {
   user_id                   String           @id @default(cuid())
   phone                     String           @db.VarChar(255)
   username                  String?          @db.VarChar(255)
+  profile_picture           String?
   password                  String?          @db.VarChar(255)
   Otp                       Int?
-  // online_status             Boolean?         @default(false)
-  // online_status_time        DateTime?        @updatedAt
+  Otp_verified              Boolean?         @default(false)
+  // online_status          Boolean?         @default(false)
+  // online_status_time     DateTime?        @updatedAt
   created_at                DateTime         @default(now())
   updated_at                DateTime         @updatedAt
   my_created_groups         Groups[]
-  my_last_message           Groups[]         @relation("last_message_sender")
   my_joined_groups          Group_members[]  @relation("member")
   i_send_messages_in_groups Group_messages[] @relation("group_message_sender")
-  Otp_verified              Boolean?         @default(false)
+  my_last_message           Groups[]         @relation("last_message_sender")
 }
 
 model Groups {
@@ -61,6 +62,7 @@ model Group_messages {
   group_id     String
   message_body String?
   attatchment  String?
+  message_type String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   sender       User     @relation(fields: [sender_id], references: [user_id], name: "group_message_sender")
