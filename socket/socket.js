@@ -9,7 +9,6 @@ const {
 } = require("./users");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 
-
 const setUpSocket = (server) => {
   io = socketio(server);
   io.on("connect", (socket) => {

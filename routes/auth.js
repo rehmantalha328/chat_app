@@ -19,9 +19,48 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-// const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
 // SIMPLE SIGNUP USER
+router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
+  try {
+    if (!req.body.phone) {
+      return res.status(404).send(getError("please send phone number"));
+    }
+    if (!req.body.password) {
+      return res.status(404).send(getError("please send password"));
+    }
+    const phone = "+" + clean(req.body.phone);
+    const chkphone = await getUserFromphone(phone);
+    if (!chkphone) {
+      return res.status(404).send(getError("phone number doest not Exist."));
+    }
+    if (chkphone?.Otp_verified == false) {
+      return res
+        .status(404)
+        .send(getError("Please verify your phone number first."));
+    }
+    const updateuser = await prisma.user.update({
+      where: {
+        user_id: chkphone?.user_id,
+      },
+      data: {
+        password: req.body.password,
+      },
+    });
+    if (updateuser)
+      return res
+        .status(200)
+        .send(getSuccessData("password updated successfully"));
+    return res.status(404).send(getError("please try again"));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+});
+
+// UpdatePassword USER
 router.post("/signUpUser", [trimRequest.all], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
@@ -36,22 +75,11 @@ router.post("/signUpUser", [trimRequest.all], async (req, res) => {
     if (chkusername) {
       return res.status(404).send(getError("Username Already Taken."));
     }
-    const chkphone = await getUserFromphone(phone);
-    if (!chkphone) {
-      return res.status(404).send(getError("phone number doest not Exist."));
-    }
-    if (chkphone?.Otp_verified == false) {
-      return res
-        .status(404)
-        .send(getError("Please verify your phone number first."));
-    }
-    const createUser = await prisma.user.update({
-      where: {
-        user_id: chkphone?.user_id,
-      },
+    const createUser = await prisma.user.create({
       data: {
         password,
         username,
+        phone,
       },
     });
     return res.status(200).send(getSuccessData(await createToken(createUser)));
