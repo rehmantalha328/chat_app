@@ -53,9 +53,21 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     })();
     const PhoneExists = await getUserFromphone(phone);
     if (PhoneExists) {
-      return res
-        .status(404)
-        .send(getSuccessData("Phone number already verified"));
+      if (PhoneExists.Otp_verified == true) {
+        return res
+          .status(404)
+          .send(getSuccessData("Phone number already verified"));
+      } else {
+        await prisma.user.update({
+          where: {
+            user_id: PhoneExists.user_id,
+          },
+          data: {
+            Otp: random,
+            phone,
+          },
+        });
+      }
     } else {
       await prisma.user.create({
         data: {
@@ -81,9 +93,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     }
   } catch (err) {
     if (err && err.message) {
-      return res.status(404).send(getError(err.message));
+      return res.status(500).send(getError(err.message));
     }
-    return res.status(404).send(getError(err));
+    return res.status(500).send(getError(err));
   }
 });
 
@@ -228,9 +240,9 @@ router.post(
       }
     } catch (err) {
       if (err && err.message) {
-        return res.status(404).send(getError(err.message));
+        return res.status(500).send(getError(err.message));
       }
-      return res.status(404).send(getError(err));
+      return res.status(500).send(getError(err));
     }
   }
 );
