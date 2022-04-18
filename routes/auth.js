@@ -61,7 +61,7 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   }
 });
 
-// signUp USER
+// signUp USER //
 router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
