@@ -53,9 +53,21 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     })();
     const PhoneExists = await getUserFromphone(phone);
     if (PhoneExists) {
-      return res
-        .status(404)
-        .send(getSuccessData("Phone number already verified"));
+      if (PhoneExists.Otp_verified == true) {
+        return res
+          .status(404)
+          .send(getSuccessData("Phone number already verified"));
+      } else {
+        await prisma.user.update({
+          where: {
+            user_id: PhoneExists.user_id,
+          },
+          data: {
+            Otp: random,
+            phone,
+          },
+        });
+      }
     } else {
       await prisma.user.create({
         data: {
@@ -81,9 +93,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     }
   } catch (err) {
     if (err && err.message) {
-      return res.status(404).send(getError(err.message));
+      return res.status(500).send(getError(err.message));
     }
-    return res.status(404).send(getError(err));
+    return res.status(500).send(getError(err));
   }
 });
 
@@ -114,11 +126,13 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   //   return res
   //     .status(404)
   //     .send(getError("Phone can only starts with +92 or +234."));
+  console.log(phone);
   const PhoneExists = await prisma.user.findFirst({
     where: {
       phone,
     },
   });
+  console.log(PhoneExists);
   if (!PhoneExists) {
     return res
       .status(404)
@@ -206,6 +220,7 @@ router.post(
           },
           data: {
             Otp: random,
+            Otp_verified: false,
           },
         });
       } else {
@@ -228,9 +243,9 @@ router.post(
       }
     } catch (err) {
       if (err && err.message) {
-        return res.status(404).send(getError(err.message));
+        return res.status(500).send(getError(err.message));
       }
-      return res.status(404).send(getError(err));
+      return res.status(500).send(getError(err));
     }
   }
 );
@@ -276,10 +291,6 @@ router.post(
         .status(404)
         .send(getError("This phone number is not registered"));
     }
-    console.log({
-      phone,
-      otp,
-    });
     const existingOtp = await prisma.user.findFirst({
       where: {
         phone,
