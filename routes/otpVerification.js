@@ -54,9 +54,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     const PhoneExists = await getUserFromphone(phone);
     if (PhoneExists) {
       if (PhoneExists.Otp_verified == true) {
-        return res
-          .status(404)
-          .send(getSuccessData("Phone number already verified"));
+        return res.status(404).send(getError("Phone number already verified"));
       } else {
         await prisma.user.update({
           where: {

@@ -64,6 +64,7 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 // signUp USER //
 router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
   try {
+    console.log(req.body);
     const { error, value } = signUpValidation(req.body);
     if (error) {
       // deleteSingleImage(req);
