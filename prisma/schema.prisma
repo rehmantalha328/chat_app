@@ -11,23 +11,23 @@ datasource db {
 }
 
 model User {
-  user_id                   String           @id @default(cuid())
-  phone                     String           @db.VarChar(255)
-  username                  String?          @db.VarChar(255)
-  profile_picture           String?
-  password                  String?          @db.VarChar(255)
-  Otp                       Int?
-  Otp_verified              Boolean?         @default(false)
-  profile_img              String?         @db.VarChar(255)
+  user_id                      String             @id @default(cuid())
+  phone                        String             @db.VarChar(255)
+  username                     String?            @db.VarChar(255)
+  profile_picture              String?
+  password                     String?            @db.VarChar(255)
+  Otp                          Int?
+  Otp_verified                 Boolean?           @default(false)
+  profile_img                  String?            @db.VarChar(255)
   // online_status          Boolean?         @default(false)
   // online_status_time     DateTime?        @updatedAt
-  created_at                DateTime         @default(now())
-  updated_at                DateTime         @updatedAt
-  my_created_groups         Groups[]
-  my_joined_groups          Group_members[]  @relation("member")
-  i_send_messages_in_groups Group_messages[] @relation("group_message_sender")
-  my_last_message           Groups[]         @relation("last_message_sender")
-  // Group_msg_seen            Group_msg_seen[]
+  created_at                   DateTime           @default(now())
+  updated_at                   DateTime           @updatedAt
+  my_created_groups            Groups[]
+  my_joined_groups             Group_members[]    @relation("member")
+  i_send_messages_in_groups    Group_messages[]   @relation("group_message_sender")
+  i_recieve_messages_in_groups message_reciever[]
+  my_last_message              Groups[]           @relation("last_message_sender")
 }
 
 model Groups {
@@ -59,20 +59,33 @@ model Group_members {
 }
 
 model Group_messages {
-  id           String   @id @default(cuid())
-  sender_id    String
+  id           String             @id @default(cuid())
+  sender_id    String?
+  reciever_id  String?
   group_id     String
   message_body String?
   attatchment  String?
   message_type String?
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  sender       User     @relation(fields: [sender_id], references: [user_id], name: "group_message_sender")
-  group        Groups   @relation(fields: [group_id], references: [group_id])
+  created_at   DateTime           @default(now())
+  updated_at   DateTime           @updatedAt
+  sender       User?              @relation(fields: [sender_id], references: [user_id], name: "group_message_sender")
+  group        Groups             @relation(fields: [group_id], references: [group_id])
+  reciver      message_reciever[]
+}
+
+model message_reciever {
+  id          String          @id @default(cuid())
+  message_id  String?
+  reciever_id String?
+  seen        Boolean         @default(false)
+  reciever    User?           @relation(fields: [reciever_id], references: [user_id])
+  message     Group_messages? @relation(fields: [message_id], references: [id])
 }
 
 // model Group_msg_seen {
-//   id      String  @id @default(cuid())
-//   user_id String?
-//   seen_by User?   @relation(fields: [user_id], references: [user_id])
+//   id               String          @id @default(cuid())
+//   user_id          String?
+//   user             User?           @relation(fields: [user_id], references: [user_id])
+//   Group_messages   Group_messages? @relation(fields: [group_messagesId], references: [id])
+//   group_messagesId String?
 // }
