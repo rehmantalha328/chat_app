@@ -12,7 +12,6 @@ const multerStorage = multer.diskStorage({
     cb(null, "public/");
   },
   filename: (req, file, cb) => {
-    // console.log("areeb 2");
     const ext = file.mimetype.split("/")[1];
     cb(null, `${v4()}-${Date.now()}.${ext}`);
   },
@@ -42,7 +41,6 @@ const upload = multer({
 });
 
 module.exports = async function (req, res, next) {
-  console.log("multer ");
   const _upload = upload.single("profile");
   _upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {

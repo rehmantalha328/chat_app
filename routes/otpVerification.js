@@ -124,30 +124,23 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   //   return res
   //     .status(404)
   //     .send(getError("Phone can only starts with +92 or +234."));
-  console.log(phone);
   const PhoneExists = await prisma.user.findFirst({
     where: {
       phone,
     },
   });
-  console.log(PhoneExists);
   if (!PhoneExists) {
     return res
       .status(404)
       .send(getError("This phone number is not registered"));
   }
-  console.log({
-    phone,
-    otp,
-  });
+
   const existingOtp = await prisma.user.findFirst({
     where: {
       phone,
       // Otp: otp,
     },
   });
-  console.log("121");
-  console.log(existingOtp);
 
   // if (!existingOtp) return res.status(404).send(getError("Otp not correct"));
 
@@ -278,7 +271,6 @@ router.post(
     //   return res
     //     .status(404)
     //     .send(getError("Phone can only starts with +92 or +234."));
-    // console.log(phone);
     const PhoneExists = await prisma.user.findFirst({
       where: {
         phone,
