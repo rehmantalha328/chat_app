@@ -240,4 +240,4 @@ router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
   return res.send(getSuccessData(getMyGroups));
 });
 
-module.exports = router;new 
+module.exports = router;

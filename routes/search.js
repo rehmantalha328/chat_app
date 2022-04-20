@@ -27,7 +27,7 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
       where: {
         NOT: [
           {
-            user_id: req.user.user_id,
+            user_id: req?.user?.user_id,
           },
         ],
       },
@@ -47,5 +47,6 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
+
 
 module.exports = router;
