@@ -34,7 +34,6 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
     if (!chkphone) {
       return res.status(404).send(getError("phone number doest not Exist."));
     }
-    console.log(chkphone);
     if (chkphone?.Otp_verified == false) {
       return res
         .status(404)
@@ -62,32 +61,32 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 });
 
 // signUp USER //
-router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
+router.post("/signUpUser", [trimRequest.all], async (req, res) => {
+  console.log("signUpUser");
+  console.log(req.body);
   try {
-    console.log(req.body);
     const { error, value } = signUpValidation(req.body);
     if (error) {
       // deleteSingleImage(req);
       return res.status(404).send(getError(error.details[0].message));
     }
-    if (req.file_error) {
-      console.log("!req.file_error");
-      deleteSingleImage(req);
-      return res.status(404).send(req.file_error);
-    }
-    if (!req.file) {
-      console.log("!req.file");
-      deleteSingleImage(req);
-      return res.status(404).send(getError("Please Select Your Profile."));
-    }
+    // if (req.file_error) {
+    //   console.log("!req.file_error");
+    //   deleteSingleImage(req);
+    //   return res.status(404).send(req.file_error);
+    // }
+    // if (!req.file) {
+    //   console.log("!req.file");
+    //   deleteSingleImage(req);
+    //   return res.status(404).send(getError("Please Select Your Profile."));
+    // }
     const { username: _username, password } = value;
     const phone = "+" + clean(value.phone);
     const username = _username.toLowerCase();
 
     const chkusername = await chkExistingUserName(username);
     if (chkusername) {
-      console.log("chkusername");
-      deleteSingleImage(req);
+      // deleteSingleImage(req);
       return res.status(404).send(getError("Username Already Taken."));
     }
     const createUser = await prisma.user.create({
@@ -96,12 +95,12 @@ router.post("/signUpUser", [imagemulter, trimRequest.all], async (req, res) => {
         username,
         phone,
         Otp_verified: true,
-        profile_img: req.file.filename,
+        // profile_img: req.file.filename,
       },
     });
     return res.status(200).send(getSuccessData(await createToken(createUser)));
   } catch (catchError) {
-    deleteSingleImage(req);
+    // deleteSingleImage(req);
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
     }

@@ -10,6 +10,7 @@ var cors = require("cors");
 const otpVerification = require("./routes/otpVerification");
 const signUpUser = require("./routes/auth");
 const chat = require("./routes/chat");
+const search = require("./routes/search");
 // END
 
 // Importing JWT Verification
@@ -41,7 +42,7 @@ app.use("/api", [otpVerification, signUpUser]);
 // END
 
 // Authenticated Routes
-app.use("/api", verify, [chat]);
+app.use("/api", verify, [chat, search]);
 // END
 
 server.listen(PORT, async () => {

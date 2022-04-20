@@ -21,9 +21,23 @@ const {
 const imagemulter = require("../middleWares/imageMulter");
 
 // SIMPLE SIGNUP USER
-router.post("/searchAllUsers", [trimRequest.all], async (req, res) => {
+router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
   try {
-    const allusers = await prisma.user.findMany({});
+    const allusers = await prisma.user.findMany({
+      where: {
+        NOT: [
+          {
+            user_id: req.user.user_id,
+          },
+        ],
+      },
+      select: {
+        username: true,
+        user_id: true,
+        phone: true,
+        profile_img: true,
+      },
+    });
     if (allusers) return res.status(200).send(getSuccessData(allusers));
     return res.status(404).send(getError("no any user found"));
   } catch (catchError) {
