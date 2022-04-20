@@ -136,6 +136,7 @@ router.post("/chkReferalId", trimRequest.all, async (req, res) => {
 
 // SIMPLE LOGIN
 router.post("/simpleLogin", trimRequest.all, async (req, res) => {
+  console.log(req.body);
   try {
     let username = req.body.username;
     let phone = req.body.phone;

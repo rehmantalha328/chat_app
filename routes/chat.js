@@ -170,38 +170,6 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
               },
             },
           },
-          // groupMessages: {
-          //   where: {
-          //     OR: [
-          //       {
-          //         sender_id: user_id,
-          //       },
-          //       {
-          //         reciever_id: user_id,
-          //       },
-          //     ],
-          //   },
-          //   select: {
-          //     attatchment: true,
-          //     message_body: true,
-          //     message_type: true,
-          //     created_at: true,
-          //     seen_by_me: true,
-          //     sender_id: true,
-          //     reciever_id: true,
-          //     created_at: true,
-          //     sender: {
-          //       select: {
-          //         user_id: true,
-          //         username: true,
-          //         profile_picture: true,
-          //       },
-          //     },
-          //   },
-          //   orderBy: {
-          //     created_at: "desc",
-          //   },
-          // },
         },
       },
     },
@@ -211,7 +179,7 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
     data?.group?.groupMessages?.forEach((data) => {
       data?.reciver?.forEach((data) => {
         newArray.push(data);
-      })
+      });
     });
   });
 
@@ -221,31 +189,55 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
       unseenCounter++;
     }
   }
-  return res.send(getSuccessData({getMyGroups,unseenCounter}));
+  return res.send(getSuccessData({ getMyGroups, unseenCounter }));
 });
 
 router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
   let user_id = req.user.user_id;
-  const getMyGroups = await prisma.group_messages.findMany({
+  let group_id = req?.body?.group_id;
+  // const getMyGroups = await prisma.group_messages.findMany({
+  //   where: {
+  //     OR: [
+  //       {
+  //         sender_id: user_id,
+  //       },
+  //       {
+  //         reciver: {
+  //           some: {
+  //             reciever_id: user_id,
+  //           },
+  //         },
+  //       },
+  //     ],
+  //   },
+  //   orderBy: {
+  //     created_at: "desc",
+  //   },
+  // });
+  const getGroupMessages = await prisma.groups.findFirst({
     where: {
-      OR: [
-        {
-          sender_id: user_id,
-        },
-        {
-          reciver: {
-            some: {
-              reciever_id: user_id,
-            },
-          },
-        },
-      ],
+      group_id,
     },
-    orderBy: {
-      created_at: 'desc',
-    }
+    include: {
+      groupMessages: {
+        where: {
+          OR: [
+            {
+              sender_id: user_id,
+            },
+            {
+              reciver: {
+                some: {
+                  reciever_id: user_id,
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
   });
   return res.send(getSuccessData(getMyGroups));
 });
 
-module.exports = router;
+module.exports = router;new 
