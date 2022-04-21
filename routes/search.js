@@ -18,7 +18,6 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
-const imagemulter = require("../middleWares/imageMulter");
 
 // SIMPLE SIGNUP USER
 router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
@@ -36,7 +35,12 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
         user_id: true,
         phone: true,
         profile_img: true,
+        online_status: true,
+        online_status_time: true,
       },
+      orderBy: {
+        created_at:'desc',
+      }
     });
     if (allusers) return res.status(200).send(getSuccessData(allusers));
     return res.status(404).send(getError("no any user found"));
