@@ -511,8 +511,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             reciever: {
               select: {
                 user_id: true,
-                fname: true,
+                username: true,
                 profile_img: true,
+                phone: true,
                 // online_status: true,
                 // online_status_time: true,
                 // user_i_block: {
@@ -577,7 +578,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             sender: {
               select: {
                 user_id: true,
-                fname: true,
+                username: true,
+                phone: true,
                 profile_img: true,
                 // online_status: true,
                 // online_status_time: true,
