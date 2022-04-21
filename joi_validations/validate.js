@@ -68,6 +68,13 @@ function messageValidation(data) {
   return messageSchema.validate(data);
 };
 
+function fetchMessageValidation(data) {
+  const fetchMessageSchema = joi.object({
+    reciever_id: joi.string().required()
+  });
+  return fetchMessageSchema.validate(data);
+};
+
 module.exports = {
   emailValidation,
   emailPhoneAndOtpValidation,
@@ -75,4 +82,5 @@ module.exports = {
   phoneValidation,
   signUpValidation,
   messageValidation,
+  fetchMessageValidation
 };

@@ -6,6 +6,10 @@ const fs = require("fs");
 var _ = require("lodash");
 const { MessageType } = require("@prisma/client");
 const {
+  messageValidation,
+  fetchMessageValidation,
+} = require("../joi_validations/validate");
+const {
   chkMessageChannel,
   createMessageChannel,
 } = require("../database_queries/chat");
@@ -496,7 +500,7 @@ router.post("/fetch_messages", trimRequest.all, async (req, res) => {
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {
     const user_id = req.user.user_id;
-    const contacts = await prisma.users.findFirst({
+    const contacts = await prisma.user.findFirst({
       where: {
         user_id,
       },
@@ -507,9 +511,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               select: {
                 user_id: true,
                 fname: true,
-                profile_picture: true,
-                online_status: true,
-                online_status_time: true,
+                profile_img: true,
+                // online_status: true,
+                // online_status_time: true,
                 // user_i_block: {
                 //   where: {
                 //     OR: [
@@ -573,9 +577,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               select: {
                 user_id: true,
                 fname: true,
-                profile_picture: true,
-                online_status: true,
-                online_status_time: true,
+                profile_img: true,
+                // online_status: true,
+                // online_status_time: true,
                 // user_i_block: {
                 //   where: {
                 //     OR: [
