@@ -2,7 +2,7 @@ const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 
 function updateOnlineStatus(id) {
-    return prisma.users.update({
+    return prisma.user.update({
         where: {
             user_id: id,
         },
@@ -14,7 +14,7 @@ function updateOnlineStatus(id) {
 };
 
 function updateOfflineStatus(id) {
-    return prisma.users.update({
+    return prisma.user.update({
         where: {
             user_id: id,
         },

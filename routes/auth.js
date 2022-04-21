@@ -62,9 +62,6 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
-  console.log("signUpUser");
-  console.log(req.body);
-  console.log("FILE::::",req.file);
   try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
@@ -72,12 +69,10 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
       return res.status(404).send(getError(error.details[0].message));
     }
     if (req.file_error) {
-      console.log("!req.file_error");
       deleteSingleImage(req);
       return res.status(404).send(req.file_error);
     }
     if (!req.file) {
-      console.log("!req.file");
       deleteSingleImage(req);
       return res.status(404).send(getError("Please Select Your Profile."));
     }
