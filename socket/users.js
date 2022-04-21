@@ -5,7 +5,6 @@ const {
   updateOnlineStatus,
   updateOfflineStatus,
 } = require("../database_queries/onlineOfflineStatus");
-const { getSuccessData } = require("../helper_functions/helpers");
 const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 
@@ -21,7 +20,7 @@ const addUser = async ({ token, socketId }) => {
       return { error: err };
     }
     const id = userData.user_id;
-    // await updateOnlineStatus(id);
+    await updateOnlineStatus(id);
     const chkExistingUser = users.find((user) => user.id == id);
     if (chkExistingUser) return { error: "This user is already connected" };
     const user = { id, socketId, token };
@@ -37,7 +36,7 @@ const removeUser = async (socketId) => {
   const index = users.findIndex((user) => user.socketId === socketId);
   if (index >= 0) {
     const { id } = users[index];
-    // await updateOfflineStatus(id);
+    await updateOfflineStatus(id);
     return users.splice(index, 1)[0];
   }
 };
@@ -65,7 +64,6 @@ const getUser = (id, socketId = null) =>
   users.find((user) =>
     socketId ? user.socketId == socketId && user.id === id : user.id == id
 );
-//
 
 module.exports = {
   addUser,

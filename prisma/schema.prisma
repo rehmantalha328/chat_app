@@ -19,8 +19,8 @@ model User {
   Otp                          Int?
   Otp_verified                 Boolean?           @default(false)
   profile_img                  String?            @db.VarChar(255)
-  // online_status          Boolean?         @default(false)
-  // online_status_time     DateTime?        @updatedAt
+  online_status                Boolean?           @default(false)
+  online_status_time           DateTime?          @updatedAt
   created_at                   DateTime           @default(now())
   updated_at                   DateTime           @updatedAt
   my_created_groups            Groups[]
