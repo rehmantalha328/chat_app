@@ -75,22 +75,6 @@ const sendMessageToGroup = (sender_id, reciever, message) => {
   }
 };
 
-const sendMediaMessage = (sender_id, reciever_id, media, message_type) => {
-  const chkSender = findSender(sender_id);
-  if (chkSender) {
-    const chkReciever = findReciever(reciever_id);
-    if (chkReciever) {
-      io.to(chkReciever.socketId).emit("newMediaMessage", {
-        sender_id,
-        reciever_id,
-        media,
-        message_type,
-        message_time: new Date().toLocaleTimeString(),
-      });
-    }
-  }
-};
-
 const sendTextMessage = (sender_id, reciever_id, textMessage, message_type) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
@@ -108,93 +92,9 @@ const sendTextMessage = (sender_id, reciever_id, textMessage, message_type) => {
   }
 };
 
-const seenMessages = (id, second_user_id, message_id, seen_status) => {
-  console.log("iam id:::", id);
-  console.log("iam id:::", second_user_id);
-  console.log("iam id:::", message_id);
-  console.log("iam id:::", seen_status);
-  const my_id = getUser(id);
-  if (my_id) {
-    console.log("my id found::", my_id);
-    const otherUser = getUser(second_user_id);
-    if (otherUser) {
-      console.log("other user Id::", otherUser);
-      io.to(otherUser.socketId).emit("seen_status", {
-        reciever_id: id,
-        sender_id: second_user_id,
-        message_id,
-        seen: seen_status,
-      });
-    }
-  }
-};
-
-const userBlock = (blocker_id, blocked_id, block_status) => {
-  const chkBlocker = getUser(blocker_id);
-  if (chkBlocker) {
-    const chkBlocked = getUser(blocked_id);
-    if (chkBlocked) {
-      io.to(chkBlocked.socketId).emit("block_status", {
-        blocker_id,
-        block_status,
-      });
-    }
-  }
-};
-
-const togglePrivatePictures = (user_id, status) => {
-  const my_id = getUser(user_id);
-  if (my_id) {
-    io.to(my_id.socketId).emit("show_private_pictures", {
-      user_id,
-      status,
-    });
-  }
-};
-
-const showNotifications = (user_id, status) => {
-  const my_id = getUser(user_id);
-  if (my_id) {
-    io.to(my_id.socketId).emit("show_notifications", {
-      user_id,
-      status,
-    });
-  }
-};
-
-const sendBlockStatusByAdmin = (user_id, admin_approval) => {
-  const chkBlocked = getUser(user_id);
-  if (chkBlocked) {
-    io.to(chkBlocked.socketId).emit("block_by_admin", {
-      user_id,
-      admin_approval,
-    });
-  }
-};
-
-const sendNotificationCounter = (sender_id, reciever_id, counter) => {
-  const chkSender = getUser(sender_id);
-  if (chkSender) {
-    const chkReciever = getUser(reciever_id);
-    if (chkReciever) {
-      io.to(chkReciever.socketId).emit("notification_counter", {
-        sender_id,
-        reciever_id,
-        counter,
-      });
-    }
-  }
-};
 
 module.exports = {
   setUpSocket,
   sendTextMessage,
-  sendMediaMessage,
-  seenMessages,
-  userBlock,
-  togglePrivatePictures,
-  showNotifications,
-  sendBlockStatusByAdmin,
-  sendNotificationCounter,
   sendMessageToGroup,
 };

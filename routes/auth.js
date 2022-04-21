@@ -96,7 +96,7 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
         username,
         phone,
         Otp_verified: true,
-        profile_img: req.file.filename,
+        profile_img: req?.file?.filename,
       },
     });
     return res.status(200).send(getSuccessData(await createToken(createUser)));

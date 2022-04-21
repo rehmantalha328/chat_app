@@ -7,6 +7,7 @@ function emailValidation(data) {
   });
   return emailSchema.validate(data);
 }
+
 function phoneAndOtpValidation(data) {
   const phoneAndOtpSchema = Joi.object({
     phone: Joi.string().required(),
@@ -48,10 +49,30 @@ function emailPhoneAndOtpValidation(data) {
   return phoneEmailAndOtpSchema.validate(data);
 }
 
+function messageValidation(data) {
+  const messageSchema = Joi.object({
+    reciever_id: Joi.string().required(),
+    message_type: Joi.string()
+      .valid(MessageType.TEXT.toString())
+      .required(),
+    //   attachment: joi.when("message_type", {
+    //   is: MessageType.MEDIA.toString(),
+    //   then: joi.string(),
+    // }),
+    message_body: Joi.when("message_type", {
+      is: MessageType.TEXT.toString(),
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+  });
+  return messageSchema.validate(data);
+};
+
 module.exports = {
   emailValidation,
   emailPhoneAndOtpValidation,
   phoneAndOtpValidation,
   phoneValidation,
   signUpValidation,
+  messageValidation,
 };

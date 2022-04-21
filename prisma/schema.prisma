@@ -28,6 +28,10 @@ model User {
   i_send_messages_in_groups    Group_messages[]   @relation("group_message_sender")
   i_recieve_messages_in_groups message_reciever[]
   my_last_message              Groups[]           @relation("last_message_sender")
+  send_messages                Messages[]         @relation("user_sender_name")
+  recieve_messages             Messages[]         @relation("user_reciever_name")
+  primary_user_channel         Messages_Channel[] @relation("primary_user")
+  secondary_user_channel       Messages_Channel[] @relation("secondary_user")
 }
 
 model Groups {
@@ -80,6 +84,38 @@ model message_reciever {
   seen        Boolean         @default(false)
   reciever    User?           @relation(fields: [reciever_id], references: [user_id])
   message     Group_messages? @relation(fields: [message_id], references: [id])
+}
+
+model Messages {
+  message_id     String           @id @default(cuid())
+  sender_id      String
+  reciever_id    String
+  msg_channel_id String
+  message_body   String?
+  attatchment    String?
+  message_type   MessageType      @default(TEXT)
+  seen           Boolean          @default(false)
+  user_sender    User             @relation(fields: [sender_id], references: [user_id], name: "user_sender_name")
+  user_reciever  User             @relation(fields: [reciever_id], references: [user_id], name: "user_reciever_name")
+  msg_channel    Messages_Channel @relation(fields: [msg_channel_id], references: [channel_id])
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+}
+
+model Messages_Channel {
+  channel_id       String     @id @default(cuid())
+  sender_id        String
+  reciever_id      String
+  sender           User       @relation(fields: [sender_id], references: [user_id], name: "primary_user")
+  reciever         User       @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
+  channel_messages Messages[]
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+}
+
+enum MessageType {
+  TEXT
+  MEDIA
 }
 
 // model Group_msg_seen {
