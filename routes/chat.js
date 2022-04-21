@@ -13,6 +13,7 @@ const {
   chkMessageChannel,
   createMessageChannel,
 } = require("../database_queries/chat");
+const { getUserFromId } = require("../database_queries/auth");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 const { sendMessageToGroup,sendTextMessage } = require("../socket/socket");
 
