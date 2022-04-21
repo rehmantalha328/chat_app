@@ -69,7 +69,7 @@ function messageValidation(data) {
 };
 
 function fetchMessageValidation(data) {
-  const fetchMessageSchema = joi.object({
+  const fetchMessageSchema = Joi.object({
     reciever_id: Joi.string().required()
   });
   return fetchMessageSchema.validate(data);
