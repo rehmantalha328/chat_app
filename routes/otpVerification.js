@@ -71,7 +71,6 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         data: {
           Otp: random,
           phone,
-          updated_at: new Date(),
         },
       });
     }
