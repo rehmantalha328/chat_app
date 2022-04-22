@@ -26,7 +26,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   if (error) return res.status(404).send(getError(error.details[0].message));
   const phone = "+" + clean(value.phone);
   // return res.send(value);
-  // try {
+  try {
     // if (phone.startsWith("+92")) {
     //   if (phone.length != 13)
     //     return res
@@ -89,12 +89,12 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
     } else {
       return res.status(404).send(getError("Please try again"));
     }
-  // } catch (err) {
-  //   if (err && err.message) {
-  //     return res.status(500).send(getError(err.message));
-  //   }
-  //   return res.status(500).send(getError(err));
-  // }
+  } catch (err) {
+    if (err && err.message) {
+      return res.status(500).send(getError(err.message));
+    }
+    return res.status(500).send(getError(err));
+  }
 });
 
 router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
