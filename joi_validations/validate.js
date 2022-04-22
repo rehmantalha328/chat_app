@@ -75,6 +75,13 @@ function fetchMessageValidation(data) {
   return fetchMessageSchema.validate(data);
 };
 
+function seenMessagesValidation(data) {
+  const seenMessagesSchema = joi.object({
+      sender_id: joi.string().required(),
+  });
+  return seenMessagesSchema.validate(data);
+};
+
 module.exports = {
   emailValidation,
   emailPhoneAndOtpValidation,
@@ -82,5 +89,6 @@ module.exports = {
   phoneValidation,
   signUpValidation,
   messageValidation,
-  fetchMessageValidation
+  fetchMessageValidation,
+  seenMessagesValidation,
 };

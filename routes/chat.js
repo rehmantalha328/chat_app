@@ -8,6 +8,7 @@ const { MessageType } = require("@prisma/client");
 const {
   messageValidation,
   fetchMessageValidation,
+  seenMessagesValidation,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -735,6 +736,55 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError(catchError.message));
     }
     return res.status(404).send(getError(catchError));
+  }
+});
+
+router.post("/seen_messages", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = seenMessagesValidation(req.body);
+    if (error) {
+      return res.status(400).send(getError(error.details[0].message));
+    }
+    const reciever_id = req.user.user_id;
+    const { sender_id } = value;
+    const findSender = await getUserFromId(sender_id);
+    if (!findSender) {
+      return res.status(404).send(getError("User not found!"));
+    }
+    if (sender_id == reciever_id) {
+      return res
+        .status(404)
+        .send(getError("sender id should be different from reciever id."));
+    }
+    const message_id = await prisma.messages.findMany({
+      where: {
+        sender_id,
+        reciever_id,
+        seen: false,
+      },
+      select: {
+        message_id: true,
+      },
+    });
+    const is_seen = await prisma.messages.updateMany({
+      where: {
+        sender_id,
+        reciever_id,
+      },
+      data: {
+        seen: true,
+      },
+    });
+    if (is_seen.count <= 0) {
+      return res.status(400).send(getError("No data found"));
+    }
+    // seenMessages(reciever_id, sender_id, message_id, true);
+    return res.status(200).send(getSuccessData("Successfully done"));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(400).send(getError(catchError.message));
+    }
+    return res.status(400).send(getError(catchError));
   }
 });
 
