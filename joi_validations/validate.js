@@ -76,8 +76,8 @@ function fetchMessageValidation(data) {
 };
 
 function seenMessagesValidation(data) {
-  const seenMessagesSchema = joi.object({
-      sender_id: joi.string().required(),
+  const seenMessagesSchema = Joi.object({
+      sender_id: Joi.string().required(),
   });
   return seenMessagesSchema.validate(data);
 };
