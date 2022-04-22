@@ -71,6 +71,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         data: {
           Otp: random,
           phone,
+          updated_at: new Date(),
         },
       });
     }
@@ -165,8 +166,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   // }
 });
 
-router.post(
-  "/request_forgotPassword_phone_otp",
+router.post("/request_forgotPassword_phone_otp",
   trimRequest.all,
   async (req, res) => {
     const { error, value } = phoneValidation(req.body);
@@ -241,8 +241,7 @@ router.post(
   }
 );
 
-router.post(
-  "/forgotpassowrd_verify_phone_otp",
+router.post("/forgotpassowrd_verify_phone_otp",
   trimRequest.all,
   async (req, res) => {
     const { error, value } = phoneAndOtpValidation(req.body);
@@ -315,170 +314,6 @@ router.post(
   }
 );
 
-// router.post("/request_email_otp", trimRequest.all, async (req, res) => {
-//   const { error, value } = emailValidation(req.body);
-//   if (error) return res.status(404).send(getError(error.details[0].message));
 
-//   try {
-//     const { email: _email } = value;
-//     const email = _email.toLowerCase();
-//     const emailExists = await prisma.users.findFirst({
-//       where: {
-//         email,
-//         is_registered: true,
-//       },
-//     });
-//     if (emailExists)
-//       return res.status(404).send(getError("Email already taken."));
-
-//     const random = rn.generator({
-//       min: 1111,
-//       max: 9999,
-//       integer: true,
-//     })();
-
-//     const existingOtp = await prisma.otpVerify.findFirst({
-//       where: {
-//         user_identifier: email,
-//       },
-//     });
-
-//     await Mailer.sendMail(
-//       email,
-//       "Otp Verification",
-//       `Dear User, Otp is ${random}, which is valid only for 5 minutes.`
-//     );
-
-//     if (existingOtp) {
-//       await prisma.otpVerify.update({
-//         where: {
-//           id: existingOtp.id,
-//         },
-//         data: {
-//           otp: random,
-//         },
-//       });
-//     } else {
-//       await prisma.otpVerify.create({
-//         data: {
-//           user_identifier: email,
-//           otp: random,
-//         },
-//       });
-//     }
-//     return res
-//       .status(200)
-//       .send(
-//         getSuccessData(
-//           "Otp sent to your email, which is valid only for 5 minutes"
-//         )
-//       );
-//   } catch (err) {
-//     return res.status(404).send(getError(err));
-//   }
-// });
-
-// router.post("/verify_email_otp", trimRequest.all, async (req, res) => {
-//   const { error, value } = emailPhoneAndOtpValidation(req.body);
-//   if (error) return res.status(404).send(getError(error.details[0].message));
-
-//   const { email: _email, otp } = value;
-//   const email = _email.toLowerCase();
-//   const phone = "+" + clean(value.phone);
-
-//   try {
-//     if (phone.startsWith("+92")) {
-//       if (phone.length != 13)
-//         return res
-//           .status(404)
-//           .send(getError("Phone should be 10 character long."));
-//     } else if (phone.startsWith("+234")) {
-//       if (phone.length != 14)
-//         return res
-//           .status(404)
-//           .send(getError("Phone should be 10 or 11  character long."));
-//     } else
-//       return res
-//         .status(404)
-//         .send(getError("Phone can only starts with +92 or +234."));
-
-//     const emailExists = await prisma.users.findFirst({
-//       where: {
-//         email,
-//         is_registered: true,
-//       },
-//     });
-//     if (emailExists)
-//       return res.status(404).send(getError("Email already taken."));
-
-//     const phoneExists = await prisma.users.findFirst({
-//       where: {
-//         phone,
-//         is_registered: true,
-//       },
-//     });
-//     if (phoneExists)
-//       return res
-//         .status(404)
-//         .send(getError("This phone number is already registered"));
-
-//     const existingOtp = await prisma.otpVerify.findFirst({
-//       where: {
-//         user_identifier: email,
-//       },
-//     });
-
-//     if (!existingOtp)
-//       return res
-//         .status(404)
-//         .send(getError("sorry no otp issued to this Email."));
-
-//     if (timeExpired({ time: existingOtp.updated_at, p_minutes: 5 })) {
-//       await prisma.otpVerify.delete({
-//         where: {
-//           id: existingOtp.id,
-//         },
-//       });
-//       return res.status(404).send(getError("Otp Expired."));
-//     }
-
-//     if (existingOtp.otp != otp)
-//       return res.status(404).send(getError("Otp does not match."));
-
-//     const existingUser = await prisma.users.findFirst({
-//       where: {
-//         phone,
-//       },
-//     });
-
-//     if (!existingUser) {
-//       return res
-//         .status(404)
-//         .send(getError("First verify your phone, then verify email."));
-//     }
-
-//     if (existingUser.is_registered == true)
-//       return res.status(404).send(getError("Email already taken."));
-
-//     await prisma.users
-//       .update({
-//         where: { id: existingUser.id },
-//         data: {
-//           email,
-//         },
-//       })
-//       .then(async () => {
-//         await prisma.otpVerify.delete({
-//           where: {
-//             id: existingOtp.id,
-//           },
-//         });
-//       });
-
-//     return res.status(200).send(getSuccessData("Email successfully verified"));
-//   } catch (err) {
-//     return res.status(404).send(getError(err));
-//   }
-// });
 
 module.exports = router;
