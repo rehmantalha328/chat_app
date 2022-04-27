@@ -55,10 +55,14 @@ function messageValidation(data) {
     message_type: Joi.string()
       .valid(MessageType.TEXT.toString())
       .required(),
-    //   attachment: joi.when("message_type", {
-    //   is: MessageType.MEDIA.toString(),
-    //   then: joi.string(),
-    // }),
+      // media: Joi.when("message_type", {
+      // is: MessageType.MEDIA.toString(),
+      // then: Joi.string(),
+      // }),
+      // media_caption: Joi.when("message_type", {
+      //   is: MessageType.MEDIA.toString(),
+      //   then: Joi.string(),
+      // }),
     message_body: Joi.when("message_type", {
       is: MessageType.TEXT.toString(),
       then: Joi.string().required(),

@@ -91,7 +91,7 @@ model Messages {
   reciever_id    String
   msg_channel_id String
   message_body   String?
-  attatchment    String?
+  media          String?
   message_type   MessageType      @default(TEXT)
   seen           Boolean          @default(false)
   user_sender    User             @relation(fields: [sender_id], references: [user_id], name: "user_sender_name")
@@ -100,6 +100,15 @@ model Messages {
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
 }
+
+// model messages_media {
+//   media_id       String    @id @default(cuid())
+//   message_id     String?
+//   media          String?
+//   media_captions Messages? @relation(fields: [message_id], references: [message_id])
+//   created_at     DateTime  @default(now())
+//   updated_at     DateTime  @updatedAt
+// }
 
 model Messages_Channel {
   channel_id       String     @id @default(cuid())
