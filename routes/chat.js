@@ -139,25 +139,13 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
     include: {
       group: {
         include: {
-          group_creator: {
-            select: {
-              user_id: true,
-              username: true,
-              phone: true,
-            },
-          },
-          group_members: {
-            select: {
-              is_admin: true,
-              member: {
-                select: {
-                  user_id: true,
-                  username: true,
-                  phone: true,
-                },
-              },
-            },
-          },
+          // group_creator: {
+          //   select: {
+          //     user_id: true,
+          //     username: true,
+          //     phone: true,
+          //   },
+          // },
           last_message_sender: {
             select: {
               user_id: true,
@@ -166,6 +154,19 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
               profile_img: true,
             },
           },
+          // group_members: {
+          //   select: {
+          //     is_admin: true,
+          //     member: {
+          //       select: {
+          //         user_id: true,
+          //         username: true,
+          //         phone: true,
+          //       },
+          //     },
+          //   },
+          // },
+          
           groupMessages: {
             select: {
               reciver: {
@@ -186,8 +187,11 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
       },
     },
   });
-  let newArray = [];
-  getMyGroups?.forEach((data) => {
+    
+    let newArray = [];
+    let groups = [];
+    getMyGroups?.forEach((data) => {
+      groups.push(data?.group);
     data?.group?.groupMessages?.forEach((data) => {
       data?.reciver?.forEach((data) => {
         newArray.push(data);
@@ -201,7 +205,7 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
       unseenCounter++;
     }
   }
-    return res.send(getSuccessData({ getMyGroups, unseenCounter }));
+    return res.send(getSuccessData({ groups, unseenCounter }));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));

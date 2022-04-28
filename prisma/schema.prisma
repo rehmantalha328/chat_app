@@ -37,7 +37,8 @@ model Groups {
   group_id            String           @id @default(cuid())
   creator_id          String
   group_name          String           @db.VarChar(255)
-  group_description   String           @db.VarChar(255)
+  group_description   String?           @db.VarChar(255)
+  group_picture       String?
   last_message        String?
   last_message_time   String?
   last_message_from   String?
