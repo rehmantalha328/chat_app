@@ -22,9 +22,10 @@ const { sendMessageToGroup, sendTextMessage } = require("../socket/socket");
 
 router.post("/createGroup", trimRequest.all, async (req, res) => {
   try {
-    let creator_id = req?.user?.user_id;
+    let group_creator_id = req?.user?.user_id;
     let groupDescription = req?.body?.groupDescription;
     let groupName = req?.body?.groupName;
+    let is_group_chat = true;
     let groupMembers = [];
 
     if (req?.body?.member_id) {
@@ -36,9 +37,10 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
     }
     const createGroup = await prisma.groups.create({
       data: {
-        creator_id,
+        group_creator_id,
         group_description: groupDescription,
         group_name: groupName,
+        is_group_chat,
         group_members: {
           createMany: {
             data: groupMembers,
@@ -49,7 +51,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
     const group_members = await prisma.group_members.create({
       data: {
         group_id: createGroup.group_id,
-        member_id: creator_id,
+        member_id: group_creator_id,
         is_admin: true,
       },
     });
@@ -65,9 +67,9 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 router.post("/groupChat", trimRequest.all, async (req, res) => {
   try {
   let sender_id = req?.user?.user_id;
+  let sender_name = req?.user?.username;
   let group_id = req.body.group_id;
   let message = req.body.message;
-  let messageReciever = [];
   const getUsersFromGroup = await prisma.groups.findFirst({
     where: {
       group_id,
@@ -97,16 +99,6 @@ router.post("/groupChat", trimRequest.all, async (req, res) => {
       message_body: message,
     },
   });
-
-  reciever?.forEach((user) => {
-    messageReciever.push({
-      message_id: createMessage?.id,
-      reciever_id: user?.member?.user_id,
-    });
-  });
-  const addReciever = await prisma.message_reciever.createMany({
-    data: messageReciever,
-  });
   const updateLastMessage = await prisma.groups.update({
     where: {
       group_id,
@@ -115,10 +107,9 @@ router.post("/groupChat", trimRequest.all, async (req, res) => {
       last_message: message,
       last_message_time: new Date(),
       last_message_id: createMessage?.id,
-      last_message_from: sender_id,
+      last_message_from: sender_name,
     },
   });
-
   sendMessageToGroup(sender_id, reciever, message);
   return res.status(200).send(getSuccessData(createMessage));
   } catch (error) {
@@ -154,6 +145,30 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
               profile_img: true,
             },
           },
+          sender: {
+            select: {
+              user_id: true,
+              username: true,
+              phone: true,
+              profile_img: true,
+            },
+          },
+          reciever: {
+            select: {
+              user_id: true,
+              username: true,
+              phone: true,
+              profile_img: true,
+            },
+          },
+          messages: {
+            select: {
+              media:true,
+              message_body:true,
+              message_id:true,
+              message_type:true,
+            }
+          },
           // group_members: {
           //   select: {
           //     is_admin: true,
@@ -186,26 +201,29 @@ router.get("/fetchMygroups", trimRequest.all, async (req, res) => {
         },
       },
     },
+    orderBy: {
+      created_at:'desc',
+    }
   });
     
-    let newArray = [];
-    let groups = [];
-    getMyGroups?.forEach((data) => {
-      groups.push(data?.group);
-    data?.group?.groupMessages?.forEach((data) => {
-      data?.reciver?.forEach((data) => {
-        newArray.push(data);
-      });
-    });
-  });
+  //   let newArray = [];
+  //   let groups = [];
+  //   getMyGroups?.forEach((data) => {
+  //     groups.push(data?.group);
+  //   data?.group?.groupMessages?.forEach((data) => {
+  //     data?.reciver?.forEach((data) => {
+  //       newArray.push(data);
+  //     });
+  //   });
+  // });
 
-  let unseenCounter = 0;
-  for (let i = 0; i < newArray?.length; i++) {
-    if (newArray[i]?.reciever_id === user_id && newArray[i]?.seen === false) {
-      unseenCounter++;
-    }
-  }
-    return res.send(getSuccessData({ groups, unseenCounter }));
+  // let unseenCounter = 0;
+  // for (let i = 0; i < newArray?.length; i++) {
+  //   if (newArray[i]?.reciever_id === user_id && newArray[i]?.seen === false) {
+  //     unseenCounter++;
+  //   }
+  // }
+    return res.send(getSuccessData(groups));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
@@ -262,12 +280,108 @@ router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
   return res.send(getSuccessData(getMyGroups));
 });
 
-router.post("/sendMessages", trimRequest.all, async (req, res) => {
+router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
   try {
-    let sender_id = req.user.user_id;
+    let reciever_id = req?.user?.user_id;
+    // const findMesages = await prisma.group_messages.findMany({
+    //   where: {
+    //     reciver: {
+    //       some: {
+    //         reciever_id,
+    //         seen: false,
+    //       },
+    //     }
+    //   },
+    //   select: {
+    //     message_body: true,
+    //     attatchment: true,
+    //     message_type: true,
+    //     id: true,
+    //   }
+    // });
+    const seen = await prisma.message_reciever.updateMany({
+      where: {
+        reciever_id,
+        seen: false,
+      },
+      data: {
+        seen: true,
+      }
+    })
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+  
+});
+
+router.post("/sendMessages", trimRequest.all, async (req, res) => {
+  // try {
+  let sender_id = req.user.user_id;
+  let sender_name = req?.user?.username;
+  let is_group_chat = req?.body?.is_group_chat;
+  // let reciever = [];
+  if (is_group_chat === true) {
+  let group_id = req?.body?.group_id;
+    let message_body = req?.body?.message_body;
+    let message_type = req?.body?.message_type;
+  const getUsersFromGroup = await prisma.groups.findFirst({
+    where: {
+      group_id,
+    },
+    include: {
+      group_members: {
+        select: {
+          member: {
+            select: {
+              user_id: true,
+              username: true,
+              phone: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  const reciever = getUsersFromGroup?.group_members?.filter(
+    (user) => user?.member?.user_id !== sender_id
+    );
+    // reciever?.forEach((data) => {
+    //   reciever.push({
+    //     sender_id: sender_id,
+    //     reciever_id: data?.member?.user_id,
+    //     group_id: group,
+    //   })
+    // })
+    // console.log(reciever);
+    // return;
+  const createMessage = await prisma.group_messages.create({
+    data: {
+      sender_id,
+      group_id,
+      message_body,
+      message_type,
+    },
+  });
+  const updateLastMessage = await prisma.groups.update({
+    where: {
+      group_id,
+    },
+    data: {
+      last_message: message_body,
+      last_message_time: new Date(),
+      last_message_id: createMessage?.id,
+      last_message_sender: sender_name,
+      last_message_sender_id: sender_id,
+    },
+  });
+  sendMessageToGroup(sender_id, reciever, message);
+  }
     // const { fname, lname, profile_picture } = req.user;
-    let files = [];
-    let media = [];
+    // let files = [];
+    // let media = [];
     const { error, value } = messageValidation(req.body);
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
@@ -325,7 +439,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("Message does not send to your self"));
     }
-    let chkChannel = await chkMessageChannel(sender_id, reciever_id);
+  let chkChannel = await chkMessageChannel(sender_id, reciever_id);
     if (!chkChannel) {
       chkChannel = await createMessageChannel(sender_id, reciever_id);
     }
@@ -417,14 +531,14 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     if (message_type === MessageType.TEXT) {
       // files = null;
       // deleteUploadedImage(req);
-      const createMessage = await prisma.messages.create({
+      const createMessage = await prisma.group_messages.create({
         data: {
           sender_id,
           reciever_id,
-          msg_channel_id: chkChannel
-            ? chkChannel.channel_id
-            : chkChannel.channel_id,
-          message_body,
+          group_id: chkChannel
+            ? chkChannel.group_id
+            : chkChannel.group_id,
+          message_body, 
           message_type,
         },
       });
@@ -462,12 +576,12 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       // sendNotificationCounter(sender_id, reciever_id, true);
       return res.status(200).send(getSuccessData(createMessage));
     }
-  } catch (catchError) {
-    if (catchError && catchError.message) {
-      return res.status(404).send(getError(catchError.message));
-    }
-    return res.status(404).send(getError(catchError));
-  }
+  // } catch (catchError) {
+  //   if (catchError && catchError.message) {
+  //     return res.status(404).send(getError(catchError.message));
+  //   }
+  //   return res.status(404).send(getError(catchError));
+  // }
 });
 
 router.post("/fetch_messages", trimRequest.all, async (req, res) => {
@@ -557,7 +671,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 //     ],
                 //   },
                 // },
-                send_messages: {
+                i_send_messages: {
                   where: {
                     OR: [
                       {
@@ -569,7 +683,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                recieve_messages: {
+                i_recieve_messages: {
                   where: {
                     OR: [
                       {
@@ -583,7 +697,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            channel_messages: {
+            group_messages: {
               orderBy: {
                 created_at: "desc",
               },
@@ -624,7 +738,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 //     ],
                 //   },
                 // },
-                send_messages: {
+                i_send_messages: {
                   where: {
                     OR: [
                       {
@@ -636,7 +750,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                recieve_messages: {
+                i_recieve_messages: {
                   where: {
                     OR: [
                       {
@@ -650,18 +764,69 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            channel_messages: {
+            group_messages: {
               orderBy: {
                 created_at: "desc",
               },
             },
           },
         },
+        groups_i_created: {
+          select: {
+            group_name: true,
+            group_id: true,
+            group_image: true,
+            group_description: true,
+            last_message: true,
+            last_message_time: true,
+            last_message_id: true,
+            last_message_sender: true,
+            last_message_sender_id: true,
+            is_group_chat: true,
+            group_messages: {
+              orderBy: {
+                created_at:'desc',
+              }
+            },
+          },
+          
+        },
+        groups_i_joined: {
+          where: {
+            OR: [{
+              is_admin: false,
+            }, {
+              is_sub_admin: true,
+            }]
+          },
+          select: {
+            group: {
+              select: {
+                group_name: true,
+                group_id: true,
+                group_image: true,
+                group_description: true,
+                last_message: true,
+                last_message_time: true,
+                last_message_id: true,
+                last_message_sender: true,
+                last_message_sender_id: true,
+                is_group_chat: true,
+                group_messages: {
+                  orderBy: {
+                    created_at:'desc',
+                  }
+                }
+              }
+            }
+          }
+        }
       },
+      
     });
 
     const first = contacts.primary_user_channel;
-    const send = first.map((arr) => {
+    const send = first?.map((arr) => {
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
       // } else {
@@ -676,36 +841,36 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete arr.reciever.user_blocked_me;
 
       if (
-        arr.reciever.send_messages.length > 0 &&
-        arr.reciever.recieve_messages.length > 0
+        arr.reciever.i_send_messages.length > 0 &&
+        arr.reciever.i_recieve_messages.length > 0
       ) {
         arr.reciever.is_chat_start = true;
       } else {
         arr.reciever.is_chat_start = false;
       }
-      delete arr.reciever.send_messages;
-      delete arr.reciever.recieve_messages;
+      delete arr.reciever.i_send_messages;
+      delete arr.reciever.i_recieve_messages;
 
       const obj = arr.reciever;
       obj.last_message =
-        arr.channel_messages.length > 0
-          ? arr.channel_messages[0].message_body
-            ? arr.channel_messages[0].message_body
-            : arr.channel_messages[0].attatchment
+        arr.group_messages.length > 0
+          ? arr.group_messages[0].message_body
+            ? arr.group_messages[0].message_body
+            : arr.group_messages[0].attatchment
           : null;
       obj.last_message_time =
-        arr.channel_messages.length > 0
-          ? arr.channel_messages[0].created_at
+        arr.group_messages.length > 0
+          ? arr.group_messages[0].created_at
           : null;
-      obj.un_seen_counter = arr.channel_messages.filter(
-        (ar) => ar.seen == false && ar.reciever_id == user_id
+      obj.un_seen_counter = arr.group_messages.filter(
+        (ar) => ar.seen === false && ar.reciever_id === user_id
       ).length;
-
+      obj.is_group_chat = false;
       return obj;
     });
 
     const second = contacts.secondary_user_channel;
-    const recieve = second.map((ary) => {
+    const recieve = second?.map((ary) => {
       // if (ary.sender.user_i_block.length > 0) {
       //   ary.sender.is_user_i_block = true;
       // } else {
@@ -720,31 +885,52 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete ary.sender.user_i_block;
 
       const obj = ary.sender;
-      if (obj.send_messages.length > 0 && obj.recieve_messages.length > 0) {
+      if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
         obj.is_chat_start = true;
       } else {
         obj.is_chat_start = false;
       }
-      delete obj.send_messages;
-      delete obj.recieve_messages;
+      delete obj.i_send_messages;
+      delete obj.i_recieve_messages;
 
       obj.last_message =
-        ary.channel_messages.length > 0
-          ? ary.channel_messages[0].message_body
-            ? ary.channel_messages[0].message_body
-            : ary.channel_messages[0].attatchment
+        ary.group_messages.length > 0
+          ? ary.group_messages[0].message_body
+            ? ary.group_messages[0].message_body
+            : ary.group_messages[0].attatchment
           : null;
       obj.last_message_time =
-        ary.channel_messages.length > 0
-          ? ary.channel_messages[0].created_at
+        ary.group_messages.length > 0
+          ? ary.group_messages[0].created_at
           : null;
-      obj.un_seen_counter = ary.channel_messages.filter(
-        (ar) => ar.seen == false && ar.reciever_id == user_id
+      obj.un_seen_counter = ary.group_messages.filter(
+        (ar) => ar.seen === false && ar.reciever_id === user_id
       ).length;
+      obj.is_group_chat = false;
       return obj;
     });
 
-    const friend = [...send, ...recieve];
+    const my_created_groups = contacts.groups_i_created;
+    const fourth = contacts.groups_i_joined;
+    
+    const my_joined_groups = [];
+    const chk = fourth?.forEach((ary) => {
+      my_joined_groups.push({
+        group_name: ary?.group?.group_name,
+        group_id: ary?.group?.group_id,
+        group_image: ary?.group?.group_image,
+        group_description: ary?.group?.group_description,
+        last_message: ary?.group?.last_message,
+        last_message_time: ary?.group?.last_message_time,
+        last_message_id: ary?.group?.last_message_id,
+        last_message_sender: ary?.group?.last_message_sender,
+        last_message_sender_id: ary?.group?.last_message_sender_id,
+        is_group_chat: ary?.group?.is_group_chat,
+       })
+    });
+    
+    const friend = [...send, ...recieve, ...my_created_groups, ...my_joined_groups];
+    console.log(friend);
     const sorted = _.orderBy(friend, ["last_message_time"], ["desc"]);
     return res.status(200).send(getSuccessData(sorted));
   } catch (catchError) {

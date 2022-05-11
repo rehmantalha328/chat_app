@@ -2,7 +2,7 @@ const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 
 function chkMessageChannel(sender_id, reciever_id) {
-  return prisma.messages_Channel.findFirst({
+  return prisma.groups.findFirst({
     where: {
       OR: [
         {
@@ -19,7 +19,7 @@ function chkMessageChannel(sender_id, reciever_id) {
 }
 
 function createMessageChannel(sender_id, reciever_id) {
-  return prisma.messages_Channel.create({
+  return prisma.groups.create({
     data: {
       sender_id,
       reciever_id,

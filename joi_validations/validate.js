@@ -68,6 +68,7 @@ function messageValidation(data) {
       then: Joi.string().required(),
       otherwise: Joi.string(),
     }),
+    is_group_chat: Joi.boolean().required(),
   });
   return messageSchema.validate(data);
 };
