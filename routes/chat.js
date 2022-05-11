@@ -318,7 +318,7 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
 });
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
-  // try {
+  try {
   let sender_id = req.user.user_id;
   let sender_name = req?.user?.username;
   let is_group_chat = req?.body?.is_group_chat;
@@ -576,12 +576,12 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       // sendNotificationCounter(sender_id, reciever_id, true);
       return res.status(200).send(getSuccessData(createMessage));
     }
-  // } catch (catchError) {
-  //   if (catchError && catchError.message) {
-  //     return res.status(404).send(getError(catchError.message));
-  //   }
-  //   return res.status(404).send(getError(catchError));
-  // }
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
 });
 
 router.post("/fetch_messages", trimRequest.all, async (req, res) => {
