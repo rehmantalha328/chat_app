@@ -241,6 +241,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 // });
 
 router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
+  try{
   let user_id = req.user.user_id;
   // let is_group_chat = req?.body?.is_group_chat;
   let group_id = req?.body?.group_id;
@@ -258,6 +259,12 @@ router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
     })
     return res.send(getSuccessData(fetchGroupMessages));
   // }
+} catch (catchError) {
+  if (catchError && catchError.message) {
+    return res.status(404).send(getError(catchError.message));
+  }
+  return res.status(404).send(getError(catchError));
+}
 });
 
 // router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
