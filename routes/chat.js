@@ -254,7 +254,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
         group_messages: true,
       },
       orderBy: {
-        created_at: 'desc',
+        created_at: 'asc',
       }
     })
     return res.send(getSuccessData(fetchGroupMessages));
