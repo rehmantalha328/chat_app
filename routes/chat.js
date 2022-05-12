@@ -318,67 +318,61 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
 });
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
-  try {
+  try { 
   let sender_id = req.user.user_id;
   let sender_name = req?.user?.username;
   let is_group_chat = req?.body?.is_group_chat;
-  // let reciever = [];
+
   if (is_group_chat === true) {
-  let group_id = req?.body?.group_id;
+    let group_id = req?.body?.group_id;
     let message_body = req?.body?.message_body;
     let message_type = req?.body?.message_type;
-  const getUsersFromGroup = await prisma.groups.findFirst({
-    where: {
-      group_id,
-    },
-    include: {
-      group_members: {
-        select: {
-          member: {
-            select: {
-              user_id: true,
-              username: true,
-              phone: true,
+    const getUsersFromGroup = await prisma.groups.findFirst({
+      where: {
+        group_id,
+      },
+      include: {
+        group_members: {
+          select: {
+            member: {
+              select: {
+                user_id: true,
+                username: true,
+                phone: true,
+              },
             },
           },
         },
       },
-    },
-  });
-  const reciever = getUsersFromGroup?.group_members?.filter(
-    (user) => user?.member?.user_id !== sender_id
+    });
+    const reciever = getUsersFromGroup?.group_members?.filter(
+      (user) => user?.member?.user_id !== sender_id
     );
-    // reciever?.forEach((data) => {
-    //   reciever.push({
-    //     sender_id: sender_id,
-    //     reciever_id: data?.member?.user_id,
-    //     group_id: group,
-    //   })
-    // })
-    // console.log(reciever);
-    // return;
-  const createMessage = await prisma.group_messages.create({
-    data: {
-      sender_id,
-      group_id,
-      message_body,
-      message_type,
-    },
-  });
-  const updateLastMessage = await prisma.groups.update({
-    where: {
-      group_id,
-    },
-    data: {
-      last_message: message_body,
-      last_message_time: new Date(),
-      last_message_id: createMessage?.id,
-      last_message_sender: sender_name,
-      last_message_sender_id: sender_id,
-    },
-  });
-  sendMessageToGroup(sender_id, reciever, message);
+
+    const createMessage = await prisma.group_messages.create({
+      data: {
+        sender_id,
+        group_id,
+        message_body,
+        message_type,
+      },
+    });
+    const updateLastMessage = await prisma.groups.update({
+      where: {
+        group_id,
+      },
+      data: {
+        last_message: message_body,
+        last_message_time: new Date(),
+        last_message_id: createMessage?.id,
+        last_message_sender: sender_name,
+        last_message_sender_id: sender_id,
+      },
+    });
+    sendMessageToGroup(sender_id, reciever, message_body);
+    return res.status(200).send(getSuccessData(createMessage));
   }
+  else {
     // const { fname, lname, profile_picture } = req.user;
     // let files = [];
     // let media = [];
@@ -439,7 +433,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("Message does not send to your self"));
     }
-  let chkChannel = await chkMessageChannel(sender_id, reciever_id);
+    let chkChannel = await chkMessageChannel(sender_id, reciever_id);
     if (!chkChannel) {
       chkChannel = await createMessageChannel(sender_id, reciever_id);
     }
@@ -538,7 +532,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
           group_id: chkChannel
             ? chkChannel.group_id
             : chkChannel.group_id,
-          message_body, 
+          message_body,
           message_type,
         },
       });
@@ -576,6 +570,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       // sendNotificationCounter(sender_id, reciever_id, true);
       return res.status(200).send(getSuccessData(createMessage));
     }
+  }
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
@@ -789,7 +784,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               }
             },
           },
-          
+          orderBy: {
+            created_at:'desc',
+          }
         },
         groups_i_joined: {
           where: {
@@ -819,6 +816,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 }
               }
             }
+          },
+          orderBy: {
+            created_at: 'desc',
           }
         }
       },
