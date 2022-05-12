@@ -67,7 +67,7 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
       if (chkReciever) {
         io.to(chkReciever.socketId).emit("newGroupMessage", {
           sender_id,
-          message,
+          message_body: message,
           message_type,
           message_time: new Date().toLocaleTimeString(),
         });
