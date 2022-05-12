@@ -253,11 +253,11 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       select: {
         group_messages: true,
       },
-      orderBy: {
-        created_at: 'asc',
-      }
-    })
-    return res.send(getSuccessData(fetchGroupMessages));
+    });
+    const get = fetchGroupMessages.group_messages;
+    const msgs = _.orderBy(get, ["created_at"], ["asc"]);
+    return res.status(200).send(getSuccessData(msgs));
+    // return res.send(getSuccessData(fetchGroupMessages));
   // }
 } catch (catchError) {
   if (catchError && catchError.message) {
