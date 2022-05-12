@@ -22,7 +22,7 @@ const {
 // SIMPLE SIGNUP USER
 router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
   try {
-    const allusers = await prisma.user.findMany({
+    const allusers = await prisma.user.findFirst({
       where: {
         NOT: [
           {
@@ -37,6 +37,33 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
         profile_img: true,
         online_status: true,
         online_status_time: true,
+        // groups_i_created: {
+        //   select: {
+        //     group_name: true,
+        //     group_id: true,
+        //     group_image: true,
+        //     group_description: true,
+        //   }
+        // },
+        // groups_i_joined: {
+        //   where: {
+        //     OR: [{
+        //       is_admin: false,
+        //     }, {
+        //       is_sub_admin: true,
+        //       },],
+        //   },
+        //   select: {
+        //     group: {
+        //       select: {
+        //         group_name: true,
+        //         group_id: true,
+        //         group_image: true,
+        //         group_description: true,
+        //       }
+        //     }
+        //   }
+        // }
       },
       orderBy: {
         created_at:'desc',
