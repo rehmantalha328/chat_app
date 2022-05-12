@@ -45,7 +45,7 @@ model groups {
   is_group_chat          Boolean          @default(false)
   created_at             DateTime         @default(now())
   updated_at             DateTime         @updatedAt
-  last_message_time      DateTime?         
+  last_message_time      DateTime?
   sender                 User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
   reciever               User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
   group_members          group_members[]
@@ -79,8 +79,8 @@ model group_messages {
   user_sender   User?       @relation(fields: [sender_id], references: [user_id], name: "user_sender")
   user_reciever User?       @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
   groups        groups?     @relation(fields: [group_id], references: [group_id])
-
 }
+
 
 enum MessageType {
   TEXT

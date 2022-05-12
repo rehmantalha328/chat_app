@@ -963,7 +963,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         seen: false,
       },
       select: {
-        message_id: true,
+        id: true,
       },
     });
     const is_seen = await prisma.group_messages.updateMany({
