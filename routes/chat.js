@@ -255,7 +255,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       },
     });
     const get = fetchGroupMessages.group_messages;
-    const msgs = _.orderBy(get, ["created_at"], ["asc"]);
+    const msgs = _.orderBy(get, ["created_at"], ["desc"]);
+    console.log("sdvjkbkvdv",msgs);
     return res.status(200).send(getSuccessData(msgs));
     // return res.send(getSuccessData(fetchGroupMessages));
   // }
