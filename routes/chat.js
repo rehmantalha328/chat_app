@@ -240,7 +240,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 //   }
 // });
 
-router.get("/fetchMyMessages", trimRequest.all, async (req, res) => {
+router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try{
   let user_id = req.user.user_id;
   // let is_group_chat = req?.body?.is_group_chat;
