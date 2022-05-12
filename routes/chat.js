@@ -356,7 +356,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         last_message_sender_id: sender_id,
       },
     });
-    sendMessageToGroup(sender_id, reciever, message_body);
+    sendMessageToGroup(sender_id, reciever, message_body, message_type);
     return res.status(200).send(getSuccessData(createMessage));
   }
   else {

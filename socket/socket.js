@@ -54,7 +54,7 @@ const setUpSocket = (server) => {
   });
 };
 
-const sendMessageToGroup = (sender_id, reciever, message) => {
+const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
   console.log("sender::", sender_id);
   console.log("reciever::", reciever);
   console.log("message::", message);
@@ -68,6 +68,7 @@ const sendMessageToGroup = (sender_id, reciever, message) => {
         io.to(chkReciever.socketId).emit("newGroupMessage", {
           sender_id,
           message,
+          message_type,
           message_time: new Date().toLocaleTimeString(),
         });
       }
