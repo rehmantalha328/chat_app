@@ -50,9 +50,17 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
     });
     const group_members = await prisma.group_members.create({
       data: {
-        group_id: createGroup.group_id,
+        group_id: createGroup?.group_id,
         member_id: group_creator_id,
         is_admin: true,
+      },
+    });
+    const updateLastMessage = await prisma.groups.update({
+      where: {
+        group_id: createGroup?.group_id,
+      },
+      data: {
+        last_message_time: new Date(),
       },
     });
     return res.send(getSuccessData(createGroup));
