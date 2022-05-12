@@ -956,7 +956,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("sender id should be different from reciever id."));
     }
-    const message_id = await prisma.messages.findMany({
+    const message_id = await prisma.group_messages.findMany({
       where: {
         sender_id,
         reciever_id,
@@ -966,7 +966,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         message_id: true,
       },
     });
-    const is_seen = await prisma.messages.updateMany({
+    const is_seen = await prisma.group_messages.updateMany({
       where: {
         sender_id,
         reciever_id,
@@ -975,7 +975,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         seen: true,
       },
     });
-    if (is_seen.count <= 0) {
+    if (is_seen.count <= 0) { 
       return res.status(400).send(getError("No data found"));
     }
     // seenMessages(reciever_id, sender_id, message_id, true);

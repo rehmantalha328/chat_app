@@ -58,7 +58,6 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
   console.log("sender::", sender_id);
   console.log("reciever::", reciever);
   console.log("message::", message);
-  // return true;
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
