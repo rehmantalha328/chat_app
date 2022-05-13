@@ -254,10 +254,9 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
         group_messages: true,
       },
     });
-    const get = fetchGroupMessages.group_messages;
+    const get = fetchGroupMessages?.group_messages;
     const msgs = _.orderBy(get, ["created_at"], ["desc"]);
     return res.status(200).send(getSuccessData(msgs));
-    // return res.send(getSuccessData(fetchGroupMessages));
   // }
 } catch (catchError) {
   if (catchError && catchError.message) {
@@ -356,7 +355,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         last_message_sender_id: sender_id,
       },
     });
-    sendMessageToGroup(sender_id, reciever, message_body, message_type);
+    sendMessageToGroup(sender_id, reciever, message_body, message_type, group_id);
     return res.status(200).send(getSuccessData(createMessage));
   }
   else {
@@ -523,7 +522,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
           message_type,
         },
       });
-      sendTextMessage(sender_id, reciever_id, message_body, message_type);
+      sendTextMessage(sender_id, reciever_id, message_body, message_type, chkChannel?.group_id);
       // Notifications
       // const isNotificationAllowed = await prisma.users.findFirst({
       //   where: {
@@ -814,7 +813,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
 
     const first = contacts.primary_user_channel;
     const send = first?.map((arr) => {
-      console.log("iamm arr::",arr);
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
       // } else {
@@ -909,6 +907,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
 
     const my_created_groups = contacts.groups_i_created;
+    // console.log(my_created_groups);
     const fourth = contacts.groups_i_joined;
     
     const my_joined_groups = [];

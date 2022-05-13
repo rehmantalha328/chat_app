@@ -54,7 +54,7 @@ const setUpSocket = (server) => {
   });
 };
 
-const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
+const sendMessageToGroup = (sender_id, reciever, message, message_type, group_id) => {
   console.log("sender::", sender_id);
   console.log("reciever::", reciever);
   console.log("message::", message);
@@ -68,6 +68,7 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
           sender_id,
           message_body: message,
           message_type,
+          group_id,
           message_time: new Date().toLocaleTimeString(),
         });
       }
@@ -75,7 +76,7 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type) => {
   }
 };
 
-const sendTextMessage = (sender_id, reciever_id, textMessage, message_type) => {
+const sendTextMessage = (sender_id, reciever_id, textMessage, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
@@ -86,6 +87,7 @@ const sendTextMessage = (sender_id, reciever_id, textMessage, message_type) => {
         reciever_id,
         message_body: textMessage,
         message_type,
+        group_id,
         message_time: new Date().toLocaleTimeString(),
       });
     }
