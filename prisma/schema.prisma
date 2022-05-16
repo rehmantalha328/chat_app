@@ -17,6 +17,7 @@ model User {
   password                    String?            @db.VarChar(255)
   Otp                         Int?
   Otp_verified                Boolean?           @default(false)
+  forgot_password_otp_verify  Boolean?           @default(false)
   profile_img                 String?            @db.VarChar(255)
   is_registered               Boolean            @default(false)
   created_at                  DateTime           @default(now())
