@@ -27,4 +27,12 @@ function createMessageChannel(sender_id, reciever_id) {
   });
 }
 
-module.exports = { chkMessageChannel, createMessageChannel };
+function chkExistingGroup(group_id) {
+  return prisma.groups.findFirst({
+    where: {
+      group_id,
+    },
+  });
+}
+
+module.exports = { chkMessageChannel, createMessageChannel, chkExistingGroup };

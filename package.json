@@ -26,7 +26,7 @@
     "nodemailer": "^6.7.3",
     "nodemon": "^2.0.15",
     "random-number": "0.0.9",
-    "socket.io": "^4.4.1",
+    "socket.io": "^4.4.0",
     "timediff": "^1.1.1",
     "trim-request": "^1.0.6",
     "twilio": "^3.76.0",

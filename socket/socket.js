@@ -55,9 +55,9 @@ const setUpSocket = (server) => {
 };
 
 const sendMessageToGroup = (sender_id, reciever, message, message_type, group_id) => {
-  console.log("sender::", sender_id);
-  console.log("reciever::", reciever);
-  console.log("message::", message);
+  // console.log("sender::", sender_id);
+  // console.log("reciever::", reciever);
+  // console.log("message::", message);
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {

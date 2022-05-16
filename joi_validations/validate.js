@@ -73,9 +73,23 @@ function messageValidation(data) {
   return messageSchema.validate(data);
 };
 
-function fetchMessageValidation(data) {
+function chkIsGroupChat(data) {
+  const groupChatChkSchema = Joi.object({
+    is_group_chat: Joi.boolean().required(),
+  });
+  return groupChatChkSchema.validate(data);
+}
+
+function fetchMessageValidationForOnetoOne(data) {
   const fetchMessageSchema = Joi.object({
-    reciever_id: Joi.string().required()
+    reciever_id: Joi.string().required(),
+  });
+  return fetchMessageSchema.validate(data);
+};
+
+function fetchMessageValidationForGroup(data) {
+  const fetchMessageSchema = Joi.object({
+    group_id: Joi.string().required(),
   });
   return fetchMessageSchema.validate(data);
 };
@@ -94,6 +108,8 @@ module.exports = {
   phoneValidation,
   signUpValidation,
   messageValidation,
-  fetchMessageValidation,
+  chkIsGroupChat,
+  fetchMessageValidationForOnetoOne,
+  fetchMessageValidationForGroup,
   seenMessagesValidation,
 };
