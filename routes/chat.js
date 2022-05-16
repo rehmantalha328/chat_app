@@ -241,6 +241,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 // });
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
+  console.log("iam request:::",req?.body);
   try {
     const sender_id = req.user.user_id;
     const { error, value } = fetchMessageValidation(req.body);
