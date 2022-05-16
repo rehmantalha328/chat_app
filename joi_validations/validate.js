@@ -35,6 +35,14 @@ function signUpValidation(data) {
   return signupschema.validate(data);
 }
 
+function updatePasswordValidation(data) {
+  const updatePasswordSchema = Joi.object({
+    phone: Joi.string().required(),
+    password: Joi.string().required(),
+  });
+  return updatePasswordSchema.validate(data);
+}
+
 function emailPhoneAndOtpValidation(data) {
   const phoneEmailAndOtpSchema = Joi.object({
     email: Joi.string().email().required(),
@@ -106,4 +114,5 @@ module.exports = {
   messageValidation,
   fetchMessageValidation,
   seenMessagesValidation,
+  updatePasswordValidation,
 };

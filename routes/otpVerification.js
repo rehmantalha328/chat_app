@@ -139,12 +139,23 @@ router.post(
 
       const PhoneExists = await getUserFromphone(phone);
       if (PhoneExists.Otp_verified == true && PhoneExists?.is_registered == true) {
+        if (PhoneExists?.forgot_password_otp_verify == false) {
+          await prisma.user.update({
+            where: {
+              user_id: PhoneExists.user_id,
+            },
+            data: {
+              Otp: random,
+            },
+          });
+        }
         await prisma.user.update({
           where: {
             user_id: PhoneExists.user_id,
           },
           data: {
             Otp: random,
+            forgot_password_otp_verify: false,
           },
         });
       } else {

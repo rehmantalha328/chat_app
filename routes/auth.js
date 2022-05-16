@@ -4,8 +4,7 @@ const prisma = Prisma_Client.prismaClient;
 const trimRequest = require("trim-request");
 const {
   signUpValidation,
-  checkEmailValidation,
-  referalIdValidation,
+  updatePasswordValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -23,18 +22,17 @@ const imagemulter = require("../middleWares/imageMulter");
 // SIMPLE SIGNUP USER
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   try {
-    if (!req.body.phone) {
-      return res.status(404).send(getError("please send phone number"));
+    const { error, value } = updatePasswordValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
     }
-    if (!req.body.password) {
-      return res.status(404).send(getError("please send password"));
-    }
-    const phone = "+" + clean(req.body.phone);
+    const { password } = value;
+    const phone = "+" + clean(value.phone);
     const chkphone = await getUserFromphone(phone);
     if (!chkphone) {
       return res.status(404).send(getError("phone number doest not Exist."));
     }
-    if (chkphone?.Otp_verified == false) {
+    if (chkphone?.forgot_password_otp_verify == false) {
       return res
         .status(404)
         .send(getError("Please verify your phone number first."));
@@ -44,7 +42,7 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
         user_id: chkphone?.user_id,
       },
       data: {
-        password: req.body.password,
+        password,
       },
     });
     if (updateuser)
