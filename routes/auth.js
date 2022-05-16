@@ -10,14 +10,16 @@ const {
   getError,
   getSuccessData,
   createToken,
-  deleteSingleImage,
+  deleteExistigImg,
   clean,
 } = require("../helper_functions/helpers");
 const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
+const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const imagemulter = require("../middleWares/imageMulter");
+const { fs } = require("file-system");
 
 // SIMPLE SIGNUP USER
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
@@ -59,19 +61,19 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 });
 
 // signUp USER //
-router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
+router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
     const { error, value } = signUpValidation(req.body);
     if (error) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(getError(error.details[0].message));
     }
     if (req.file_error) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(req.file_error);
     }
     if (!req.file) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(getError("Please Select Your Profile."));
     }
     const { username: _username, password } = value;
@@ -79,18 +81,33 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
     const username = _username.toLowerCase();
 
     const getExistingUser = await getUserFromphone(phone);
+    if (!getExistingUser) {
+      deleteExistigImg(req);
+      return res.status(404).send(getError("User not found"));
+    }
     if (getExistingUser?.Otp_verified == false) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(getError("Please verify otp first"));
     }
     if (getExistingUser?.is_registered == true) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(getError("This user already exists"));
     }
     if (getExistingUser?.username == username) {
-      deleteSingleImage(req);
+      deleteExistigImg(req);
       return res.status(404).send(getError("This username already exists"));
     }
+
+    // s3 bucket for profile
+    if (req?.file) {
+      const file = req?.file;
+      let { Location } = await uploadFile(file);
+      var profile_picture = Location;
+    }
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    // END
 
     const createUser = await prisma.user.update({
       where: {
@@ -99,14 +116,19 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
       data: {
         password,
         username,
-        phone,
         is_registered: true,
-        profile_img: req?.file?.filename,
+        profile_img: profile_picture,
       },
     });
+    if (!createUser) {
+      deleteFile(profile_picture);
+      return res
+        .status(404)
+        .send(getError("There is some issue please try again later"));
+    }
     return res.status(200).send(getSuccessData(await createToken(createUser)));
   } catch (catchError) {
-    deleteSingleImage(req);
+    deleteFile(profile_picture);
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
     }

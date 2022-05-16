@@ -109,7 +109,7 @@ const deleteSingleImage = (req) => {
 
 const deleteExistigImg = (file) => {
   try {
-    fs.unlink("" + "public/images/" + file, callback);
+    fs.unlink("" + "public/" + file, callback);
     function callback(error) {
       if (error) {
         console.log("Error Deleting File");

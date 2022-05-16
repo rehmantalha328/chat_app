@@ -12,14 +12,14 @@ datasource db {
 
 model User {
   user_id                     String             @id @default(cuid())
-  phone                       String             @db.VarChar(255)
+  phone                       String?            @db.VarChar(255)
   username                    String?            @db.VarChar(255)
   password                    String?            @db.VarChar(255)
   Otp                         Int?
   Otp_verified                Boolean?           @default(false)
   forgot_password_otp_verify  Boolean?           @default(false)
   profile_img                 String?            @db.VarChar(255)
-  is_registered               Boolean            @default(false)
+  is_registered               Boolean?           @default(false)
   created_at                  DateTime           @default(now())
   updated_at                  DateTime           @updatedAt
   online_status               Boolean?           @default(false)
@@ -70,20 +70,20 @@ model group_members {
 }
 
 model group_messages {
-  id                        String             @id @default(cuid())
-  sender_id                 String?            @db.VarChar(255)
-  reciever_id               String?            @db.VarChar(255)
-  group_id                  String?            @db.VarChar(255)
-  message_body              String?            @db.VarChar(255)
-  attatchment               String?            @db.VarChar(255)
-  seen                      Boolean            @default(false)
-  message_type              MessageType        @default(TEXT)
-  created_at                DateTime           @default(now())
-  updated_at                DateTime           @updatedAt
-  user_sender               User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
-  user_reciever             User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
-  groups                    groups?            @relation(fields: [group_id], references: [group_id])
-  reciever                  message_reciever[]
+  id            String             @id @default(cuid())
+  sender_id     String?            @db.VarChar(255)
+  reciever_id   String?            @db.VarChar(255)
+  group_id      String?            @db.VarChar(255)
+  message_body  String?            @db.VarChar(255)
+  attatchment   String?            @db.VarChar(255)
+  seen          Boolean            @default(false)
+  message_type  MessageType        @default(TEXT)
+  created_at    DateTime           @default(now())
+  updated_at    DateTime           @updatedAt
+  user_sender   User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
+  user_reciever User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
+  groups        groups?            @relation(fields: [group_id], references: [group_id])
+  reciever      message_reciever[]
 }
 
 model message_reciever {
