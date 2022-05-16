@@ -80,17 +80,29 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
     const phone = "+" + clean(value.phone);
     const username = _username.toLowerCase();
 
-    const chkusername = await chkExistingUserName(username);
-    if (chkusername) {
+    const getExistingUser = await getUserFromphone(phone);
+    if (getExistingUser?.Otp_verified == false) {
       deleteSingleImage(req);
-      return res.status(404).send(getError("Username Already Taken."));
+      return res.status(404).send(getError("Please verify otp first"));
     }
-    const createUser = await prisma.user.create({
+    if (getExistingUser?.is_registered == true) {
+      deleteSingleImage(req);
+      return res.status(404).send(getError("This user already exists"));
+    }
+    if (getExistingUser?.username == username) {
+      deleteSingleImage(req);
+      return res.status(404).send(getError("This username already exists"));
+    }
+
+    const createUser = await prisma.user.update({
+      where: {
+        user_id: getExistingUser?.user_id,
+      },
       data: {
         password,
         username,
         phone,
-        Otp_verified: true,
+        is_registered: true,
         profile_img: req?.file?.filename,
       },
     });
@@ -101,31 +113,6 @@ router.post("/signUpUser", [trimRequest.all,imagemulter], async (req, res) => {
       return res.status(404).send(getError(catchError.message));
     }
     return res.status(404).send(getError(catchError));
-  }
-});
-
-router.post("/chkReferalId", trimRequest.all, async (req, res) => {
-  try {
-    const { error, value } = referalIdValidation(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const { refrer_id } = value;
-
-    const chkRefrer = await prisma.users.findFirst({
-      where: {
-        referal_id: refrer_id,
-      },
-    });
-    if (!chkRefrer) {
-      return res.status(404).send(getError("Invalid referal ID"));
-    }
-    return res.status(200).send(getSuccessData("Successfully applied"));
-  } catch (error) {
-    if (error && error.message) {
-      return res.status(404).send(getError(error.message));
-    }
-    return res.status(404).send(getError(error.message));
   }
 });
 

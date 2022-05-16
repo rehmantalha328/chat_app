@@ -25,8 +25,18 @@ function chkExistingUserName(username) {
   });
 };
 
+function chkExistingOtp(phone,otp) {
+  return prisma.user.findFirst({
+    where: {
+      phone,
+      Otp: otp,
+    }
+  });
+};
+
 module.exports = {
   getUserFromphone,
   getUserFromId,
   chkExistingUserName,
+  chkExistingOtp,
 };

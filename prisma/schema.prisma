@@ -18,6 +18,7 @@ model User {
   Otp                         Int?
   Otp_verified                Boolean?           @default(false)
   profile_img                 String?            @db.VarChar(255)
+  is_registered               Boolean            @default(false)
   created_at                  DateTime           @default(now())
   updated_at                  DateTime           @updatedAt
   online_status               Boolean?           @default(false)
