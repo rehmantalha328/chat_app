@@ -131,44 +131,21 @@ router.post(
     const phone = "+" + clean(value.phone);
 
     try {
-      // if (phone.startsWith("+92")) {
-      //   if (phone.length != 13)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 10 character long."));
-      // } else if (phone.startsWith("+234")) {
-      //   if (phone.length != 14)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 10 or 11  character long."));
-      // } else if (phone.startsWith("+34")) {
-      //   if (phone.length != 12)
-      //     return res
-      //       .status(404)
-      //       .send(getError("Phone should be 9 or 10  character long."));
-      // } else
-      //   return res
-      //     .status(404)
-      //     .send(getError("Phone can only starts with +92 or +234."));
       const random = rn.generator({
         min: 1111,
         max: 9999,
         integer: true,
       })();
 
-      const PhoneExists = await prisma.user.findFirst({
-        where: {
-          phone,
-        },
-      });
-      if (PhoneExists) {
+      const PhoneExists = await getUserFromphone(phone);
+      if (PhoneExists.Otp_verified == true && PhoneExists?.is_registered == true) {
         await prisma.user.update({
           where: {
             user_id: PhoneExists.user_id,
           },
           data: {
             Otp: random,
-            Otp_verified: false,
+            // Otp_verified: false,
           },
         });
       } else {

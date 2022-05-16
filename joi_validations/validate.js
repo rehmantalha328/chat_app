@@ -73,25 +73,21 @@ function messageValidation(data) {
   return messageSchema.validate(data);
 };
 
-function chkIsGroupChat(data) {
+function fetchMessageValidation(data) {
   const groupChatChkSchema = Joi.object({
     is_group_chat: Joi.boolean().required(),
+    reciever_id: Joi.when("is_group_chat", {
+      is: false,
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+    group_id: Joi.when("is_group_chat", {
+      is: true,
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
   });
   return groupChatChkSchema.validate(data);
-}
-
-function fetchMessageValidationForOnetoOne(data) {
-  const fetchMessageSchema = Joi.object({
-    reciever_id: Joi.string().required(),
-  });
-  return fetchMessageSchema.validate(data);
-};
-
-function fetchMessageValidationForGroup(data) {
-  const fetchMessageSchema = Joi.object({
-    group_id: Joi.string().required(),
-  });
-  return fetchMessageSchema.validate(data);
 };
 
 function seenMessagesValidation(data) {
@@ -108,8 +104,6 @@ module.exports = {
   phoneValidation,
   signUpValidation,
   messageValidation,
-  chkIsGroupChat,
-  fetchMessageValidationForOnetoOne,
-  fetchMessageValidationForGroup,
+  fetchMessageValidation,
   seenMessagesValidation,
 };

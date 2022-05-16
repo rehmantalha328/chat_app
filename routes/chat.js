@@ -7,9 +7,7 @@ var _ = require("lodash");
 const { MessageType } = require("@prisma/client");
 const {
   messageValidation,
-  chkIsGroupChat,
-  fetchMessageValidationForOnetoOne,
-  fetchMessageValidationForGroup,
+  fetchMessageValidation,
   seenMessagesValidation,
 } = require("../joi_validations/validate");
 const {
@@ -245,17 +243,12 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
     const sender_id = req.user.user_id;
-    const { error, value } = chkIsGroupChat(req.body);
-      if (error) {
+    const { error, value } = fetchMessageValidation(req.body);
+    if (error) {
         return res.status(404).send(getError(error.details[0].message));
     } 
-    const { is_group_chat } = value;
-    if (is_group_chat === true) {
-      const { error, value } = fetchMessageValidationForGroup(req.body);
-      if (error) {
-        return res.status(404).send(getError(error.details[0].message));
-      }
-      const { group_id } = value;
+    const { is_group_chat,reciever_id, group_id } = value;
+    if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
         return res.status(404).send(getSuccessData("No Group Exists"));
@@ -272,11 +265,6 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       const msgs = _.orderBy(get, ["created_at"], ["desc"]);
       return res.status(200).send(getSuccessData(msgs));
     } else {
-      const { error, value } = fetchMessageValidationForOnetoOne(req.body);
-      if (error) {
-        return res.status(404).send(getError(error.details[0].message));
-      }
-      const { reciever_id } = value;
       const getGroup = await chkMessageChannel(sender_id, reciever_id);
       if (!getGroup) {
         return res.status(404).send(getSuccessData("No Channel Exists"));
