@@ -2,13 +2,13 @@ const router = require("express").Router();
 const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 const trimRequest = require("trim-request");
-const fs = require("fs");
 var _ = require("lodash");
 const { MessageType } = require("@prisma/client");
 const {
   messageValidation,
   fetchMessageValidation,
   seenMessagesValidation,
+  groupCreateValidation,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -18,32 +18,57 @@ const {
 const { getUserFromId } = require("../database_queries/auth");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 const { sendMessageToGroup, sendTextMessage } = require("../socket/socket");
-// const { uuid } = require('uuid');
+const imagemulter = require("../middleWares/imageMulter");
+const { fs } = require("file-system");
+const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
-router.post("/createGroup", trimRequest.all, async (req, res) => {
+
+router.post("/createGroup", [trimRequest.all,imagemulter], async (req, res) => {
   try {
     let group_creator_id = req?.user?.user_id;
-    let groupDescription = req?.body?.groupDescription;
-    let groupName = req?.body?.groupName;
+    const { error, value } = groupCreateValidation(req.body);
+    if (error) {
+      deleteExistigImg(req);
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    if (req.file_error) {
+      deleteExistigImg(req);
+      return res.status(404).send(req.file_error);
+    }
+    if (!req.file) {
+      deleteExistigImg(req);
+      return res.status(404).send(getError("Please Select group image"));
+    }
+    const { groupDescription, groupName } = value;
     let is_group_chat = true;
     let groupMembers = [];
 
     if (req?.body?.member_id) {
-      if (req.body.member_id?.length > 10 || req.body.member_id?.length < 0) {
-        return res.status(404).send(getError("Members should be 1 to 10"));
-      }
+      // if (req.body.member_id?.length > 10 || req.body.member_id?.length < 0) {
+      //   return res.status(404).send(getError("Members should be 1 to 10"));
+      // }
       req.body.member_id.forEach((ids) => {
         groupMembers.push({
           member_id: ids,
         });
       });
     }
+    if (req?.file) {
+      const file = req?.file;
+      let { Location } = await uploadFile(file);
+      var group_picture = Location;
+    }
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
     const createGroup = await prisma.groups.create({
       data: {
         group_creator_id,
         group_description: groupDescription,
         group_name: groupName,
         is_group_chat,
+        group_image: group_picture,
         group_members: {
           createMany: {
             data: groupMembers,
@@ -68,6 +93,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
     });
     return res.send(getSuccessData(createGroup));
   } catch (error) {
+    deleteFile(group_picture);
     if (error && error.message) {
       return res.status(404).send(error.message);
     }

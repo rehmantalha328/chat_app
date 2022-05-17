@@ -57,12 +57,13 @@ function emailPhoneAndOtpValidation(data) {
   return phoneEmailAndOtpSchema.validate(data);
 };
 
-// function groupCreateValidation(data) {
-//   const createGroupSchema = Joi.object({
-//     groupDescription: Joi.string(),
-//     groupName: Joi.string().required(),
-//   })
-// }
+function groupCreateValidation(data) {
+  const createGroupSchema = Joi.object({
+    groupDescription: Joi.string(),
+    groupName: Joi.string().required(),
+  });
+  return createGroupSchema.validate(data);
+};
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
@@ -122,4 +123,5 @@ module.exports = {
   fetchMessageValidation,
   seenMessagesValidation,
   updatePasswordValidation,
+  groupCreateValidation,
 };
