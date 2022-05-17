@@ -63,72 +63,74 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
-    const { error, value } = signUpValidation(req.body);
-    if (error) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    if (req.file_error) {
-      deleteExistigImg(req);
-      return res.status(404).send(req.file_error);
-    }
-    if (!req.file) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("Please Select Your Profile."));
-    }
-    const { username: _username, password } = value;
-    const phone = "+" + clean(value.phone);
-    const username = _username.toLowerCase();
+  const { error, value } = signUpValidation(req.body);
+  if (error) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError(error.details[0].message));
+  }
+  if (req.file_error) {
+    deleteExistigImg(req);
+    return res.status(404).send(req.file_error);
+  }
+  if (!req.file) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError("Please Select Your Profile."));
+  }
+  const { username: _username, password } = value;
+  const phone = "+" + clean(value.phone);
+  const username = _username.toLowerCase();
 
-    const getExistingUser = await getUserFromphone(phone);
-    if (!getExistingUser) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("User not found"));
-    }
-    if (getExistingUser?.Otp_verified == false) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("Please verify otp first"));
-    }
-    if (getExistingUser?.is_registered == true) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("This user already exists"));
-    }
-    if (getExistingUser?.username == username) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("This username already exists"));
-    }
+  const getExistingUser = await getUserFromphone(phone);
+  if (!getExistingUser) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError("User not found"));
+  }
+  if (getExistingUser?.Otp_verified == false) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError("Please verify otp first"));
+  }
+  if (getExistingUser?.is_registered == true) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError("This user already exists"));
+  }
+  if (getExistingUser?.username == username) {
+    deleteExistigImg(req);
+    return res.status(404).send(getError("This username already exists"));
+  }
 
-    // s3 bucket for profile
-    if (req?.file) {
-      const file = req?.file;
-      let { Location } = await uploadFile(file);
-      var profile_picture = Location;
-    }
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-    // END
+  // s3 bucket for profile
+  if (req?.file) {
+    const file = req?.file;
+    let { Location } = await uploadFile(file);
+    var profile_picture = Location;
+  }
+  if (fs.existsSync(req.file.path)) {
+    fs.unlinkSync(req.file.path);
+  }
+  // END
 
-    const createUser = await prisma.user.update({
-      where: {
-        user_id: getExistingUser?.user_id,
-      },
-      data: {
-        password,
-        username,
-        is_registered: true,
-        profile_img: profile_picture,
-      },
-    });
-    if (!createUser) {
-      deleteFile(profile_picture);
-      return res
-        .status(404)
-        .send(getError("There is some issue please try again later"));
-    }
-    return res.status(200).send(getSuccessData(await createToken(createUser)));
+  const createUser = await prisma.user.update({
+    where: {
+      user_id: getExistingUser?.user_id,
+    },
+    data: {
+      password,
+      username,
+      is_registered: true,
+      profile_img: profile_picture,
+    },
+  });
+  if (!createUser) {
+    deleteExistigImg(req);
+    deleteFile(profile_picture);
+    return res
+      .status(404)
+      .send(getError("There is some issue please try again later"));
+  }
+  return res.status(200).send(getSuccessData(await createToken(createUser)));
   } catch (catchError) {
     deleteFile(profile_picture);
+    deleteExistigImg(req);
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
     }
