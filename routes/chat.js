@@ -34,6 +34,7 @@ router.post(
   "/createGroup",
   [imagemulter, trimRequest.all],
   async (req, res) => {
+    console.log("iam request from creatGroup Api",req?.body);
     try {
       const group_creator_id = req?.user?.user_id;
       const creator_name = req?.user?.username;
