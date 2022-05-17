@@ -61,6 +61,7 @@ function groupCreateValidation(data) {
   const createGroupSchema = Joi.object({
     groupDescription: Joi.string(),
     groupName: Joi.string().required(),
+    member_id: Joi.array().required(),
   });
   return createGroupSchema.validate(data);
 };

@@ -21,14 +21,22 @@ const {
   getSuccessData,
   deleteExistigImg,
 } = require("../helper_functions/helpers");
-const { sendMessageToGroup, sendTextMessage } = require("../socket/socket");
+const {
+  sendMessageToGroup,
+  sendTextMessage,
+  newGroupCreated,
+} = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
-router.post("/createGroup",[imagemulter,trimRequest.all],async (req, res) => {
+router.post(
+  "/createGroup",
+  [imagemulter, trimRequest.all],
+  async (req, res) => {
     try {
-      let group_creator_id = req?.user?.user_id;
+      const group_creator_id = req?.user?.user_id;
+      const creator_name = req?.user?.username;
       const { error, value } = groupCreateValidation(req.body);
       if (error) {
         deleteExistigImg(req);
@@ -46,19 +54,17 @@ router.post("/createGroup",[imagemulter,trimRequest.all],async (req, res) => {
       let is_group_chat = true;
       let groupMembers = [];
 
-      if (req?.body?.member_id) {
-        if (req.body.member_id?.length <= 0) {
-          deleteExistigImg(req);
-          return res
-            .status(404)
-            .send(getError("Please add atleast one member to this group"));
-        }
-        req.body.member_id.forEach((ids) => {
-          groupMembers.push({
-            member_id: ids,
-          });
-        });
+      if (req?.body?.member_id?.length <= 0) {
+        deleteExistigImg(req);
+        return res
+          .status(404)
+          .send(getError("Please add atleast one member to group"));
       }
+      req.body.member_id.forEach((ids) => {
+        groupMembers.push({
+          member_id: ids,
+        });
+      });
       if (req?.file) {
         const file = req?.file;
         let { Location } = await uploadFile(file);
@@ -97,9 +103,24 @@ router.post("/createGroup",[imagemulter,trimRequest.all],async (req, res) => {
           last_message_time: new Date(),
         },
       });
+      const last_message = `${creator_name} added you in the group`;
+      newGroupCreated(
+        groupMembers,
+        group_creator_id,
+        creator_name,
+        groupName,
+        createGroup?.group_id,
+        group_picture,
+        createGroup?.last_message !== null
+          ? createGroup?.last_message
+          : last_message,
+        createGroup?.last_message_time,
+        is_group_chat
+      );
       return res.send(getSuccessData(createGroup));
     } catch (error) {
       deleteFile(group_picture);
+      deleteExistigImg(req);
       if (error && error.message) {
         return res.status(404).send(error.message);
       }
