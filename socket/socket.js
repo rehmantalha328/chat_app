@@ -55,19 +55,17 @@ const setUpSocket = (server) => {
 };
 
 const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, group_id, group_image, last_message, last_message_time, is_group_chat) => {
-  const chkSender = findSender(creator_id);
-  if (chkSender) {
+  const chkCreator = findSender(creator_id);
+  if (chkCreator) {
     groupMembers?.forEach((user) => {
-      console.log("usergroup", user);
-      return;
-      const chkReciever = findReciever(reciever_id);
+      const chkReciever = findReciever(user?.member_id);
       if (chkReciever) {
-        io.to(chkReciever.socketId).emit("newGroupMessage", {
-          sender_id,
-          message_body: message,
-          message_type,
+        io.to(chkReciever.socketId).emit("newGroupCreated", {
           group_id,
-          message_time: new Date().toLocaleTimeString(),
+          group_name,
+          group_image,
+          last_message_time,
+          is_group_chat,
         });
       }
     });

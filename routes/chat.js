@@ -55,7 +55,7 @@ router.post(
       let is_group_chat = true;
       let groupMembers = [];
 
-      if (req?.body?.member_id?.length == 0) {
+      if (req?.body?.member_id == '') {
         deleteExistigImg(req);
         return res
           .status(404)
