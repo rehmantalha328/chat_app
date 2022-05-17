@@ -16,7 +16,7 @@ const {
   chkExistingGroup,
 } = require("../database_queries/chat");
 const { getUserFromId } = require("../database_queries/auth");
-const { getError, getSuccessData } = require("../helper_functions/helpers");
+const { getError, getSuccessData, deleteExistigImg } = require("../helper_functions/helpers");
 const { sendMessageToGroup, sendTextMessage } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const { fs } = require("file-system");
