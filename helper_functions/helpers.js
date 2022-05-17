@@ -32,6 +32,7 @@ const createToken = async (user) => {
       _id: user.user_id,
       username: user.username,
       phone: user.phone,
+      profile_img: user.profile_img,
     },
     getEnv("JWT_SECRET"),
     {

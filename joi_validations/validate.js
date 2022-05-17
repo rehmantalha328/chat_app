@@ -55,7 +55,14 @@ function emailPhoneAndOtpValidation(data) {
     }),
   });
   return phoneEmailAndOtpSchema.validate(data);
-}
+};
+
+// function groupCreateValidation(data) {
+//   const createGroupSchema = Joi.object({
+//     groupDescription: Joi.string(),
+//     groupName: Joi.string().required(),
+//   })
+// }
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
