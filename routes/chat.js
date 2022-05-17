@@ -29,7 +29,7 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
     let groupMembers = [];
 
     if (req?.body?.member_id) {
-      if (req.body.member_id?.length > 10 || req.body.member_id?.length < 0 ) {
+      if (req.body.member_id?.length > 10 || req.body.member_id?.length < 0) {
         return res.status(404).send(getError("Members should be 1 to 10"));
       }
       req.body.member_id.forEach((ids) => {
@@ -76,14 +76,13 @@ router.post("/createGroup", trimRequest.all, async (req, res) => {
 });
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
-  console.log("iam request:::",req?.body);
   try {
     const sender_id = req.user.user_id;
     const { error, value } = fetchMessageValidation(req.body);
     if (error) {
-        return res.status(404).send(getError(error.details[0].message));
-    } 
-    const { is_group_chat,reciever_id, group_id } = value;
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { is_group_chat, reciever_id, group_id } = value;
     if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
@@ -94,7 +93,28 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
           group_id,
         },
         select: {
-          group_messages: true,
+          group_messages: {
+            select: {
+              attatchment: true,
+              message_body: true,
+              message_type: true,
+              sender_id: true,
+              reciever_id: true,
+              seen: true,
+              created_at: true,
+              updated_at: true,
+              group_id: true,
+              user_sender: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  profile_img: true,
+                  online_status: true,
+                  online_status_time: true,
+                },
+              },
+            },
+          },
         },
       });
       const get = fetchGroupMessages?.group_messages;
@@ -110,7 +130,28 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
           group_id: getGroup?.group_id,
         },
         select: {
-          group_messages: true,
+          group_messages: {
+            select: {
+              attatchment: true,
+              message_body: true,
+              message_type: true,
+              sender_id: true,
+              reciever_id: true,
+              seen: true,
+              created_at: true,
+              updated_at: true,
+              group_id: true,
+              user_sender: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  profile_img: true,
+                  online_status: true,
+                  online_status_time: true,
+                },
+              },
+            },
+          },
         },
       });
       const get = getMessages?.group_messages;
