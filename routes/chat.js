@@ -16,90 +16,97 @@ const {
   chkExistingGroup,
 } = require("../database_queries/chat");
 const { getUserFromId } = require("../database_queries/auth");
-const { getError, getSuccessData, deleteExistigImg } = require("../helper_functions/helpers");
+const {
+  getError,
+  getSuccessData,
+  deleteExistigImg,
+} = require("../helper_functions/helpers");
 const { sendMessageToGroup, sendTextMessage } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
+router.post("/createGroup",[imagemulter,trimRequest.all],async (req, res) => {
+    try {
+      let group_creator_id = req?.user?.user_id;
+      const { error, value } = groupCreateValidation(req.body);
+      if (error) {
+        deleteExistigImg(req);
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      if (req.file_error) {
+        deleteExistigImg(req);
+        return res.status(404).send(req.file_error);
+      }
+      if (!req.file) {
+        deleteExistigImg(req);
+        return res.status(404).send(getError("Please Select group image"));
+      }
+      const { groupDescription, groupName } = value;
+      let is_group_chat = true;
+      let groupMembers = [];
 
-router.post("/createGroup", [trimRequest.all,imagemulter], async (req, res) => {
-  try {
-    let group_creator_id = req?.user?.user_id;
-    const { error, value } = groupCreateValidation(req.body);
-    if (error) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    if (req.file_error) {
-      deleteExistigImg(req);
-      return res.status(404).send(req.file_error);
-    }
-    if (!req.file) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("Please Select group image"));
-    }
-    const { groupDescription, groupName } = value;
-    let is_group_chat = true;
-    let groupMembers = [];
-
-    if (req?.body?.member_id) {
-      // if (req.body.member_id?.length > 10 || req.body.member_id?.length < 0) {
-      //   return res.status(404).send(getError("Members should be 1 to 10"));
-      // }
-      req.body.member_id.forEach((ids) => {
-        groupMembers.push({
-          member_id: ids,
+      if (req?.body?.member_id) {
+        if (req.body.member_id?.length <= 0) {
+          deleteExistigImg(req);
+          return res
+            .status(404)
+            .send(getError("Please add atleast one member to this group"));
+        }
+        req.body.member_id.forEach((ids) => {
+          groupMembers.push({
+            member_id: ids,
+          });
         });
-      });
-    }
-    if (req?.file) {
-      const file = req?.file;
-      let { Location } = await uploadFile(file);
-      var group_picture = Location;
-    }
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
+      }
+      if (req?.file) {
+        const file = req?.file;
+        let { Location } = await uploadFile(file);
+        var group_picture = Location;
+      }
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
 
-    const createGroup = await prisma.groups.create({
-      data: {
-        group_creator_id,
-        group_description: groupDescription,
-        group_name: groupName,
-        is_group_chat,
-        group_image: group_picture,
-        group_members: {
-          createMany: {
-            data: groupMembers,
+      const createGroup = await prisma.groups.create({
+        data: {
+          group_creator_id,
+          group_description: groupDescription,
+          group_name: groupName,
+          is_group_chat,
+          group_image: group_picture,
+          group_members: {
+            createMany: {
+              data: groupMembers,
+            },
           },
         },
-      },
-    });
-    const group_members = await prisma.group_members.create({
-      data: {
-        group_id: createGroup?.group_id,
-        member_id: group_creator_id,
-        is_admin: true,
-      },
-    });
-    const updateLastMessage = await prisma.groups.update({
-      where: {
-        group_id: createGroup?.group_id,
-      },
-      data: {
-        last_message_time: new Date(),
-      },
-    });
-    return res.send(getSuccessData(createGroup));
-  } catch (error) {
-    deleteFile(group_picture);
-    if (error && error.message) {
-      return res.status(404).send(error.message);
+      });
+      const group_members = await prisma.group_members.create({
+        data: {
+          group_id: createGroup?.group_id,
+          member_id: group_creator_id,
+          is_admin: true,
+        },
+      });
+      const updateLastMessage = await prisma.groups.update({
+        where: {
+          group_id: createGroup?.group_id,
+        },
+        data: {
+          last_message_time: new Date(),
+        },
+      });
+      return res.send(getSuccessData(createGroup));
+    } catch (error) {
+      deleteFile(group_picture);
+      if (error && error.message) {
+        return res.status(404).send(error.message);
+      }
+      return res.status(404).send(error);
     }
-    return res.status(404).send(error);
   }
-});
+);
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
