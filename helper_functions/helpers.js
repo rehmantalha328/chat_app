@@ -107,15 +107,10 @@ const deleteSingleImage = (req) => {
   }
 };
 
-const deleteExistigImg = (file) => {
+const deleteExistigImg = (req) => {
   try {
-    fs.unlink("" + "public/" + file, callback);
-    function callback(error) {
-      if (error) {
-        console.log("Error Deleting File");
-        console.log(error.message);
-      }
-    }
+    const path = req?.file?.path;
+    fs.unlinkSync(path);
   } catch (error) {
     console.log(error);
   }
@@ -134,11 +129,11 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c; // Distance in km
   return d;
-}
+};
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
-}
+};
 
 module.exports = {
   getError,
