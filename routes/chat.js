@@ -61,10 +61,6 @@ router.post(
           .send(getError("Please add atleast one member to group"));
       }
       req.body.member_id.forEach((ids) => {
-        const chkUser = await getUserFromId(ids);
-        if (!chkUser) {
-          return res.status(404).send(getError("User doesn't exists"));
-        }
         groupMembers.push({
           member_id: ids,
         });
