@@ -203,15 +203,15 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               created_at: true,
               updated_at: true,
               group_id: true,
-              user_sender: {
-                select: {
-                  user_id: true,
-                  username: true,
-                  profile_img: true,
-                  online_status: true,
-                  online_status_time: true,
-                },
-              },
+              // user_sender: {
+              //   select: {
+              //     user_id: true,
+              //     username: true,
+              //     profile_img: true,
+              //     online_status: true,
+              //     online_status_time: true,
+              //   },
+              // },
             },
           },
         },
