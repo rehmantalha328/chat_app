@@ -159,11 +159,26 @@ router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
 
 router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
   try {
+    const admin_id = req?.user?.user_id;
     const { error, value } = addMembersInGroup(req.body);
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
     const { group_id } = value;
+    const chkGroupAdmin = await prisma.group_members.findFirst({
+      where: {
+        AND: [{
+          group_id,
+        }, {
+          member_id: admin_id,
+        }, {
+          is_admin: true,
+        }]
+      }
+    });
+    if (!chkGroupAdmin) {
+      return res.status(404).send(getError("Only admin can add members to this group"));
+    }
     const groupMembers = [];
     const getExistingGroup = await chkExistingGroup(group_id);
     if (!getExistingGroup) {
