@@ -9,6 +9,7 @@ const {
   fetchMessageValidation,
   seenMessagesValidation,
   groupCreateValidation,
+  addMembersInGroup,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -129,9 +130,28 @@ router.post(
   }
 );
 
-// router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
-
-// });
+router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = addMembersInGroup(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const getExistingGroup = await prisma.groups.findFirst({
+      where: {
+        group_id,
+      },
+    });
+   
+  } catch (error) {
+    deleteFile(group_picture);
+    deleteExistigImg(req);
+    if (error && error.message) {
+      return res.status(404).send(error.message);
+    }
+    return res.status(404).send(error);
+  }
+});
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -263,7 +283,6 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
   try {
-    console.log("req.body::::::",req.body);
     let sender_id = req.user.user_id;
     let username = req?.user?.username;
     let profile_img = req?.user?.profile_img;
@@ -271,7 +290,6 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       username: username,
       profile_img: profile_img,
     };
-    console.log("sendr",user_sender);
     let is_group_chat = req?.body?.is_group_chat;
     if (is_group_chat === true) {
       let reciever_data = [];
@@ -327,7 +345,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
           last_message: message_body,
           last_message_time: new Date(),
           last_message_id: createMessage?.id,
-          last_message_sender: sender_name,
+          last_message_sender: username,
           last_message_sender_id: sender_id,
         },
       });
