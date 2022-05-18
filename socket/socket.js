@@ -81,8 +81,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_t
       if (chkReciever) {
         io.to(chkReciever.socketId).emit("newGroupMessage", {
           sender_id,
-          username,
-          profile_img,
+          user_sender: user_sender,
           message_body: message,
           message_type,
           group_id,
@@ -101,8 +100,7 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, messa
     if (chkReciever) {
       io.to(chkReciever.socketId).emit("newTextMessage", {
         sender_id,
-        username,
-        profile_img,
+        user_sender: user_sender,
         reciever_id,
         message_body: textMessage,
         message_type,
