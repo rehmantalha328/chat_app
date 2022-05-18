@@ -288,10 +288,13 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     let sender_id = req.user.user_id;
     let username = req?.user?.username;
     let profile_img = req?.user?.profile_img;
-    let user_sender = {
+    let user_sender_group = {
       username: username,
       profile_img: profile_img,
     };
+    let user_sender_one_to_one = {
+      profile_img: profile_img,
+    }
     let is_group_chat = req?.body?.is_group_chat;
     if (is_group_chat === true) {
       let reciever_data = [];
@@ -353,7 +356,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       });
       sendMessageToGroup(
         sender_id,
-        user_sender,
+        user_sender_group,
         reciever,
         message_body,
         message_type,
@@ -524,7 +527,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         });
         sendTextMessage(
           sender_id,
-          user_sender,
+          user_sender_one_to_one,
           reciever_id,
           message_body,
           message_type,
