@@ -34,7 +34,6 @@ router.post(
   "/createGroup",
   [imagemulter, trimRequest.all],
   async (req, res) => {
-    console.log("iam request from creatGroup Api",req?.body);
     try {
       const group_creator_id = req?.user?.user_id;
       const creator_name = req?.user?.username;
@@ -62,6 +61,10 @@ router.post(
           .send(getError("Please add atleast one member to group"));
       }
       req.body.member_id.forEach((ids) => {
+        const chkUser = await getUserFromId(ids);
+        if (!chkUser) {
+          return res.status(404).send(getError("User doesn't exists"));
+        }
         groupMembers.push({
           member_id: ids,
         });
@@ -129,6 +132,10 @@ router.post(
     }
   }
 );
+
+// router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
+  
+// });
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -259,9 +266,10 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 // });
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
-  // try {
+  try {
   let sender_id = req.user.user_id;
-  let sender_name = req?.user?.username;
+  let username = req?.user?.username;
+  let profile_img = req?.user?.profile_img;
   let is_group_chat = req?.body?.is_group_chat;
   if (is_group_chat === true) {
     let reciever_data = [];
@@ -323,6 +331,8 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     });
     sendMessageToGroup(
       sender_id,
+      username,
+      profile_img,
       reciever,
       message_body,
       message_type,
@@ -493,6 +503,8 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       });
       sendTextMessage(
         sender_id,
+        username,
+        profile_img,
         reciever_id,
         message_body,
         message_type,
@@ -532,12 +544,12 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       return res.status(200).send(getSuccessData(createMessage));
     }
   }
-  // } catch (catchError) {
-  //   if (catchError && catchError.message) {
-  //     return res.status(404).send(getError(catchError.message));
-  //   }
-  //   return res.status(404).send(getError(catchError));
-  // }
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
 });
 
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {

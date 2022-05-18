@@ -72,7 +72,7 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
   }
 };
 
-const sendMessageToGroup = (sender_id, reciever, message, message_type, group_id) => {
+const sendMessageToGroup = (sender_id, username, profile_img, reciever, message, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
@@ -81,6 +81,8 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type, group_id
       if (chkReciever) {
         io.to(chkReciever.socketId).emit("newGroupMessage", {
           sender_id,
+          username,
+          profile_img,
           message_body: message,
           message_type,
           group_id,
@@ -91,7 +93,7 @@ const sendMessageToGroup = (sender_id, reciever, message, message_type, group_id
   }
 };
 
-const sendTextMessage = (sender_id, reciever_id, textMessage, message_type, group_id) => {
+const sendTextMessage = (sender_id, username, profile_img, reciever_id, textMessage, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
@@ -99,6 +101,8 @@ const sendTextMessage = (sender_id, reciever_id, textMessage, message_type, grou
     if (chkReciever) {
       io.to(chkReciever.socketId).emit("newTextMessage", {
         sender_id,
+        username,
+        profile_img,
         reciever_id,
         message_body: textMessage,
         message_type,
