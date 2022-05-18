@@ -43,12 +43,12 @@ function chkExistingGroup(group_id) {
       created_at: true,
       updated_at: true,
       group_members: {
-        select: {
+        include: {
           member: {
             select: {
               user_id: true,
               username: true,
-              profile_img: true,
+              profile_img: true
             }
           }
         }
