@@ -74,6 +74,13 @@ function addMembersInGroup(data) {
   return addMembersSchema.validate(data);
 };
 
+function getAllMembers(data) {
+  const membersSchema = Joi.object({
+    group_id: Joi.string().required(),
+  });
+  return membersSchema.validate(data);
+}
+
 function messageValidation(data) {
   const messageSchema = Joi.object({
     reciever_id: Joi.string().required(),
@@ -134,4 +141,5 @@ module.exports = {
   updatePasswordValidation,
   groupCreateValidation,
   addMembersInGroup,
+  getAllMembers,
 };

@@ -72,6 +72,25 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
   }
 };
 
+const addMemberToGroup = (groupMembers, group_id, group_image, group_name, last_message, last_message_time, is_group_chat) => {
+  const chkCreator = findSender(creator_id);
+  if (chkCreator) {
+    groupMembers?.forEach((user) => {
+      const chkReciever = findReciever(user?.member_id);
+      if (chkReciever) {
+        io.to(chkReciever.socketId).emit("addedToGroup", {
+          group_id,
+          group_name,
+          group_image,
+          last_message,
+          last_message_time,
+          is_group_chat,
+        });
+      }
+    });
+  }
+};
+
 const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
@@ -117,4 +136,5 @@ module.exports = {
   sendTextMessage,
   sendMessageToGroup,
   newGroupCreated,
+  addMemberToGroup,
 };

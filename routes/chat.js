@@ -10,6 +10,7 @@ const {
   seenMessagesValidation,
   groupCreateValidation,
   addMembersInGroup,
+  getAllMembers,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -26,6 +27,7 @@ const {
   sendMessageToGroup,
   sendTextMessage,
   newGroupCreated,
+  addMemberToGroup,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const { fs } = require("file-system");
@@ -130,30 +132,99 @@ router.post(
   }
 );
 
+router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = getAllMembers(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const isGroupExists = await chkExistingGroup(group_id);
+    if (!isGroupExists) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
+    const getAllGroupMembers = isGroupExists.group_members;
+    if (getAllGroupMembers?.length == 0) {
+      return res.status(200).send(getSuccessData("No member in this group"));
+    }
+    const allmem = _.orderBy(getAllGroupMembers, ["created_at"], ["desc"]);
+    return res.status(200).send(getSuccessData(allmem));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
 
-// router.get("/addMembersInGroup")
-// router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
-//   try {
-//     const { error, value } = addMembersInGroup(req.body);
-//     if (error) {
-//       return res.status(404).send(getError(error.details[0].message));
-//     }
-//     const { group_id } = value;
-//     const getExistingGroup = await prisma.groups.findFirst({
-//       where: {
-//         group_id,
-//       },
-//     });
-//     if (!getExistingGroup) {
-//       return res.status(404).send(getError("Group doesn't exists"));
-//     }
-//   } catch (error) {
-//     if (error && error.message) {
-//       return res.status(404).send(error.message);
-//     }
-//     return res.status(404).send(error);
-//   }
-// });
+router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = addMembersInGroup(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const groupMembers = [];
+    const getExistingGroup = await chkExistingGroup(group_id);
+    if (!getExistingGroup) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
+    req.body.member_id?.forEach((ids) => {
+      groupMembers.push({
+        member_id: ids,
+        group_id: group_id,
+      });
+    });
+    for (let i = 0; i < groupMembers?.length; i++) {
+      const getExistingMembers = await prisma.group_members.findFirst({
+        where: {
+          AND: [
+            {
+              member_id: groupMembers[i].member_id,
+            },
+            {
+              group_id: groupMembers[i].group_id,
+            },
+          ],
+        },
+      });
+      if (getExistingMembers) {
+        return res
+          .status(404)
+          .send(
+            getError(
+              `This member ${getExistingMembers.member_id} already exists`
+            )
+          );
+      }
+    }
+    const addMember = await prisma.group_members.createMany({
+      data: groupMembers,
+    });
+    if (!addMember) {
+      return res
+        .status(404)
+        .send(
+          getError("There is some error from server please try again later")
+        );
+    }
+    addMemberToGroup(
+      groupMembers,
+      group_id,
+      getExistingGroup?.group_image,
+      getExistingGroup?.group_name,
+      getExistingGroup?.last_message,
+      getExistingGroup?.last_message_time,
+      is_group_chat = true,
+    );
+    return res.status(200).send(getSuccessData(addMember));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(error.message);
+    }
+    return res.status(404).send(error);
+  }
+});
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -294,7 +365,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     };
     let user_sender_one_to_one = {
       profile_img: profile_img,
-    }
+    };
     let is_group_chat = req?.body?.is_group_chat;
     if (is_group_chat === true) {
       let reciever_data = [];
