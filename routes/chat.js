@@ -263,7 +263,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
   try {
-    console.log("req.body::::::");
+    console.log("req.body::::::",req.body);
     let sender_id = req.user.user_id;
     let username = req?.user?.username;
     let profile_img = req?.user?.profile_img;
