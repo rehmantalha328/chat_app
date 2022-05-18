@@ -263,9 +263,14 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
   try {
+    console.log("req.body::::::");
   let sender_id = req.user.user_id;
   let username = req?.user?.username;
-  let profile_img = req?.user?.profile_img;
+    let profile_img = req?.user?.profile_img;
+    let user_sender = {
+      username: username,
+      profile_img: profile_img,
+    }
   let is_group_chat = req?.body?.is_group_chat;
   if (is_group_chat === true) {
     let reciever_data = [];
@@ -327,12 +332,11 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     });
     sendMessageToGroup(
       sender_id,
-      username,
-      profile_img,
+      user_sender,
       reciever,
       message_body,
       message_type,
-      group_id
+      group_id,
     );
     return res.status(200).send(getSuccessData(createMessage));
   } else {
@@ -499,8 +503,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
       });
       sendTextMessage(
         sender_id,
-        username,
-        profile_img,
+        user_sender,
         reciever_id,
         message_body,
         message_type,

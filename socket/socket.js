@@ -72,7 +72,7 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
   }
 };
 
-const sendMessageToGroup = (sender_id, username, profile_img, reciever, message, message_type, group_id) => {
+const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
@@ -93,7 +93,7 @@ const sendMessageToGroup = (sender_id, username, profile_img, reciever, message,
   }
 };
 
-const sendTextMessage = (sender_id, username, profile_img, reciever_id, textMessage, message_type, group_id) => {
+const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
