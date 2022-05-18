@@ -130,28 +130,30 @@ router.post(
   }
 );
 
-router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
-  try {
-    const { error, value } = addMembersInGroup(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const { group_id } = value;
-    const getExistingGroup = await prisma.groups.findFirst({
-      where: {
-        group_id,
-      },
-    });
-   
-  } catch (error) {
-    deleteFile(group_picture);
-    deleteExistigImg(req);
-    if (error && error.message) {
-      return res.status(404).send(error.message);
-    }
-    return res.status(404).send(error);
-  }
-});
+
+// router.get("/addMembersInGroup")
+// router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
+//   try {
+//     const { error, value } = addMembersInGroup(req.body);
+//     if (error) {
+//       return res.status(404).send(getError(error.details[0].message));
+//     }
+//     const { group_id } = value;
+//     const getExistingGroup = await prisma.groups.findFirst({
+//       where: {
+//         group_id,
+//       },
+//     });
+//     if (!getExistingGroup) {
+//       return res.status(404).send(getError("Group doesn't exists"));
+//     }
+//   } catch (error) {
+//     if (error && error.message) {
+//       return res.status(404).send(error.message);
+//     }
+//     return res.status(404).send(error);
+//   }
+// });
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -219,15 +221,15 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               created_at: true,
               updated_at: true,
               group_id: true,
-              // user_sender: {
-              //   select: {
-              //     user_id: true,
-              //     username: true,
-              //     profile_img: true,
-              //     online_status: true,
-              //     online_status_time: true,
-              //   },
-              // },
+              user_sender: {
+                select: {
+                  user_id: true,
+                  // username: true,
+                  profile_img: true,
+                  online_status: true,
+                  online_status_time: true,
+                },
+              },
             },
           },
         },
