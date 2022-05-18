@@ -24,6 +24,7 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
   try {
     const allusers = await prisma.user.findMany({
       where: {
+        is_registered: true,
         NOT: [
           {
             user_id: req?.user?.user_id,
