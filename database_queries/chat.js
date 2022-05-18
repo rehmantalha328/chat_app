@@ -42,7 +42,17 @@ function chkExistingGroup(group_id) {
       last_message_time: true,
       created_at: true,
       updated_at: true,
-      group_members: true,
+      group_members: {
+        select: {
+          member: {
+            select: {
+              user_id: true,
+              username: true,
+              profile_img: true,
+            }
+          }
+        }
+      }
     }
   });
 };
