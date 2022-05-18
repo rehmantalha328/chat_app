@@ -54,7 +54,7 @@ router.post(
       let is_group_chat = true;
       let groupMembers = [];
 
-      if (req?.body?.member_id == '') {
+      if (req?.body?.member_id == "") {
         deleteExistigImg(req);
         return res
           .status(404)
@@ -130,7 +130,7 @@ router.post(
 );
 
 // router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
-  
+
 // });
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
@@ -264,285 +264,286 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 router.post("/sendMessages", trimRequest.all, async (req, res) => {
   try {
     console.log("req.body::::::");
-  let sender_id = req.user.user_id;
-  let username = req?.user?.username;
+    let sender_id = req.user.user_id;
+    let username = req?.user?.username;
     let profile_img = req?.user?.profile_img;
     let user_sender = {
       username: username,
       profile_img: profile_img,
-    }
-  let is_group_chat = req?.body?.is_group_chat;
-  if (is_group_chat === true) {
-    let reciever_data = [];
-    let group_id = req?.body?.group_id;
-    let message_body = req?.body?.message_body;
-    let message_type = req?.body?.message_type;
-    const getUsersFromGroup = await prisma.groups.findFirst({
-      where: {
-        group_id,
-      },
-      include: {
-        group_members: {
-          select: {
-            member: {
-              select: {
-                user_id: true,
-                username: true,
-                phone: true,
+    };
+    console.log("sendr",user_sender);
+    let is_group_chat = req?.body?.is_group_chat;
+    if (is_group_chat === true) {
+      let reciever_data = [];
+      let group_id = req?.body?.group_id;
+      let message_body = req?.body?.message_body;
+      let message_type = req?.body?.message_type;
+      const getUsersFromGroup = await prisma.groups.findFirst({
+        where: {
+          group_id,
+        },
+        include: {
+          group_members: {
+            select: {
+              member: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  phone: true,
+                },
               },
             },
           },
         },
-      },
-    });
-    const reciever = getUsersFromGroup?.group_members?.filter(
-      (user) => user?.member?.user_id !== sender_id
-    );
-
-    reciever?.forEach((data) => {
-      reciever_data.push({
-        reciever_id: data?.member?.user_id,
       });
-    });
+      const reciever = getUsersFromGroup?.group_members?.filter(
+        (user) => user?.member?.user_id !== sender_id
+      );
 
-    const createMessage = await prisma.group_messages.create({
-      data: {
-        sender_id,
-        group_id,
-        message_body,
-        message_type,
-        reciever: {
-          createMany: {
-            data: reciever_data,
-          },
-        },
-      },
-    });
-    const updateLastMessage = await prisma.groups.update({
-      where: {
-        group_id,
-      },
-      data: {
-        last_message: message_body,
-        last_message_time: new Date(),
-        last_message_id: createMessage?.id,
-        last_message_sender: sender_name,
-        last_message_sender_id: sender_id,
-      },
-    });
-    sendMessageToGroup(
-      sender_id,
-      user_sender,
-      reciever,
-      message_body,
-      message_type,
-      group_id,
-    );
-    return res.status(200).send(getSuccessData(createMessage));
-  } else {
-    // const { fname, lname, profile_picture } = req.user;
-    // let files = [];
-    // let media = [];
-    const { error, value } = messageValidation(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    // if (req.file_error) {
-    //   deleteUploadedImage(req);
-    //   return res.status(404).send(getError(req.file_error));
-    // }
-    let { reciever_id, message_body, message_type } = value;
+      reciever?.forEach((data) => {
+        reciever_data.push({
+          reciever_id: data?.member?.user_id,
+        });
+      });
 
-    // const isBlock = await prisma.blockProfile.findFirst({
-    //   where: {
-    //     blocker_id: sender_id,
-    //     blocked_id: reciever_id,
-    //   },
-    // });
-
-    // const isBlockMe = await prisma.blockProfile.findFirst({
-    //   where: {
-    //     blocker_id: reciever_id,
-    //     blocked_id: sender_id,
-    //   },
-    // });
-
-    // if (isBlock) {
-    //   return res
-    //     .status(404)
-    //     .send(
-    //       getError(
-    //         "You block this user! Please unblock first then you can send the message."
-    //       )
-    //     );
-    // }
-    // if (isBlockMe) {
-    //   return res
-    //     .status(404)
-    //     .send(
-    //       getError(
-    //         "You blocked from this user! You can not send the message."
-    //       )
-    //     );
-    // }
-    const chkSender = await getUserFromId(sender_id);
-    if (!chkSender) {
-      return res.status(404).send(getError("Unauthorized user!"));
-    }
-    const chkReciever = await getUserFromId(reciever_id);
-    if (!chkReciever) {
-      return res
-        .status(404)
-        .send(getError("Reciever is not available in our record."));
-    }
-    if (reciever_id == sender_id) {
-      return res
-        .status(404)
-        .send(getError("Message does not send to your self"));
-    }
-    let chkChannel = await chkMessageChannel(sender_id, reciever_id);
-    if (!chkChannel) {
-      chkChannel = await createMessageChannel(sender_id, reciever_id);
-    }
-
-    // if (req.files) {
-    //   req.files.forEach((file) => {
-    //     const fileName = file ? file.filename : null;
-    //     if (fileName) {
-    //       files.push({
-    //         media: fileName,
-    //         media_caption: media_caption? media_caption : null,
-    //         sender_id,
-    //         reciever_id,
-    //         msg_channel_id: chkChannel
-    //           ? chkChannel.channel_id
-    //           : chkChannel.channel_id,
-    //         message_type,
-    //       });
-    //       // media.push({
-    //       //   media: fileName,
-    //       //   media_caption: media_caption? media_caption : null,
-    //       // });
-    //     }
-    //   });
-    // }
-    // console.log(files);
-    // return;
-    // s3 bucket for media
-    // if (req.files) {
-    //   for (const file of req.files) {
-    //     if (file) {
-    //       let { Location } = await uploadFile(file);
-    //       files.push({
-    //         attatchment: Location,
-    //         sender_id,
-    //         reciever_id,
-    //         msg_channel_id: chkChannel
-    //           ? chkChannel.channel_id
-    //           : chkChannel.channel_id,
-    //         message_type,
-    //       });
-    //       media.push({
-    //         attatchment: Location,
-    //       });
-    //     }
-    //     if (fs.existsSync(file.path)) {
-    //       fs.unlinkSync(file.path);
-    //     }
-    //   }
-    // }
-    // if (message_type === MessageType.MEDIA && files.length >= 0) {
-    //   const createMedia = await prisma.messages.createMany({
-    //     data: files,
-    //   });
-    //   sendMediaMessage(sender_id, reciever_id, media, message_type);
-    //   // Notifications
-    //   // const isNotificationAllowed = await prisma.users.findFirst({
-    //   //   where: {
-    //   //     user_id: reciever_id,
-    //   //     notifications: true,
-    //   //   },
-    //   // });
-    //   // if (isNotificationAllowed) {
-    //   //   const getFcmToken = await prisma.users.findFirst({
-    //   //     where: {
-    //   //       user_id: reciever_id,
-    //   //     },
-    //   //     select: {
-    //   //       fcm_token: true,
-    //   //     },
-    //   //   });
-    //   //   if (getFcmToken?.fcm_token) {
-    //   //     SendNotification(getFcmToken.fcm_token, {
-    //   //       // profile: profile_picture,
-    //   //       title: fname + "" + lname,
-    //   //       body: "Send you a attachment",
-    //   //     })
-    //   //       .then((res) => {
-    //   //         console.log(res, "done");
-    //   //       })
-    //   //       .catch((error) => {
-    //   //         console.log(error, "Error sending notification");
-    //   //       });
-    //   //   }
-    //   // }
-    //   // sendNotificationCounter(sender_id, reciever_id, true);
-    //   return res.status(200).send(getSuccessData(createMedia));
-    // }
-    if (message_type === MessageType.TEXT) {
-      // files = null;
-      // deleteUploadedImage(req);
       const createMessage = await prisma.group_messages.create({
         data: {
           sender_id,
-          reciever_id,
-          group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
+          group_id,
           message_body,
           message_type,
+          reciever: {
+            createMany: {
+              data: reciever_data,
+            },
+          },
         },
       });
-      sendTextMessage(
+      const updateLastMessage = await prisma.groups.update({
+        where: {
+          group_id,
+        },
+        data: {
+          last_message: message_body,
+          last_message_time: new Date(),
+          last_message_id: createMessage?.id,
+          last_message_sender: sender_name,
+          last_message_sender_id: sender_id,
+        },
+      });
+      sendMessageToGroup(
         sender_id,
         user_sender,
-        reciever_id,
+        reciever,
         message_body,
         message_type,
-        chkChannel?.group_id
+        group_id
       );
-      // Notifications
-      // const isNotificationAllowed = await prisma.users.findFirst({
+      return res.status(200).send(getSuccessData(createMessage));
+    } else {
+      // const { fname, lname, profile_picture } = req.user;
+      // let files = [];
+      // let media = [];
+      const { error, value } = messageValidation(req.body);
+      if (error) {
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      // if (req.file_error) {
+      //   deleteUploadedImage(req);
+      //   return res.status(404).send(getError(req.file_error));
+      // }
+      let { reciever_id, message_body, message_type } = value;
+
+      // const isBlock = await prisma.blockProfile.findFirst({
       //   where: {
-      //     user_id: reciever_id,
-      //     notifications: true,
+      //     blocker_id: sender_id,
+      //     blocked_id: reciever_id,
       //   },
       // });
-      // if (isNotificationAllowed) {
-      //   const getFcmToken = await prisma.users.findFirst({
-      //     where: {
-      //       user_id: reciever_id,
-      //     },
-      //     select: {
-      //       fcm_token: true,
-      //     },
-      //   });
-      //   if (getFcmToken?.fcm_token) {
-      //     SendNotification(getFcmToken.fcm_token, {
-      //       // profile: profile_picture,
-      //       title: fname + "" + lname,
-      //       body: "Send you a message",
-      //     })
-      //       .then((res) => {
-      //         console.log(res, "done");
-      //       })
-      //       .catch((error) => {
-      //         console.log(error, "Error sending notification");
+
+      // const isBlockMe = await prisma.blockProfile.findFirst({
+      //   where: {
+      //     blocker_id: reciever_id,
+      //     blocked_id: sender_id,
+      //   },
+      // });
+
+      // if (isBlock) {
+      //   return res
+      //     .status(404)
+      //     .send(
+      //       getError(
+      //         "You block this user! Please unblock first then you can send the message."
+      //       )
+      //     );
+      // }
+      // if (isBlockMe) {
+      //   return res
+      //     .status(404)
+      //     .send(
+      //       getError(
+      //         "You blocked from this user! You can not send the message."
+      //       )
+      //     );
+      // }
+      const chkSender = await getUserFromId(sender_id);
+      if (!chkSender) {
+        return res.status(404).send(getError("Unauthorized user!"));
+      }
+      const chkReciever = await getUserFromId(reciever_id);
+      if (!chkReciever) {
+        return res
+          .status(404)
+          .send(getError("Reciever is not available in our record."));
+      }
+      if (reciever_id == sender_id) {
+        return res
+          .status(404)
+          .send(getError("Message does not send to your self"));
+      }
+      let chkChannel = await chkMessageChannel(sender_id, reciever_id);
+      if (!chkChannel) {
+        chkChannel = await createMessageChannel(sender_id, reciever_id);
+      }
+
+      // if (req.files) {
+      //   req.files.forEach((file) => {
+      //     const fileName = file ? file.filename : null;
+      //     if (fileName) {
+      //       files.push({
+      //         media: fileName,
+      //         media_caption: media_caption? media_caption : null,
+      //         sender_id,
+      //         reciever_id,
+      //         msg_channel_id: chkChannel
+      //           ? chkChannel.channel_id
+      //           : chkChannel.channel_id,
+      //         message_type,
       //       });
+      //       // media.push({
+      //       //   media: fileName,
+      //       //   media_caption: media_caption? media_caption : null,
+      //       // });
+      //     }
+      //   });
+      // }
+      // console.log(files);
+      // return;
+      // s3 bucket for media
+      // if (req.files) {
+      //   for (const file of req.files) {
+      //     if (file) {
+      //       let { Location } = await uploadFile(file);
+      //       files.push({
+      //         attatchment: Location,
+      //         sender_id,
+      //         reciever_id,
+      //         msg_channel_id: chkChannel
+      //           ? chkChannel.channel_id
+      //           : chkChannel.channel_id,
+      //         message_type,
+      //       });
+      //       media.push({
+      //         attatchment: Location,
+      //       });
+      //     }
+      //     if (fs.existsSync(file.path)) {
+      //       fs.unlinkSync(file.path);
+      //     }
       //   }
       // }
-      // sendNotificationCounter(sender_id, reciever_id, true);
-      return res.status(200).send(getSuccessData(createMessage));
+      // if (message_type === MessageType.MEDIA && files.length >= 0) {
+      //   const createMedia = await prisma.messages.createMany({
+      //     data: files,
+      //   });
+      //   sendMediaMessage(sender_id, reciever_id, media, message_type);
+      //   // Notifications
+      //   // const isNotificationAllowed = await prisma.users.findFirst({
+      //   //   where: {
+      //   //     user_id: reciever_id,
+      //   //     notifications: true,
+      //   //   },
+      //   // });
+      //   // if (isNotificationAllowed) {
+      //   //   const getFcmToken = await prisma.users.findFirst({
+      //   //     where: {
+      //   //       user_id: reciever_id,
+      //   //     },
+      //   //     select: {
+      //   //       fcm_token: true,
+      //   //     },
+      //   //   });
+      //   //   if (getFcmToken?.fcm_token) {
+      //   //     SendNotification(getFcmToken.fcm_token, {
+      //   //       // profile: profile_picture,
+      //   //       title: fname + "" + lname,
+      //   //       body: "Send you a attachment",
+      //   //     })
+      //   //       .then((res) => {
+      //   //         console.log(res, "done");
+      //   //       })
+      //   //       .catch((error) => {
+      //   //         console.log(error, "Error sending notification");
+      //   //       });
+      //   //   }
+      //   // }
+      //   // sendNotificationCounter(sender_id, reciever_id, true);
+      //   return res.status(200).send(getSuccessData(createMedia));
+      // }
+      if (message_type === MessageType.TEXT) {
+        // files = null;
+        // deleteUploadedImage(req);
+        const createMessage = await prisma.group_messages.create({
+          data: {
+            sender_id,
+            reciever_id,
+            group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
+            message_body,
+            message_type,
+          },
+        });
+        sendTextMessage(
+          sender_id,
+          user_sender,
+          reciever_id,
+          message_body,
+          message_type,
+          chkChannel?.group_id
+        );
+        // Notifications
+        // const isNotificationAllowed = await prisma.users.findFirst({
+        //   where: {
+        //     user_id: reciever_id,
+        //     notifications: true,
+        //   },
+        // });
+        // if (isNotificationAllowed) {
+        //   const getFcmToken = await prisma.users.findFirst({
+        //     where: {
+        //       user_id: reciever_id,
+        //     },
+        //     select: {
+        //       fcm_token: true,
+        //     },
+        //   });
+        //   if (getFcmToken?.fcm_token) {
+        //     SendNotification(getFcmToken.fcm_token, {
+        //       // profile: profile_picture,
+        //       title: fname + "" + lname,
+        //       body: "Send you a message",
+        //     })
+        //       .then((res) => {
+        //         console.log(res, "done");
+        //       })
+        //       .catch((error) => {
+        //         console.log(error, "Error sending notification");
+        //       });
+        //   }
+        // }
+        // sendNotificationCounter(sender_id, reciever_id, true);
+        return res.status(200).send(getSuccessData(createMessage));
+      }
     }
-  }
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
