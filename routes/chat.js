@@ -25,6 +25,7 @@ const {
   getError,
   getSuccessData,
   deleteExistigImg,
+  createToken,
 } = require("../helper_functions/helpers");
 const {
   sendMessageToGroup,
@@ -168,15 +169,15 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError(error.details[0].message));
     }
     const { group_id } = value;
+    const getExistingGroup = await chkExistingGroup(group_id);
+    if (!getExistingGroup) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
     const chkGroupAdmin = await chkAdmin(group_id, admin_id);
     if (!chkGroupAdmin) {
       return res.status(404).send(getError("Only admin can add members to this group"));
     }
     const groupMembers = [];
-    const getExistingGroup = await chkExistingGroup(group_id);
-    if (!getExistingGroup) {
-      return res.status(404).send(getError("Group doesn't exists"));
-    }
     // if (getExistingGroup?.group_members?.length == 50) {
     //   return res.status(404).send(getError("Members are full you cannot add more members in this group"));
     // }
@@ -221,6 +222,7 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
         );
     }
     addMemberToGroup(
+      admin_id,
       groupMembers,
       group_id,
       getExistingGroup?.group_image,
@@ -277,9 +279,10 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
     }
     const removeUserFromGroup = await prisma.group_members.delete({
       where: {
-        id: isMemberExists?.member_id,
+        id: isMemberExists?.id,
       },
     });
+    return res.status(200).send(getSuccessData(`You successfully remove ${findUser?.username} from this group`));
   } catch (error) {
     if (error&&error.message) {
       return res.status(404).send(getError(error.message));

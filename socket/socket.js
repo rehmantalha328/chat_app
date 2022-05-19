@@ -72,8 +72,8 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
   }
 };
 
-const addMemberToGroup = (groupMembers, group_id, group_image, group_name, last_message, last_message_time, is_group_chat) => {
-  const chkCreator = findSender(creator_id);
+const addMemberToGroup = (admin_id, groupMembers, group_id, group_image, group_name, last_message, last_message_time, is_group_chat) => {
+  const chkCreator = findSender(admin_id);
   if (chkCreator) {
     groupMembers?.forEach((user) => {
       const chkReciever = findReciever(user?.member_id);
