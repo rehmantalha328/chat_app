@@ -263,7 +263,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
     if (!findUser) {
       return res.status(404).send(getError("User not found"));
     }
-    const isMemberExists = await chkExistingMember(member_id);
+    const isMemberExists = await chkExistingMember(member_id,group_id);
     if (!isMemberExists) {
       return res.status(404).send(getError("Member not found"));
     }

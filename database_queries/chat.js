@@ -57,10 +57,11 @@ function chkExistingGroup(group_id) {
   });
 };
 
-function chkExistingMember(member_id) {
+function chkExistingMember(member_id,group_id) {
   return prisma.group_members.findFirst({
     where: {
       member_id,
+      group_id,
     }
   });
 };
