@@ -248,17 +248,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError(error.details[0].message));
     }
     const { group_id, member_id } = value;
-    const chkGroupAdmin = await prisma.group_members.findFirst({
-      where: {
-        AND: [{
-          group_id,
-        }, {
-          member_id: admin_id,
-        }, {
-          is_admin: true,
-        }]
-      }
-    });
+    const chkGroupAdmin = await chkAdmin(group_id, admin_id);
     if (!chkGroupAdmin) {
       return res.status(404).send(getError("Only admin can remove members from this group"));
     }
