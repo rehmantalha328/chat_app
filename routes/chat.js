@@ -863,14 +863,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             last_message_sender_id: true,
             is_group_chat: true,
             group_messages: {
-              include: {
-                reciever: {
-                  select: {
-                    reciever_id: true,
-                    seen: true,
-                  },
-                },
-              },
               orderBy: {
                 created_at: "desc",
               },
@@ -905,14 +897,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 last_message_sender_id: true,
                 is_group_chat: true,
                 group_messages: {
-                  include: {
-                    reciever: {
-                      select: {
-                        reciever_id: true,
-                        seen: true,
-                      },
-                    },
-                  },
                   orderBy: {
                     created_at: "desc",
                   },
