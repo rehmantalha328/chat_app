@@ -57,4 +57,26 @@ function chkExistingGroup(group_id) {
   });
 };
 
-module.exports = { chkMessageChannel, createMessageChannel, chkExistingGroup };
+function chkExistingMember(member_id) {
+  return prisma.group_members.findFirst({
+    where: {
+      member_id,
+    }
+  });
+};
+
+function chkAdmin(group_id,admin_id) {
+   return prisma.group_members.findFirst({
+    where: {
+      AND: [{
+        group_id,
+      }, {
+        member_id: admin_id,
+      }, {
+        is_admin: true,
+      }]
+    }
+  });
+};
+
+module.exports = { chkMessageChannel, createMessageChannel, chkExistingGroup, chkExistingMember, chkAdmin };

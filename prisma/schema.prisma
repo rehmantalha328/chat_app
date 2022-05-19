@@ -30,7 +30,7 @@ model User {
   i_recieve_messages          group_messages[]   @relation("user_reciever")
   groups_i_joined             group_members[]    @relation("member")
   groups_i_created            groups[]           @relation("creator")
-  i_recieve_messages_in_group message_reciever[] @relation("reciever_in_group")
+  // i_recieve_messages_in_group message_reciever[] @relation("reciever_in_group")
 
 }
 
@@ -83,20 +83,20 @@ model group_messages {
   user_sender   User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
   user_reciever User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
   groups        groups?            @relation(fields: [group_id], references: [group_id])
-  reciever      message_reciever[]
+  // reciever      message_reciever[]
 }
 
-model message_reciever {
-  id          String          @id @default(cuid())
-  message_id  String?         @db.VarChar(255)
-  reciever_id String?         @db.VarChar(255)
-  group_id    String?
-  seen        Boolean         @default(false)
-  created_at  DateTime        @default(now())
-  updated_at  DateTime        @updatedAt
-  reciever    User?           @relation(fields: [reciever_id], references: [user_id], name: "reciever_in_group")
-  message     group_messages? @relation(fields: [message_id], references: [id])
-}
+// model message_reciever {
+//   id          String          @id @default(cuid())
+//   message_id  String?         @db.VarChar(255)
+//   reciever_id String?         @db.VarChar(255)
+//   group_id    String?
+//   seen        Boolean         @default(false)
+//   created_at  DateTime        @default(now())
+//   updated_at  DateTime        @updatedAt
+//   reciever    User?           @relation(fields: [reciever_id], references: [user_id], name: "reciever_in_group")
+//   message     group_messages? @relation(fields: [message_id], references: [id])
+// }
 
 enum MessageType {
   TEXT

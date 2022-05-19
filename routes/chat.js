@@ -11,11 +11,14 @@ const {
   groupCreateValidation,
   addMembersInGroup,
   getAllMembers,
+  removeMembersFromGroup,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
   createMessageChannel,
   chkExistingGroup,
+  chkAdmin,
+  chkExistingMember,
 } = require("../database_queries/chat");
 const { getUserFromId } = require("../database_queries/auth");
 const {
@@ -165,17 +168,7 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError(error.details[0].message));
     }
     const { group_id } = value;
-    const chkGroupAdmin = await prisma.group_members.findFirst({
-      where: {
-        AND: [{
-          group_id,
-        }, {
-          member_id: admin_id,
-        }, {
-          is_admin: true,
-        }]
-      }
-    });
+    const chkGroupAdmin = await chkAdmin(group_id, admin_id);
     if (!chkGroupAdmin) {
       return res.status(404).send(getError("Only admin can add members to this group"));
     }
@@ -184,6 +177,9 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
     if (!getExistingGroup) {
       return res.status(404).send(getError("Group doesn't exists"));
     }
+    // if (getExistingGroup?.group_members?.length == 50) {
+    //   return res.status(404).send(getError("Members are full you cannot add more members in this group"));
+    // }
     req.body.member_id?.forEach((ids) => {
       groupMembers.push({
         member_id: ids,
@@ -241,6 +237,56 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
     return res.status(404).send(error);
   }
 });
+
+router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
+  try {
+    const admin_id = req?.user?.user_id;
+    const { error, value } = removeMembersFromGroup(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id, member_id } = value;
+    const chkGroupAdmin = await prisma.group_members.findFirst({
+      where: {
+        AND: [{
+          group_id,
+        }, {
+          member_id: admin_id,
+        }, {
+          is_admin: true,
+        }]
+      }
+    });
+    if (!chkGroupAdmin) {
+      return res.status(404).send(getError("Only admin can remove members from this group"));
+    }
+    if (member_id == admin_id) {
+      return res.status(404).send(getError("Actions cannot perform on same Ids"));
+    }
+    const getExistingGroup = await chkExistingGroup(group_id);
+    if (!getExistingGroup) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
+    const findUser = await getUserFromId(member_id);
+    if (!findUser) {
+      return res.status(404).send(getError("User not found"));
+    }
+    const isMemberExists = await chkExistingMember(member_id);
+    if (!isMemberExists) {
+      return res.status(404).send(getError("Member not found"));
+    }
+    const removeUserFromGroup = await prisma.group_members.delete({
+      where: {
+        id: isMemberExists?.member_id,
+      },
+    });
+  } catch (error) {
+    if (error&&error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+})
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -384,7 +430,7 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
     };
     let is_group_chat = req?.body?.is_group_chat;
     if (is_group_chat === true) {
-      let reciever_data = [];
+      // let reciever_data = [];
       let group_id = req?.body?.group_id;
       let message_body = req?.body?.message_body;
       let message_type = req?.body?.message_type;
@@ -410,11 +456,11 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
         (user) => user?.member?.user_id !== sender_id
       );
 
-      reciever?.forEach((data) => {
-        reciever_data.push({
-          reciever_id: data?.member?.user_id,
-        });
-      });
+      // reciever?.forEach((data) => {
+      //   reciever_data.push({
+      //     reciever_id: data?.member?.user_id,
+      //   });
+      // });
 
       const createMessage = await prisma.group_messages.create({
         data: {
@@ -422,11 +468,11 @@ router.post("/sendMessages", trimRequest.all, async (req, res) => {
           group_id,
           message_body,
           message_type,
-          reciever: {
-            createMany: {
-              data: reciever_data,
-            },
-          },
+          // reciever: {
+          //   createMany: {
+          //     data: reciever_data,
+          //   },
+          // },
         },
       });
       const updateLastMessage = await prisma.groups.update({

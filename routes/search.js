@@ -18,6 +18,7 @@ const {
   getUserFromphone,
   chkExistingUserName,
 } = require("../database_queries/auth");
+var _ = require("lodash");
 
 // SIMPLE SIGNUP USER
 router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
@@ -43,7 +44,13 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
         created_at:'desc',
       }
     });
-    if (allusers) return res.status(200).send(getSuccessData(allusers));
+    const users = allusers?.map((arr) => {
+      arr.is_group_chat = false;
+      return arr;
+    });
+    const updateArray = [...users];
+    const sorted = _.orderBy(updateArray, ["created_at"], ["desc"]);
+    if (allusers) return res.status(200).send(getSuccessData(sorted));
     return res.status(404).send(getError("no any user found"));
   } catch (catchError) {
     if (catchError && catchError.message) {

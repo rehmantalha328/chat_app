@@ -74,6 +74,14 @@ function addMembersInGroup(data) {
   return addMembersSchema.validate(data);
 };
 
+function removeMembersFromGroup(data) {
+  const removeMembersSchema = Joi.object({
+    group_id: Joi.string().required(),
+    member_id: Joi.string().required(),
+  });
+  return removeMembersSchema.validate(data);
+}
+
 function getAllMembers(data) {
   const membersSchema = Joi.object({
     group_id: Joi.string().required(),
@@ -142,4 +150,5 @@ module.exports = {
   groupCreateValidation,
   addMembersInGroup,
   getAllMembers,
+  removeMembersFromGroup,
 };
