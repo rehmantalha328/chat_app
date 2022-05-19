@@ -204,11 +204,12 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
         },
       });
       if (getExistingMembers) {
+        const getUser = await getUserFromId(getExistingMembers?.member_id);
         return res
           .status(404)
           .send(
             getError(
-              `This member ${getExistingMembers.member_id} already exists`
+              `This member ${getUser?.username} already exists`
             )
           );
       }
