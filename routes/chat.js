@@ -286,7 +286,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
     }
     return res.status(404).send(getError(error));
   }
-})
+});
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
