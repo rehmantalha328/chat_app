@@ -32,6 +32,7 @@ const {
   sendTextMessage,
   newGroupCreated,
   addMemberToGroup,
+  removeMember,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const { fs } = require("file-system");
@@ -273,6 +274,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
       },
     });
     if (removeUserFromGroup) {
+      removeMember(admin_id, member_id, group_id, is_removed_from_group = true);
       return res.status(200).send(getSuccessData(`You successfully remove ${findUser?.username} from this group`));
     }
     return res.status(404).send(getSuccessData(`There is error please try again later`));

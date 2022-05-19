@@ -91,6 +91,19 @@ const addMemberToGroup = (admin_id, groupMembers, group_id, group_image, group_n
   }
 };
 
+const removeMember = (admin_id, member_id, group_id, is_removed_from_group) => {
+  const chkAdmin = findSender(admin_id);
+  if (chkAdmin) {
+    const chkRemoved = findReciever(member_id);
+    if (chkRemoved) {
+      io.to(chkRemoved.socketId).emit("removeFromGroup", {
+        group_id,
+        is_removed_from_group,
+      });
+    }
+  }
+};
+
 const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
@@ -115,7 +128,6 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, messa
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
-    console.log(chkReciever);
     if (chkReciever) {
       io.to(chkReciever.socketId).emit("newTextMessage", {
         sender_id,
@@ -137,4 +149,5 @@ module.exports = {
   sendMessageToGroup,
   newGroupCreated,
   addMemberToGroup,
+  removeMember,
 };
