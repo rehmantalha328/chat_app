@@ -76,6 +76,7 @@ model group_messages {
   group_id      String?            @db.VarChar(255)
   message_body  String?            @db.VarChar(255)
   attatchment   String?            @db.VarChar(255)
+  media_type    String?            @db.VarChar(255)
   seen          Boolean            @default(false)
   message_type  MessageType        @default(TEXT)
   created_at    DateTime           @default(now())
@@ -102,3 +103,5 @@ enum MessageType {
   TEXT
   MEDIA
 }
+
+

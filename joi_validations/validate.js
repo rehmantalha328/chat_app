@@ -80,14 +80,14 @@ function removeMembersFromGroup(data) {
     member_id: Joi.string().required(),
   });
   return removeMembersSchema.validate(data);
-}
+};
 
 function getAllMembers(data) {
   const membersSchema = Joi.object({
     group_id: Joi.string().required(),
   });
   return membersSchema.validate(data);
-}
+};
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
