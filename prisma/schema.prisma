@@ -11,25 +11,25 @@ datasource db {
 }
 
 model User {
-  user_id                     String             @id @default(cuid())
-  phone                       String?            @db.VarChar(255)
-  username                    String?            @db.VarChar(255)
-  password                    String?            @db.VarChar(255)
-  Otp                         Int?
-  Otp_verified                Boolean?           @default(false)
-  forgot_password_otp_verify  Boolean?           @default(false)
-  profile_img                 String?            @db.VarChar(255)
-  is_registered               Boolean?           @default(false)
-  created_at                  DateTime           @default(now())
-  updated_at                  DateTime           @updatedAt
-  online_status               Boolean?           @default(false)
-  online_status_time          DateTime?          @updatedAt
-  primary_user_channel        groups[]           @relation("primary_user")
-  secondary_user_channel      groups[]           @relation("secondary_user")
-  i_send_messages             group_messages[]   @relation("user_sender")
-  i_recieve_messages          group_messages[]   @relation("user_reciever")
-  groups_i_joined             group_members[]    @relation("member")
-  groups_i_created            groups[]           @relation("creator")
+  user_id                    String           @id @default(cuid())
+  phone                      String?          @db.VarChar(255)
+  username                   String?          @db.VarChar(255)
+  password                   String?          @db.VarChar(255)
+  Otp                        Int?
+  Otp_verified               Boolean?         @default(false)
+  forgot_password_otp_verify Boolean?         @default(false)
+  profile_img                String?          @db.VarChar(255)
+  is_registered              Boolean?         @default(false)
+  created_at                 DateTime         @default(now())
+  updated_at                 DateTime         @updatedAt
+  online_status              Boolean?         @default(false)
+  online_status_time         DateTime?        @updatedAt
+  primary_user_channel       groups[]         @relation("primary_user")
+  secondary_user_channel     groups[]         @relation("secondary_user")
+  i_send_messages            group_messages[] @relation("user_sender")
+  i_recieve_messages         group_messages[] @relation("user_reciever")
+  groups_i_joined            group_members[]  @relation("member")
+  groups_i_created           groups[]         @relation("creator")
   // i_recieve_messages_in_group message_reciever[] @relation("reciever_in_group")
 
 }
@@ -42,14 +42,14 @@ model groups {
   group_creator_id       String?          @db.VarChar(255)
   sender_id              String?          @db.VarChar(255)
   reciever_id            String?          @db.VarChar(255)
-  last_message_id        String?          @db.VarChar(255)
-  last_message           String?          @db.VarChar(255)
-  last_message_sender    String?          @db.VarChar(255)
-  last_message_sender_id String?          @db.VarChar(255)
+  // last_message_id        String?          @db.VarChar(255)
+  // last_message           String?          @db.VarChar(255)
+  // last_message_sender    String?          @db.VarChar(255)
+  // last_message_sender_id String?          @db.VarChar(255)
   is_group_chat          Boolean          @default(false)
   created_at             DateTime         @default(now())
   updated_at             DateTime         @updatedAt
-  last_message_time      DateTime?
+  // last_message_time      DateTime?
   sender                 User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
   reciever               User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
   group_members          group_members[]
@@ -70,20 +70,21 @@ model group_members {
 }
 
 model group_messages {
-  id            String             @id @default(cuid())
-  sender_id     String?            @db.VarChar(255)
-  reciever_id   String?            @db.VarChar(255)
-  group_id      String?            @db.VarChar(255)
-  message_body  String?            @db.VarChar(255)
-  attatchment   String?            @db.VarChar(255)
-  media_type    String?            @db.VarChar(255)
-  seen          Boolean            @default(false)
-  message_type  MessageType        @default(TEXT)
-  created_at    DateTime           @default(now())
-  updated_at    DateTime           @updatedAt
-  user_sender   User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
-  user_reciever User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
-  groups        groups?            @relation(fields: [group_id], references: [group_id])
+  id            String       @id @default(cuid())
+  sender_id     String?      @db.VarChar(255)
+  reciever_id   String?      @db.VarChar(255)
+  group_id      String?      @db.VarChar(255)
+  message_body  String?      @db.VarChar(255)
+  attatchment   String?
+  media_type    MediaType?  
+  media_caption String?
+  seen          Boolean      @default(false)
+  message_type  MessageType? @default(TEXT)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  user_sender   User?        @relation(fields: [sender_id], references: [user_id], name: "user_sender")
+  user_reciever User?        @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
+  groups        groups?      @relation(fields: [group_id], references: [group_id])
   // reciever      message_reciever[]
 }
 
@@ -101,7 +102,13 @@ model group_messages {
 
 enum MessageType {
   TEXT
+  LINK
   MEDIA
 }
 
-
+enum MediaType {
+  AUDIO
+  VIDEO
+  PICTURE
+  DOCUMENT
+}

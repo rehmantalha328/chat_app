@@ -6,7 +6,7 @@ function emailValidation(data) {
     email: Joi.string().email().required(),
   });
   return emailSchema.validate(data);
-}
+};
 
 function phoneAndOtpValidation(data) {
   const phoneAndOtpSchema = Joi.object({
@@ -17,14 +17,14 @@ function phoneAndOtpValidation(data) {
     }),
   });
   return phoneAndOtpSchema.validate(data);
-}
+};
 
 function phoneValidation(data) {
   const phoneSchema = Joi.object({
     phone: Joi.string().required(),
   });
   return phoneSchema.validate(data);
-}
+};
 
 function signUpValidation(data) {
   const signupschema = Joi.object({
@@ -33,7 +33,7 @@ function signUpValidation(data) {
     password: Joi.string().min(6).required(),
   });
   return signupschema.validate(data);
-}
+};
 
 function updatePasswordValidation(data) {
   const updatePasswordSchema = Joi.object({
@@ -41,7 +41,7 @@ function updatePasswordValidation(data) {
     password: Joi.string().required(),
   });
   return updatePasswordSchema.validate(data);
-}
+};
 
 function emailPhoneAndOtpValidation(data) {
   const phoneEmailAndOtpSchema = Joi.object({
@@ -91,24 +91,36 @@ function getAllMembers(data) {
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
-    reciever_id: Joi.string().required(),
-    message_type: Joi.string()
-      .valid(MessageType.TEXT.toString())
-      .required(),
-      // media: Joi.when("message_type", {
-      // is: MessageType.MEDIA.toString(),
-      // then: Joi.string(),
-      // }),
-      // media_caption: Joi.when("message_type", {
-      //   is: MessageType.MEDIA.toString(),
-      //   then: Joi.string(),
-      // }),
+    is_group_chat: Joi.boolean().required(),
+    reciever_id: Joi.when("is_group_chat", {
+      is: false,
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+    group_id: Joi.when("is_group_chat", {
+      is: true,
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+    message_type: Joi.string().valid(MessageType.TEXT.toString(), MessageType.MEDIA.toString()).required(),
+    media: Joi.when("message_type", {
+      is: MessageType.MEDIA.toString(),
+      then: Joi.string(),
+    }),
+    media_type: Joi.when("message_type", {
+      is: MessageType.MEDIA.toString(),
+      then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+    media_caption: Joi.when("message_type", {
+      is: MessageType.MEDIA.toString(),
+      then: Joi.string(),
+    }),
     message_body: Joi.when("message_type", {
       is: MessageType.TEXT.toString(),
       then: Joi.string().required(),
       otherwise: Joi.string(),
     }),
-    is_group_chat: Joi.boolean().required(),
   });
   return messageSchema.validate(data);
 };
@@ -132,7 +144,7 @@ function fetchMessageValidation(data) {
 
 function seenMessagesValidation(data) {
   const seenMessagesSchema = Joi.object({
-      sender_id: Joi.string().required(),
+    sender_id: Joi.string().required(),
   });
   return seenMessagesSchema.validate(data);
 };

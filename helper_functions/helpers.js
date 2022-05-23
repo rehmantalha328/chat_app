@@ -84,15 +84,20 @@ const timeExpired = ({
 
 const deleteUploadedImage = (req) => {
   try {
-    if (req.files?.["profile"]) {
-      req?.files["profile"]?.forEach((file) => {
+    // if (req.files?.["profile"]) {
+    //   req?.files["profile"]?.forEach((file) => {
+    //     fs.unlinkSync(file.path);
+    //   });
+    // }
+    // if (req.files?.["gallery"]) {
+    //   req?.files["gallery"]?.forEach((file) => {
+    //     fs.unlinkSync(file.path);
+    //   });
+    // }
+    if (req.files) {
+      req?.files?.forEach((file) => {
         fs.unlinkSync(file.path);
-      });
-    }
-    if (req.files?.["gallery"]) {
-      req?.files["gallery"]?.forEach((file) => {
-        fs.unlinkSync(file.path);
-      });
+      })
     }
   } catch (error) {
     console.log(error);

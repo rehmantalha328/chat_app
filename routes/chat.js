@@ -3,7 +3,7 @@ const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 const trimRequest = require("trim-request");
 var _ = require("lodash");
-const { MessageType } = require("@prisma/client");
+const { MessageType, MediaType } = require("@prisma/client");
 const {
   messageValidation,
   fetchMessageValidation,
@@ -26,6 +26,7 @@ const {
   getSuccessData,
   deleteExistigImg,
   createToken,
+  deleteUploadedImage,
 } = require("../helper_functions/helpers");
 const {
   sendMessageToGroup,
@@ -35,6 +36,7 @@ const {
   removeMember,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
+const mediaMulter = require("../middleWares/media");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 
@@ -103,15 +105,15 @@ router.post(
           is_admin: true,
         },
       });
-      const updateLastMessage = await prisma.groups.update({
-        where: {
-          group_id: createGroup?.group_id,
-        },
-        data: {
-          last_message_time: new Date(),
-        },
-      });
-      const last_message = `${creator_name} added you in the group`;
+      // const updateLastMessage = await prisma.groups.update({
+      //   where: {
+      //     group_id: createGroup?.group_id,
+      //   },
+      //   data: {
+      //     last_message_time: new Date(),
+      //   },
+      // });
+      // const last_message = `${creator_name} added you in the group`;
       newGroupCreated(
         groupMembers,
         group_creator_id,
@@ -119,10 +121,10 @@ router.post(
         groupName,
         createGroup?.group_id,
         group_picture,
-        createGroup?.last_message !== null
-          ? createGroup?.last_message
-          : last_message,
-        createGroup?.last_message_time,
+        // createGroup?.last_message !== null
+        //   ? createGroup?.last_message
+        //   : last_message,
+        createGroup?.created_at,
         is_group_chat
       );
       return res.send(getSuccessData(createGroup));
@@ -152,7 +154,7 @@ router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
     if (getAllGroupMembers?.length == 0) {
       return res.status(200).send(getSuccessData("No member in this group"));
     }
-    const allmem = _.orderBy(getAllGroupMembers, ["created_at"], ["desc"]);
+    const allmem = _.orderBy(getAllGroupMembers, ["created_at"], ["asc"]);
     return res.status(200).send(getSuccessData(allmem));
   } catch (error) {
     if (error && error.message) {
@@ -176,12 +178,11 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
     }
     const chkGroupAdmin = await chkAdmin(group_id, admin_id);
     if (!chkGroupAdmin) {
-      return res.status(404).send(getError("Only admin can add members to this group"));
+      return res
+        .status(404)
+        .send(getError("Only admin can add members to this group"));
     }
     const groupMembers = [];
-    // if (getExistingGroup?.group_members?.length == 50) {
-    //   return res.status(404).send(getError("Members are full you cannot add more members in this group"));
-    // }
     req.body.member_id?.forEach((ids) => {
       groupMembers.push({
         member_id: ids,
@@ -205,11 +206,7 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
         const getUser = await getUserFromId(getExistingMembers?.member_id);
         return res
           .status(404)
-          .send(
-            getError(
-              `This member ${getUser?.username} already exists`
-            )
-          );
+          .send(getError(`This member ${getUser?.username} already exists`));
       }
     }
     const addMember = await prisma.group_members.createMany({
@@ -228,9 +225,13 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
       group_id,
       getExistingGroup?.group_image,
       getExistingGroup?.group_name,
-      getExistingGroup?.last_message,
-      getExistingGroup?.last_message_time,
-      is_group_chat = true,
+      getExistingGroup?.group_messages.length > 0
+        ? getExistingGroup?.group_messages[0].message_body
+          ? getExistingGroup?.group_messages[0].message_body
+          : getExistingGroup?.group_messages[0].attatchment
+        : null,
+      getExistingGroup?.group_messages.length>0? getExistingGroup?.group_messages[0].created_at:null,
+      (is_group_chat = true)
     );
     return res.status(200).send(getSuccessData(addMember));
   } catch (error) {
@@ -251,10 +252,14 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
     const { group_id, member_id } = value;
     const chkGroupAdmin = await chkAdmin(group_id, admin_id);
     if (!chkGroupAdmin) {
-      return res.status(404).send(getError("Only admin can remove members from this group"));
+      return res
+        .status(404)
+        .send(getError("Only admin can remove members from this group"));
     }
     if (member_id == admin_id) {
-      return res.status(404).send(getError("Actions cannot perform on same Ids"));
+      return res
+        .status(404)
+        .send(getError("Actions cannot perform on same Ids"));
     }
     const getExistingGroup = await chkExistingGroup(group_id);
     if (!getExistingGroup) {
@@ -264,7 +269,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
     if (!findUser) {
       return res.status(404).send(getError("User not found"));
     }
-    const isMemberExists = await chkExistingMember(member_id,group_id);
+    const isMemberExists = await chkExistingMember(member_id, group_id);
     if (!isMemberExists) {
       return res.status(404).send(getError("Member not found"));
     }
@@ -274,12 +279,25 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
       },
     });
     if (removeUserFromGroup) {
-      removeMember(admin_id, member_id, group_id, is_removed_from_group = true);
-      return res.status(200).send(getSuccessData(`You successfully remove ${findUser?.username} from this group`));
+      removeMember(
+        admin_id,
+        member_id,
+        group_id,
+        (is_removed_from_group = true)
+      );
+      return res
+        .status(200)
+        .send(
+          getSuccessData(
+            `You successfully remove ${findUser?.username} from this group`
+          )
+        );
     }
-    return res.status(404).send(getSuccessData(`There is error please try again later`));
+    return res
+      .status(404)
+      .send(getSuccessData(`There is error please try again later`));
   } catch (error) {
-    if (error&&error.message) {
+    if (error && error.message) {
       return res.status(404).send(getError(error.message));
     }
     return res.status(404).send(getError(error));
@@ -306,6 +324,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
         select: {
           group_messages: {
             select: {
+              id: true,
               attatchment: true,
               message_body: true,
               message_type: true,
@@ -343,6 +362,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
         select: {
           group_messages: {
             select: {
+              id: true,
               attatchment: true,
               message_body: true,
               message_type: true,
@@ -414,297 +434,455 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 
 // });
 
-router.post("/sendMessages", trimRequest.all, async (req, res) => {
-  try {
-    let sender_id = req.user.user_id;
-    let username = req?.user?.username;
-    let profile_img = req?.user?.profile_img;
-    let user_sender_group = {
-      username: username,
-      profile_img: profile_img,
-    };
-    let user_sender_one_to_one = {
-      profile_img: profile_img,
-    };
-    let is_group_chat = req?.body?.is_group_chat;
-    if (is_group_chat === true) {
-      // let reciever_data = [];
-      let group_id = req?.body?.group_id;
-      let message_body = req?.body?.message_body;
-      let message_type = req?.body?.message_type;
-      const getUsersFromGroup = await prisma.groups.findFirst({
-        where: {
-          group_id,
-        },
-        include: {
-          group_members: {
-            select: {
-              member: {
-                select: {
-                  user_id: true,
-                  username: true,
-                  phone: true,
+router.post(
+  "/sendMessages",
+  [mediaMulter, trimRequest.all],
+  async (req, res) => {
+    try {
+      let sender_id = req.user.user_id;
+      let username = req?.user?.username;
+      let profile_img = req?.user?.profile_img;
+      let user_sender_group = {
+        username: username,
+        profile_img: profile_img,
+      };
+      let user_sender_one_to_one = {
+        profile_img: profile_img,
+      };
+      const { error, value } = messageValidation(req.body);
+      if (error) {
+        deleteUploadedImage(req);
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      if (req.file_error) {
+        deleteUploadedImage(req);
+        return res.status(404).send(getError(req.file_error));
+      }
+      const {
+        is_group_chat,
+        reciever_id,
+        group_id,
+        message_type,
+        media_type,
+        media_caption,
+        message_body,
+      } = value;
+      let media_data = [];
+      let media = [];
+      if (is_group_chat === true) {
+        const getUsersFromGroup = await prisma.groups.findFirst({
+          where: {
+            group_id,
+          },
+          include: {
+            group_members: {
+              select: {
+                member: {
+                  select: {
+                    user_id: true,
+                    username: true,
+                    phone: true,
+                  },
                 },
               },
             },
           },
-        },
-      });
-      const reciever = getUsersFromGroup?.group_members?.filter(
-        (user) => user?.member?.user_id !== sender_id
-      );
-
-      // reciever?.forEach((data) => {
-      //   reciever_data.push({
-      //     reciever_id: data?.member?.user_id,
-      //   });
-      // });
-
-      const createMessage = await prisma.group_messages.create({
-        data: {
-          sender_id,
-          group_id,
-          message_body,
-          message_type,
-          // reciever: {
-          //   createMany: {
-          //     data: reciever_data,
-          //   },
-          // },
-        },
-      });
-      const updateLastMessage = await prisma.groups.update({
-        where: {
-          group_id,
-        },
-        data: {
-          last_message: message_body,
-          last_message_time: new Date(),
-          last_message_id: createMessage?.id,
-          last_message_sender: username,
-          last_message_sender_id: sender_id,
-        },
-      });
-      sendMessageToGroup(
-        sender_id,
-        user_sender_group,
-        reciever,
-        message_body,
-        message_type,
-        group_id
-      );
-      return res.status(200).send(getSuccessData(createMessage));
-    } else {
-      // const { fname, lname, profile_picture } = req.user;
-      // let files = [];
-      // let media = [];
-      const { error, value } = messageValidation(req.body);
-      if (error) {
-        return res.status(404).send(getError(error.details[0].message));
-      }
-      // if (req.file_error) {
-      //   deleteUploadedImage(req);
-      //   return res.status(404).send(getError(req.file_error));
-      // }
-      let { reciever_id, message_body, message_type } = value;
-
-      // const isBlock = await prisma.blockProfile.findFirst({
-      //   where: {
-      //     blocker_id: sender_id,
-      //     blocked_id: reciever_id,
-      //   },
-      // });
-
-      // const isBlockMe = await prisma.blockProfile.findFirst({
-      //   where: {
-      //     blocker_id: reciever_id,
-      //     blocked_id: sender_id,
-      //   },
-      // });
-
-      // if (isBlock) {
-      //   return res
-      //     .status(404)
-      //     .send(
-      //       getError(
-      //         "You block this user! Please unblock first then you can send the message."
-      //       )
-      //     );
-      // }
-      // if (isBlockMe) {
-      //   return res
-      //     .status(404)
-      //     .send(
-      //       getError(
-      //         "You blocked from this user! You can not send the message."
-      //       )
-      //     );
-      // }
-      const chkSender = await getUserFromId(sender_id);
-      if (!chkSender) {
-        return res.status(404).send(getError("Unauthorized user!"));
-      }
-      const chkReciever = await getUserFromId(reciever_id);
-      if (!chkReciever) {
-        return res
-          .status(404)
-          .send(getError("Reciever is not available in our record."));
-      }
-      if (reciever_id == sender_id) {
-        return res
-          .status(404)
-          .send(getError("Message does not send to your self"));
-      }
-      let chkChannel = await chkMessageChannel(sender_id, reciever_id);
-      if (!chkChannel) {
-        chkChannel = await createMessageChannel(sender_id, reciever_id);
-      }
-
-      // if (req.files) {
-      //   req.files.forEach((file) => {
-      //     const fileName = file ? file.filename : null;
-      //     if (fileName) {
-      //       files.push({
-      //         media: fileName,
-      //         media_caption: media_caption? media_caption : null,
-      //         sender_id,
-      //         reciever_id,
-      //         msg_channel_id: chkChannel
-      //           ? chkChannel.channel_id
-      //           : chkChannel.channel_id,
-      //         message_type,
-      //       });
-      //       // media.push({
-      //       //   media: fileName,
-      //       //   media_caption: media_caption? media_caption : null,
-      //       // });
-      //     }
-      //   });
-      // }
-      // console.log(files);
-      // return;
-      // s3 bucket for media
-      // if (req.files) {
-      //   for (const file of req.files) {
-      //     if (file) {
-      //       let { Location } = await uploadFile(file);
-      //       files.push({
-      //         attatchment: Location,
-      //         sender_id,
-      //         reciever_id,
-      //         msg_channel_id: chkChannel
-      //           ? chkChannel.channel_id
-      //           : chkChannel.channel_id,
-      //         message_type,
-      //       });
-      //       media.push({
-      //         attatchment: Location,
-      //       });
-      //     }
-      //     if (fs.existsSync(file.path)) {
-      //       fs.unlinkSync(file.path);
-      //     }
-      //   }
-      // }
-      // if (message_type === MessageType.MEDIA && files.length >= 0) {
-      //   const createMedia = await prisma.messages.createMany({
-      //     data: files,
-      //   });
-      //   sendMediaMessage(sender_id, reciever_id, media, message_type);
-      //   // Notifications
-      //   // const isNotificationAllowed = await prisma.users.findFirst({
-      //   //   where: {
-      //   //     user_id: reciever_id,
-      //   //     notifications: true,
-      //   //   },
-      //   // });
-      //   // if (isNotificationAllowed) {
-      //   //   const getFcmToken = await prisma.users.findFirst({
-      //   //     where: {
-      //   //       user_id: reciever_id,
-      //   //     },
-      //   //     select: {
-      //   //       fcm_token: true,
-      //   //     },
-      //   //   });
-      //   //   if (getFcmToken?.fcm_token) {
-      //   //     SendNotification(getFcmToken.fcm_token, {
-      //   //       // profile: profile_picture,
-      //   //       title: fname + "" + lname,
-      //   //       body: "Send you a attachment",
-      //   //     })
-      //   //       .then((res) => {
-      //   //         console.log(res, "done");
-      //   //       })
-      //   //       .catch((error) => {
-      //   //         console.log(error, "Error sending notification");
-      //   //       });
-      //   //   }
-      //   // }
-      //   // sendNotificationCounter(sender_id, reciever_id, true);
-      //   return res.status(200).send(getSuccessData(createMedia));
-      // }
-      if (message_type === MessageType.TEXT) {
-        // files = null;
-        // deleteUploadedImage(req);
-        const createMessage = await prisma.group_messages.create({
-          data: {
-            sender_id,
-            reciever_id,
-            group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
-            message_body,
-            message_type,
-          },
         });
-        sendTextMessage(
-          sender_id,
-          user_sender_one_to_one,
-          reciever_id,
-          message_body,
-          message_type,
-          chkChannel?.group_id
+        const reciever = getUsersFromGroup?.group_members?.filter(
+          (user) => user?.member?.user_id !== sender_id
         );
-        // Notifications
-        // const isNotificationAllowed = await prisma.users.findFirst({
+        if (message_type === MessageType.MEDIA) {
+          if (
+            media_type != MediaType.AUDIO &&
+            media_type != MediaType.PICTURE &&
+            media_type != MediaType.VIDEO &&
+            media_type != MediaType.DOCUMENT
+          ) {
+            return res
+              .status(404)
+              .send(
+                getError(
+                  `Only ${MediaType.AUDIO},${MediaType.VIDEO},${MediaType.PICTURE},&${MediaType.DOCUMENT} allowed`
+                )
+              );
+          }
+          if (req.files) {
+            for (const file of req.files) {
+              if (file) {
+                let { Location } = await uploadFile(file);
+                media_data.push({
+                  sender_id,
+                  group_id,
+                  media_caption: media_caption ? media_caption : null,
+                  media_type,
+                  message_type,
+                  attatchment: Location,
+                });
+                media.push({
+                  attatchment: Location,
+                });
+              }
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+              }
+            }
+          }
+          const createMessage = await prisma.group_messages.createMany({
+            data: media_data,
+          });
+          // const updateLastMessage = await prisma.groups.update({
+          //   where: {
+          //     group_id,
+          //   },
+          //   data: {
+          //     last_message: createMessage[0]?.attatchment,
+          //     last_message_time: new Date(),
+          //     last_message_id: createMessage[0]?.id,
+          //     last_message_sender: username,
+          //     last_message_sender_id: sender_id,
+          //   },
+          // });
+          // console.log(updateLastMessage);
+          sendMessageToGroup(
+            sender_id,
+            user_sender_group,
+            reciever,
+            message_body,
+            media,
+            message_type,
+            group_id
+          );
+          return res.status(200).send(getSuccessData(createMessage));
+        }
+        if (message_type === MessageType.TEXT) {
+          media_data = null;
+          deleteUploadedImage(req);
+          const createMessage = await prisma.group_messages.create({
+            data: {
+              sender_id,
+              group_id,
+              message_body,
+              message_type,
+            },
+          });
+          sendMessageToGroup(
+            sender_id,
+            user_sender_group,
+            reciever,
+            message_body,
+            (media = null),
+            message_type,
+            group_id
+          );
+          return res.status(200).send(getSuccessData(createMessage));
+        }
+        if (message_type === MessageType.LINK) {
+          media_data = null;
+          deleteUploadedImage(req);
+          const createMessage = await prisma.group_messages.create({
+            data: {
+              sender_id,
+              group_id,
+              message_body,
+              message_type,
+            },
+          });
+          sendMessageToGroup(
+            sender_id,
+            user_sender_group,
+            reciever,
+            message_body,
+            (media = null),
+            message_type,
+            group_id
+          );
+          return res.status(200).send(getSuccessData(createMessage));
+        }
+      } else {
+        // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {
-        //     user_id: reciever_id,
-        //     notifications: true,
+        //     blocker_id: sender_id,
+        //     blocked_id: reciever_id,
         //   },
         // });
-        // if (isNotificationAllowed) {
-        //   const getFcmToken = await prisma.users.findFirst({
-        //     where: {
-        //       user_id: reciever_id,
-        //     },
-        //     select: {
-        //       fcm_token: true,
-        //     },
-        //   });
-        //   if (getFcmToken?.fcm_token) {
-        //     SendNotification(getFcmToken.fcm_token, {
-        //       // profile: profile_picture,
-        //       title: fname + "" + lname,
-        //       body: "Send you a message",
-        //     })
-        //       .then((res) => {
-        //         console.log(res, "done");
-        //       })
-        //       .catch((error) => {
-        //         console.log(error, "Error sending notification");
+
+        // const isBlockMe = await prisma.blockProfile.findFirst({
+        //   where: {
+        //     blocker_id: reciever_id,
+        //     blocked_id: sender_id,
+        //   },
+        // });
+
+        // if (isBlock) {
+        //   return res
+        //     .status(404)
+        //     .send(
+        //       getError(
+        //         "You block this user! Please unblock first then you can send the message."
+        //       )
+        //     );
+        // }
+        // if (isBlockMe) {
+        //   return res
+        //     .status(404)
+        //     .send(
+        //       getError(
+        //         "You blocked from this user! You can not send the message."
+        //       )
+        //     );
+        // }
+        const chkSender = await getUserFromId(sender_id);
+        if (!chkSender) {
+          return res.status(404).send(getError("Unauthorized user!"));
+        }
+        const chkReciever = await getUserFromId(reciever_id);
+        if (!chkReciever) {
+          return res
+            .status(404)
+            .send(getError("Reciever is not available in our record."));
+        }
+        if (reciever_id == sender_id) {
+          return res
+            .status(404)
+            .send(getError("Message does not send to your self"));
+        }
+        let chkChannel = await chkMessageChannel(sender_id, reciever_id);
+        if (!chkChannel) {
+          chkChannel = await createMessageChannel(sender_id, reciever_id);
+        }
+
+        // if (req.files) {
+        //   req.files.forEach((file) => {
+        //     const fileName = file ? file.filename : null;
+        //     if (fileName) {
+        //       files.push({
+        //         media: fileName,
+        //         media_caption: media_caption? media_caption : null,
+        //         sender_id,
+        //         reciever_id,
+        //         msg_channel_id: chkChannel
+        //           ? chkChannel.channel_id
+        //           : chkChannel.channel_id,
+        //         message_type,
         //       });
+        //       // media.push({
+        //       //   media: fileName,
+        //       //   media_caption: media_caption? media_caption : null,
+        //       // });
+        //     }
+        //   });
+        // }
+        // console.log(files);
+        // return;
+        // s3 bucket for media
+        // if (req.files) {
+        //   for (const file of req.files) {
+        //     if (file) {
+        //       let { Location } = await uploadFile(file);
+        //       files.push({
+        //         attatchment: Location,
+        //         sender_id,
+        //         reciever_id,
+        //         msg_channel_id: chkChannel
+        //           ? chkChannel.channel_id
+        //           : chkChannel.channel_id,
+        //         message_type,
+        //       });
+        //       media.push({
+        //         attatchment: Location,
+        //       });
+        //     }
+        //     if (fs.existsSync(file.path)) {
+        //       fs.unlinkSync(file.path);
+        //     }
         //   }
         // }
-        // sendNotificationCounter(sender_id, reciever_id, true);
-        return res.status(200).send(getSuccessData(createMessage));
+        // if (message_type === MessageType.MEDIA && files.length >= 0) {
+        //   const createMedia = await prisma.messages.createMany({
+        //     data: files,
+        //   });
+        //   sendMediaMessage(sender_id, reciever_id, media, message_type);
+        //   // Notifications
+        //   // const isNotificationAllowed = await prisma.users.findFirst({
+        //   //   where: {
+        //   //     user_id: reciever_id,
+        //   //     notifications: true,
+        //   //   },
+        //   // });
+        //   // if (isNotificationAllowed) {
+        //   //   const getFcmToken = await prisma.users.findFirst({
+        //   //     where: {
+        //   //       user_id: reciever_id,
+        //   //     },
+        //   //     select: {
+        //   //       fcm_token: true,
+        //   //     },
+        //   //   });
+        //   //   if (getFcmToken?.fcm_token) {
+        //   //     SendNotification(getFcmToken.fcm_token, {
+        //   //       // profile: profile_picture,
+        //   //       title: fname + "" + lname,
+        //   //       body: "Send you a attachment",
+        //   //     })
+        //   //       .then((res) => {
+        //   //         console.log(res, "done");
+        //   //       })
+        //   //       .catch((error) => {
+        //   //         console.log(error, "Error sending notification");
+        //   //       });
+        //   //   }
+        //   // }
+        //   // sendNotificationCounter(sender_id, reciever_id, true);
+        //   return res.status(200).send(getSuccessData(createMedia));
+        // }
+        if (message_type === MessageType.MEDIA) {
+          if (
+            media_type != MediaType.AUDIO &&
+            media_type != MediaType.PICTURE &&
+            media_type != MediaType.VIDEO &&
+            media_type != MediaType.DOCUMENT
+          ) {
+            return res
+              .status(404)
+              .send(
+                getError(
+                  `Only ${MediaType.AUDIO},${MediaType.VIDEO},${MediaType.PICTURE},&${MediaType.DOCUMENT} allowed`
+                )
+              );
+          }
+          if (req.files) {
+            for (const file of req.files) {
+              if (file) {
+                let { Location } = await uploadFile(file);
+                media_data.push({
+                  sender_id,
+                  group_id,
+                  media_caption: media_caption ? media_caption : null,
+                  media_type,
+                  message_type,
+                  attatchment: Location,
+                });
+                media.push({
+                  attatchment: Location,
+                });
+              }
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+              }
+            }
+          }
+          const createMessage = await prisma.group_messages.createMany({
+            data: media_data,
+          });
+          // const updateLastMessage = await prisma.groups.update({
+          //   where: {
+          //     group_id,
+          //   },
+          //   data: {
+          //     last_message: createMessage[0]?.attatchment,
+          //     last_message_time: new Date(),
+          //     last_message_id: createMessage[0]?.id,
+          //     last_message_sender: username,
+          //     last_message_sender_id: sender_id,
+          //   },
+          // });
+          // console.log(updateLastMessage);
+          sendTextMessage(
+            sender_id,
+            user_sender_one_to_one,
+            reciever_id,
+            message_body,
+            media,
+            message_type,
+            chkChannel?.group_id
+          );
+          return res.status(200).send(getSuccessData(createMessage));
+        }
+        if (message_type === MessageType.TEXT) {
+          media_data = null;
+          deleteUploadedImage(req);
+          const createMessage = await prisma.group_messages.create({
+            data: {
+              sender_id,
+              reciever_id,
+              group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
+              message_body,
+              message_type,
+            },
+          });
+          sendTextMessage(
+            sender_id,
+            user_sender_one_to_one,
+            reciever_id,
+            message_body,
+            (media = null),
+            message_type,
+            chkChannel?.group_id
+          );
+          // Notifications
+          // const isNotificationAllowed = await prisma.users.findFirst({
+          //   where: {
+          //     user_id: reciever_id,
+          //     notifications: true,
+          //   },
+          // });
+          // if (isNotificationAllowed) {
+          //   const getFcmToken = await prisma.users.findFirst({
+          //     where: {
+          //       user_id: reciever_id,
+          //     },
+          //     select: {
+          //       fcm_token: true,
+          //     },
+          //   });
+          //   if (getFcmToken?.fcm_token) {
+          //     SendNotification(getFcmToken.fcm_token, {
+          //       // profile: profile_picture,
+          //       title: fname + "" + lname,
+          //       body: "Send you a message",
+          //     })
+          //       .then((res) => {
+          //         console.log(res, "done");
+          //       })
+          //       .catch((error) => {
+          //         console.log(error, "Error sending notification");
+          //       });
+          //   }
+          // }
+          // sendNotificationCounter(sender_id, reciever_id, true);
+          return res.status(200).send(getSuccessData(createMessage));
+        }
+        if (message_type === MessageType.LINK) {
+          media_data = null;
+          deleteUploadedImage(req);
+          const createMessage = await prisma.group_messages.create({
+            data: {
+              sender_id,
+              group_id,
+              message_body,
+              message_type,
+            },
+          });
+          sendMessageToGroup(
+            sender_id,
+            user_sender_group,
+            reciever,
+            message_body,
+            (media = null),
+            message_type,
+            group_id
+          );
+          return res.status(200).send(getSuccessData(createMessage));
+        }
       }
+    } catch (catchError) {
+      if (catchError && catchError.message) {
+        return res.status(404).send(getError(catchError.message));
+      }
+      return res.status(404).send(getError(catchError));
     }
-  } catch (catchError) {
-    if (catchError && catchError.message) {
-      return res.status(404).send(getError(catchError.message));
-    }
-    return res.status(404).send(getError(catchError));
   }
-});
+);
 
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {
@@ -722,8 +900,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 username: true,
                 profile_img: true,
                 phone: true,
-                // online_status: true,
-                // online_status_time: true,
+                online_status: true,
+                online_status_time: true,
                 // user_i_block: {
                 //   where: {
                 //     OR: [
@@ -789,8 +967,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 username: true,
                 phone: true,
                 profile_img: true,
-                // online_status: true,
-                // online_status_time: true,
+                online_status: true,
+                online_status_time: true,
                 // user_i_block: {
                 //   where: {
                 //     OR: [
@@ -854,12 +1032,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             group_id: true,
             group_image: true,
             group_description: true,
-            last_message: true,
-            last_message_time: true,
-            last_message_id: true,
-            last_message_sender: true,
-            last_message_sender_id: true,
+            // last_message: true,
+            // last_message_time: true,
+            // last_message_id: true,
+            // last_message_sender: true,
+            // last_message_sender_id: true,
             is_group_chat: true,
+            created_at: true,
+            updated_at: true,
             group_messages: {
               orderBy: {
                 created_at: "desc",
@@ -888,12 +1068,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 group_id: true,
                 group_image: true,
                 group_description: true,
-                last_message: true,
-                last_message_time: true,
-                last_message_id: true,
-                last_message_sender: true,
-                last_message_sender_id: true,
+                // last_message: true,
+                // last_message_time: true,
+                // last_message_id: true,
+                // last_message_sender: true,
+                // last_message_sender_id: true,
                 is_group_chat: true,
+                created_at: true,
+                updated_at: true,
                 group_messages: {
                   orderBy: {
                     created_at: "desc",
@@ -1001,7 +1183,19 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
 
     const my_created_groups = contacts.groups_i_created;
-
+    const add = my_created_groups?.map((data) => {
+      data.last_message =
+        data.group_messages.length > 0
+          ? data.group_messages[0].message_body
+            ? data.group_messages[0].message_body
+            : data.group_messages[0].attatchment
+          : null;
+      data.last_message_time =
+        data.group_messages.length > 0
+          ? data.group_messages[0].created_at
+          : null;
+      return data;
+    });
     const fourth = contacts.groups_i_joined;
 
     const my_joined_groups = [];
@@ -1012,30 +1206,36 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         group_id: ary?.group?.group_id,
         group_image: ary?.group?.group_image,
         group_description: ary?.group?.group_description,
-        last_message: ary?.group?.last_message,
-        last_message_time: ary?.group?.last_message_time,
-        last_message_id: ary?.group?.last_message_id,
-        last_message_sender: ary?.group?.last_message_sender,
-        last_message_sender_id: ary?.group?.last_message_sender_id,
+        // last_message: ary?.group?.last_message,
+        // last_message_time: ary?.group?.last_message_time,
+        // last_message_id: ary?.group?.last_message_id,
+        // last_message_sender: ary?.group?.last_message_sender,
+        // last_message_sender_id: ary?.group?.last_message_sender_id,
         is_group_chat: ary?.group?.is_group_chat,
+        created_at: ary?.group?.created_at,
+        updated_at: ary?.group?.updated_at,
         group_messages: ary?.group?.group_messages,
       });
     });
-    // const joined = my_joined_groups?.map((data) => {
-    //   data?.group_messages?.map((data) => {
-    //     let counter = data?.reciever.filter(
-    //       (data) => data?.seen === false && data?.reciever_id === user_id
-    //     ).length;
-    //     console.log("counter", counter);
-    //   });
-    // });
-    const friend = [
-      ...send,
-      ...recieve,
-      ...my_created_groups,
-      ...my_joined_groups,
-    ];
-    const sorted = _.orderBy(friend, ["last_message_time"], ["desc"]);
+    const joined = my_joined_groups.map((data) => {
+      data.last_message =
+        data.group_messages.length > 0
+          ? data.group_messages[0].message_body
+            ? data.group_messages[0].message_body
+            : data.group_messages[0].attatchment
+          : null;
+      data.last_message_time =
+        data.group_messages.length > 0
+          ? data.group_messages[0].created_at
+          : null;
+      return data;
+    });
+    const friend = [...send, ...recieve, ...add, ...joined];
+    const sorted = _.orderBy(
+      friend,
+      ["last_message_time", "created_at"],
+      ["desc", "desc"]
+    );
     return res.status(200).send(getSuccessData(sorted));
   } catch (catchError) {
     if (catchError && catchError.message) {

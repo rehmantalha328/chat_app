@@ -104,7 +104,7 @@ const removeMember = (admin_id, member_id, group_id, is_removed_from_group) => {
   }
 };
 
-const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_type, group_id) => {
+const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
@@ -115,6 +115,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_t
           sender_id,
           user_sender: user_sender,
           message_body: message,
+          media: media,
           message_type,
           group_id,
           message_time: new Date().toLocaleTimeString(),
@@ -124,7 +125,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, message_t
   }
 };
 
-const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, message_type, group_id) => {
+const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
@@ -134,6 +135,7 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, messa
         user_sender: user_sender,
         reciever_id,
         message_body: textMessage,
+        media: media,
         message_type,
         group_id,
         message_time: new Date().toLocaleTimeString(),

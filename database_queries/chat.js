@@ -12,7 +12,7 @@ function chkMessageChannel(sender_id, reciever_id) {
         {
           sender_id: reciever_id,
           reciever_id: sender_id,
-        },
+        },  
       ],
     },
   });
@@ -52,7 +52,8 @@ function chkExistingGroup(group_id) {
             }
           }
         }
-      }
+      },
+      group_messages: true,
     }
   });
 };
