@@ -396,6 +396,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
+// 
 
 // router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
 //   try {
