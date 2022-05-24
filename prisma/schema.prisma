@@ -47,7 +47,7 @@ model groups {
   // last_message_sender    String?          @db.VarChar(255)
   // last_message_sender_id String?          @db.VarChar(255)
   is_group_chat          Boolean          @default(false)
-  created_at             DateTime         @default(now())
+  last_message_time      DateTime         @default(now())
   updated_at             DateTime         @updatedAt
   // last_message_time      DateTime?
   sender                 User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")

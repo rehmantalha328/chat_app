@@ -131,7 +131,7 @@ router.post(
         // createGroup?.last_message !== null
         //   ? createGroup?.last_message
         //   : last_message,
-        createGroup?.created_at,
+        createGroup?.last_message_time,
         is_group_chat
       );
       return res.send(getSuccessData(createGroup));
@@ -1047,7 +1047,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             // last_message_sender: true,
             // last_message_sender_id: true,
             is_group_chat: true,
-            created_at: true,
+            last_message_time: true,
             updated_at: true,
             group_messages: {
               orderBy: {
@@ -1199,10 +1199,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
             : data.group_messages[0].attatchment
           : null;
-      data.last_message_time =
-        data.group_messages.length > 0
-          ? data.group_messages[0].created_at
-          : null;
+      // data.last_message_time =
+      //   data.group_messages.length > 0
+      //     ? data.group_messages[0].created_at
+      //     : null;
       return data;
     });
     const fourth = contacts.groups_i_joined;
@@ -1221,7 +1221,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         // last_message_sender: ary?.group?.last_message_sender,
         // last_message_sender_id: ary?.group?.last_message_sender_id,
         is_group_chat: ary?.group?.is_group_chat,
-        created_at: ary?.group?.created_at,
+        last_message_time: ary?.group?.last_message_time,
         updated_at: ary?.group?.updated_at,
         group_messages: ary?.group?.group_messages,
       });
@@ -1233,18 +1233,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
             : data.group_messages[0].attatchment
           : null;
-      data.last_message_time =
-        data.group_messages.length > 0
-          ? data.group_messages[0].created_at
-          : null;
+      // data.last_message_time =
+      //   data.group_messages.length > 0
+      //     ? data.group_messages[0].created_at
+      //     : null;
       return data;
     });
     const friend = [...send, ...recieve, ...add, ...joined];
-    const sorted = _.orderBy(
-      friend,
-      ["last_message_time", "created_at"],
-      ["desc", "desc"]
-    );
+    const sorted = _.orderBy(friend,["last_message_time"],["desc"]);
     return res.status(200).send(getSuccessData(sorted));
   } catch (catchError) {
     if (catchError && catchError.message) {

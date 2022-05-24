@@ -36,7 +36,7 @@ function chkExistingGroup(group_id) {
       group_id: true,
       group_name: true,
       group_image: true,
-      created_at: true,
+      last_message_time: true,
       updated_at: true,
       group_members: {
         include: {
