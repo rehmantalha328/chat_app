@@ -539,19 +539,14 @@ router.post(
           const createMessage = await prisma.group_messages.createMany({
             data: media_data,
           });
-          // const updateLastMessage = await prisma.groups.update({
-          //   where: {
-          //     group_id,
-          //   },
-          //   data: {
-          //     last_message: createMessage[0]?.attatchment,
-          //     last_message_time: new Date(),
-          //     last_message_id: createMessage[0]?.id,
-          //     last_message_sender: username,
-          //     last_message_sender_id: sender_id,
-          //   },
-          // });
-          // console.log(updateLastMessage);
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
+            },
+          });
           sendMessageToGroup(
             sender_id,
             user_sender_group,
@@ -572,6 +567,14 @@ router.post(
               group_id,
               message_body,
               message_type,
+            },
+          });
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
             },
           });
           sendMessageToGroup(
@@ -783,19 +786,14 @@ router.post(
           const createMessage = await prisma.group_messages.createMany({
             data: media_data,
           });
-          // const updateLastMessage = await prisma.groups.update({
-          //   where: {
-          //     group_id,
-          //   },
-          //   data: {
-          //     last_message: createMessage[0]?.attatchment,
-          //     last_message_time: new Date(),
-          //     last_message_id: createMessage[0]?.id,
-          //     last_message_sender: username,
-          //     last_message_sender_id: sender_id,
-          //   },
-          // });
-          // console.log(updateLastMessage);
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
+            },
+          });
           sendTextMessage(
             sender_id,
             user_sender_one_to_one,
@@ -817,6 +815,14 @@ router.post(
               group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
               message_body,
               message_type,
+            },
+          });
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
             },
           });
           sendTextMessage(
@@ -870,6 +876,14 @@ router.post(
               group_id,
               message_body,
               message_type,
+            },
+          });
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
             },
           });
           sendMessageToGroup(
@@ -1083,7 +1097,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 // last_message_sender: true,
                 // last_message_sender_id: true,
                 is_group_chat: true,
-                created_at: true,
+                last_message_time: true,
                 updated_at: true,
                 group_messages: {
                   orderBy: {
