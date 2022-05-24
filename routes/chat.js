@@ -112,14 +112,14 @@ router.post(
           data: groupMembers,
         })
       }
-      // const updateLastMessage = await prisma.groups.update({
-      //   where: {
-      //     group_id: createGroup?.group_id,
-      //   },
-      //   data: {
-      //     last_message_time: new Date(),
-      //   },
-      // });
+      const updateLastMessage = await prisma.groups.update({
+        where: {
+          group_id: createGroup?.group_id,
+        },
+        data: {
+          last_message_time: new Date(),
+        },
+      });
       // const last_message = `${creator_name} added you in the group`;
       newGroupCreated(
         groupMembers,
@@ -1056,12 +1056,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             group_image: true,
             group_description: true,
             // last_message: true,
-            // last_message_time: true,
+            last_message_time: true,
             // last_message_id: true,
             // last_message_sender: true,
             // last_message_sender_id: true,
             is_group_chat: true,
-            last_message_time: true,
+            created_at: true,
             updated_at: true,
             group_messages: {
               orderBy: {
@@ -1092,12 +1092,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 group_image: true,
                 group_description: true,
                 // last_message: true,
-                // last_message_time: true,
+                last_message_time: true,
                 // last_message_id: true,
                 // last_message_sender: true,
                 // last_message_sender_id: true,
                 is_group_chat: true,
-                last_message_time: true,
+                created_at: true,
                 updated_at: true,
                 group_messages: {
                   orderBy: {
@@ -1230,12 +1230,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         group_image: ary?.group?.group_image,
         group_description: ary?.group?.group_description,
         // last_message: ary?.group?.last_message,
-        // last_message_time: ary?.group?.last_message_time,
+        last_message_time: ary?.group?.last_message_time,
         // last_message_id: ary?.group?.last_message_id,
         // last_message_sender: ary?.group?.last_message_sender,
         // last_message_sender_id: ary?.group?.last_message_sender_id,
         is_group_chat: ary?.group?.is_group_chat,
-        last_message_time: ary?.group?.last_message_time,
+        created_at: ary?.group?.created_at,
         updated_at: ary?.group?.updated_at,
         group_messages: ary?.group?.group_messages,
       });
