@@ -786,14 +786,7 @@ router.post(
           const createMessage = await prisma.group_messages.createMany({
             data: media_data,
           });
-          const updateLastMessageTime = await prisma.groups.update({
-            where: {
-              group_id,
-            },
-            data: {
-              last_message_time: createMessage?.created_at,
-            },
-          });
+          
           sendTextMessage(
             sender_id,
             user_sender_one_to_one,
@@ -817,14 +810,7 @@ router.post(
               message_type,
             },
           });
-          const updateLastMessageTime = await prisma.groups.update({
-            where: {
-              group_id,
-            },
-            data: {
-              last_message_time: createMessage?.created_at,
-            },
-          });
+          
           sendTextMessage(
             sender_id,
             user_sender_one_to_one,
@@ -878,14 +864,7 @@ router.post(
               message_type,
             },
           });
-          const updateLastMessageTime = await prisma.groups.update({
-            where: {
-              group_id,
-            },
-            data: {
-              last_message_time: createMessage?.created_at,
-            },
-          });
+          
           sendMessageToGroup(
             sender_id,
             user_sender_group,
