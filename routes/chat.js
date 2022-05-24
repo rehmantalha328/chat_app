@@ -435,6 +435,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 // });
 
 // 
+
 router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
@@ -1292,6 +1293,55 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
       return res.status(400).send(getError(catchError.message));
     }
     return res.status(400).send(getError(catchError));
+  }
+});
+
+router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req?.user;
+    const getMates = await prisma.groups.findMany({
+      where: {
+        OR: [{
+          sender_id: user_id
+        }, {
+          reciever_id: user_id,
+        }]
+      },
+      select: {
+        sender: {
+          select: {
+            user_id: true,
+            username: true,
+            profile_img: true,
+            phone: true,
+          }
+        },
+        reciever: {
+          select: {
+            user_id: true,
+            username: true,
+            profile_img: true,
+            phone: true,
+          }
+        }
+      }
+    })
+    for (let i = 0; i < getMates.length; i++) {
+      if (getMates[i]?.sender?.user_id == user_id) {
+        delete getMates[i].sender;
+      }
+      else if (getMates[i]?.reciever?.user_id == user_id) {
+        delete getMates[i].reciever;
+      }
+    }
+    // const unique = Array.from(getMates.reduce((map, obj) => map.set(obj.user_id, obj), new Map()).values());
+
+    return res.status(200).send(getSuccessData(getMates));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message))
+    }
+    return res.status(404).send(error);
   }
 });
 
