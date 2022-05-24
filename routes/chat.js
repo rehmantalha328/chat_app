@@ -237,8 +237,9 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
           ? getExistingGroup?.group_messages[0].message_body
           : getExistingGroup?.group_messages[0].attatchment
         : null,
-      getExistingGroup?.group_messages.length>0? getExistingGroup?.group_messages[0].created_at:null,
-      (is_group_chat = true)
+      getExistingGroup?.group_messages.length > 0 ? getExistingGroup?.group_messages[0].created_at : null,
+      (is_group_chat = true),
+      (is_removed_from_group = false),
     );
     return res.status(200).send(getSuccessData(addMember));
   } catch (error) {

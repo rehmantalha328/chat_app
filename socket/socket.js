@@ -72,7 +72,7 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
   }
 };
 
-const addMemberToGroup = (admin_id, groupMembers, group_id, group_image, group_name, last_message, last_message_time, is_group_chat) => {
+const addMemberToGroup = (admin_id, groupMembers, group_id, group_image, group_name, last_message, last_message_time, is_group_chat,is_removed_from_group) => {
   const chkCreator = findSender(admin_id);
   if (chkCreator) {
     groupMembers?.forEach((user) => {
@@ -85,6 +85,7 @@ const addMemberToGroup = (admin_id, groupMembers, group_id, group_image, group_n
           last_message,
           last_message_time,
           is_group_chat,
+          is_removed_from_group,
         });
       }
     });
