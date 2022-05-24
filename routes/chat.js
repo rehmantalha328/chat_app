@@ -154,8 +154,8 @@ router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
     if (getAllGroupMembers?.length == 0) {
       return res.status(200).send(getSuccessData("No member in this group"));
     }
-    const allmem = _.orderBy(getAllGroupMembers, ["created_at"], ["asc"]);
-    return res.status(200).send(getSuccessData(allmem));
+    // const allmem = _.orderBy(getAllGroupMembers, ["created_at"], ["asc"]);
+    return res.status(200).send(getSuccessData(getAllGroupMembers));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
