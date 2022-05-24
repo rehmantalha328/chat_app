@@ -70,11 +70,7 @@ router.post(
           .status(404)
           .send(getError("Please add atleast one member to group"));
       }
-      req.body.member_id.forEach((ids) => {
-        groupMembers.push({
-          member_id: ids,
-        });
-      });
+      
       if (req?.file) {
         const file = req?.file;
         let { Location } = await uploadFile(file);
@@ -91,20 +87,31 @@ router.post(
           group_name: groupName,
           is_group_chat,
           group_image: group_picture,
-          group_members: {
-            createMany: {
-              data: groupMembers,
-            },
-          },
+          // group_members: {
+          //   createMany: {
+          //     data: groupMembers,
+          //   },
+          // },
         },
       });
-      const group_members = await prisma.group_members.create({
+      req.body.member_id.forEach((ids) => {
+        groupMembers.push({
+          member_id: ids,
+          group_id: createGroup?.group_id,
+        });
+      });
+      const create_admin = await prisma.group_members.create({
         data: {
           group_id: createGroup?.group_id,
           member_id: group_creator_id,
           is_admin: true,
         },
       });
+      if (create_admin) {
+        const create_members = await prisma.group_members.createMany({
+          data: groupMembers,
+        })
+      }
       // const updateLastMessage = await prisma.groups.update({
       //   where: {
       //     group_id: createGroup?.group_id,
