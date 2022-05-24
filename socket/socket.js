@@ -54,7 +54,7 @@ const setUpSocket = (server) => {
   });
 };
 
-const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, group_id, group_image, last_message_time, is_group_chat) => {
+const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, group_id, group_image, created_at, is_group_chat) => {
   const chkCreator = findSender(creator_id);
   if (chkCreator) {
     groupMembers?.forEach((user) => {
@@ -64,7 +64,7 @@ const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, gro
           group_id,
           group_name,
           group_image,
-          last_message_time,
+          created_at,
           is_group_chat,
         });
       }
