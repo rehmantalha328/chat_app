@@ -70,7 +70,7 @@ router.post(
           .status(404)
           .send(getError("Please add atleast one member to group"));
       }
-      
+
       if (req?.file) {
         const file = req?.file;
         let { Location } = await uploadFile(file);
@@ -100,6 +100,14 @@ router.post(
           group_id: createGroup?.group_id,
         });
       });
+      const updateLastMessage = await prisma.groups.update({
+        where: {
+          group_id: createGroup?.group_id,
+        },
+        data: {
+          last_message_time: new Date(),
+        },
+      });
       const create_admin = await prisma.group_members.create({
         data: {
           group_id: createGroup?.group_id,
@@ -110,16 +118,8 @@ router.post(
       if (create_admin) {
         const create_members = await prisma.group_members.createMany({
           data: groupMembers,
-        })
+        });
       }
-      const updateLastMessage = await prisma.groups.update({
-        where: {
-          group_id: createGroup?.group_id,
-        },
-        data: {
-          last_message_time: new Date(),
-        },
-      });
       // const last_message = `${creator_name} added you in the group`;
       newGroupCreated(
         groupMembers,
@@ -237,8 +237,10 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
           ? getExistingGroup?.group_messages[0].message_body
           : getExistingGroup?.group_messages[0].attatchment
         : null,
-      getExistingGroup?.group_messages.length > 0 ? getExistingGroup?.group_messages[0].created_at : null,
-      (is_group_chat = true),
+      getExistingGroup?.group_messages.length > 0
+        ? getExistingGroup?.group_messages[0].created_at
+        : null,
+      (is_group_chat = true)
     );
     return res.status(200).send(getSuccessData(addMember));
   } catch (error) {
@@ -441,13 +443,14 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
 
 // });
 
-// 
+//
 
 router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
   async (req, res) => {
     try {
+      let recieverData = [];
       let sender_id = req.user.user_id;
       let username = req?.user?.username;
       let profile_img = req?.user?.profile_img;
@@ -500,6 +503,12 @@ router.post(
         const reciever = getUsersFromGroup?.group_members?.filter(
           (user) => user?.member?.user_id !== sender_id
         );
+        reciever?.forEach((data) => {
+          recieverData.push({
+            reciever_id: data.member.user_id,
+            group_id,
+          });
+        });
         if (message_type === MessageType.MEDIA) {
           if (
             media_type != MediaType.AUDIO &&
@@ -544,7 +553,7 @@ router.post(
               group_id,
             },
             data: {
-              last_message_time: createMessage?.created_at,
+              last_message_time: new Date(),
             },
           });
           sendMessageToGroup(
@@ -567,6 +576,11 @@ router.post(
               group_id,
               message_body,
               message_type,
+              reciever: {
+                createMany: {
+                  data: recieverData,
+                },
+              },
             },
           });
           const updateLastMessageTime = await prisma.groups.update({
@@ -597,6 +611,19 @@ router.post(
               group_id,
               message_body,
               message_type,
+              reciever: {
+                createMany: {
+                  data: recieverData,
+                },
+              },
+            },
+          });
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
             },
           });
           sendMessageToGroup(
@@ -786,7 +813,7 @@ router.post(
           const createMessage = await prisma.group_messages.createMany({
             data: media_data,
           });
-          
+
           sendTextMessage(
             sender_id,
             user_sender_one_to_one,
@@ -810,7 +837,7 @@ router.post(
               message_type,
             },
           });
-          
+
           sendTextMessage(
             sender_id,
             user_sender_one_to_one,
@@ -864,7 +891,7 @@ router.post(
               message_type,
             },
           });
-          
+
           sendMessageToGroup(
             sender_id,
             user_sender_group,
@@ -1042,7 +1069,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             is_group_chat: true,
             created_at: true,
             updated_at: true,
+
             group_messages: {
+              include: {
+                reciever: true,
+              },
               orderBy: {
                 created_at: "desc",
               },
@@ -1078,7 +1109,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 is_group_chat: true,
                 created_at: true,
                 updated_at: true,
+
                 group_messages: {
+                  include: {
+                    reciever: true,
+                  },
                   orderBy: {
                     created_at: "desc",
                   },
@@ -1196,6 +1231,20 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       //   data.group_messages.length > 0
       //     ? data.group_messages[0].created_at
       //     : null;
+      let unseen_counter = data.group_messages.map((c) => {
+        let rec = c.reciever;
+        let test = [];
+        let reciver = rec.concat(rec);
+        test.push(
+          {reciver}
+        )
+        let fff = test[0].reciver;
+        let count = fff.filter(
+          (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
+        ).length;
+        return count;
+      });
+      data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
       return data;
     });
     const fourth = contacts.groups_i_joined;
@@ -1230,10 +1279,24 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       //   data.group_messages.length > 0
       //     ? data.group_messages[0].created_at
       //     : null;
+      let unseen_counter = data.group_messages.map((c) => {
+        let rec = c.reciever;
+        let test = [];
+        let reciver = rec.concat(rec);
+        test.push(
+          {reciver}
+        )
+        let fff = test[0].reciver;
+        let count = fff.filter(
+          (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
+        ).length;
+        return count;
+      });
+      data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
       return data;
     });
     const friend = [...send, ...recieve, ...add, ...joined];
-    const sorted = _.orderBy(friend,["last_message_time"],["desc"]);
+    const sorted = _.orderBy(friend, ["last_message_time"], ["desc"]);
     return res.status(200).send(getSuccessData(sorted));
   } catch (catchError) {
     if (catchError && catchError.message) {
@@ -1295,47 +1358,59 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req?.user;
-    const getMates = await prisma.groups.findMany({
+    const getMates = await prisma.user.findFirst({
       where: {
-        OR: [{
-          sender_id: user_id
-        }, {
-          reciever_id: user_id,
-        }]
+        user_id,
       },
       select: {
-        sender: {
+        primary_user_channel: {
           select: {
-            user_id: true,
-            username: true,
-            profile_img: true,
-            phone: true,
-          }
+            reciever: {
+              select: {
+                user_id: true,
+                username: true,
+                profile_img: true,
+                phone: true,
+                online_status: true,
+                online_status_time: true,
+                created_at: true,
+              },
+            },
+          },
         },
-        reciever: {
+        secondary_user_channel: {
           select: {
-            user_id: true,
-            username: true,
-            profile_img: true,
-            phone: true,
-          }
-        }
-      }
-    })
-    for (let i = 0; i < getMates.length; i++) {
-      if (getMates[i]?.sender?.user_id == user_id) {
-        delete getMates[i].sender;
-      }
-      else if (getMates[i]?.reciever?.user_id == user_id) {
-        delete getMates[i].reciever;
-      }
-    }
-    // const unique = Array.from(getMates.reduce((map, obj) => map.set(obj.user_id, obj), new Map()).values());
+            sender: {
+              select: {
+                user_id: true,
+                username: true,
+                phone: true,
+                profile_img: true,
+                online_status: true,
+                online_status_time: true,
+                created_at: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-    return res.status(200).send(getSuccessData(getMates));
+    const reciever = getMates.primary_user_channel;
+    const getReciever = reciever?.map((data) => {
+      return data.reciever;
+    });
+    const sender = getMates.secondary_user_channel;
+    const getSender = sender?.map((data) => {
+      return data.sender;
+    });
+
+    const mergeBoth = [...getReciever, ...getSender];
+    const sorted = _.orderBy(mergeBoth, ["created_at"], ["desc"]);
+    return res.status(200).send(getSuccessData(sorted));
   } catch (error) {
     if (error && error.message) {
-      return res.status(404).send(getError(error.message))
+      return res.status(404).send(getError(error.message));
     }
     return res.status(404).send(error);
   }
