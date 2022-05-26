@@ -1071,9 +1071,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             updated_at: true,
 
             group_messages: {
-              include: {
-                reciever: true,
-              },
+              // include: {
+              //   reciever: true,
+              // },
               orderBy: {
                 created_at: "desc",
               },
@@ -1111,9 +1111,9 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 updated_at: true,
 
                 group_messages: {
-                  include: {
-                    reciever: true,
-                  },
+                  // include: {
+                  //   reciever: true,
+                  // },
                   orderBy: {
                     created_at: "desc",
                   },
@@ -1220,33 +1220,54 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
 
     const my_created_groups = contacts.groups_i_created;
-    const add = my_created_groups?.map((data) => {
-      data.last_message =
-        data.group_messages.length > 0
-          ? data.group_messages[0].message_body
+    const add = await Promise.all(
+      my_created_groups?.map(async (data) => {
+        data.last_message =
+          data.group_messages.length > 0
             ? data.group_messages[0].message_body
-            : data.group_messages[0].attatchment
-          : null;
-      // data.last_message_time =
-      //   data.group_messages.length > 0
-      //     ? data.group_messages[0].created_at
-      //     : null;
-      let unseen_counter = data.group_messages.map((c) => {
-        let rec = c.reciever;
-        let test = [];
-        let reciver = rec.concat(rec);
-        test.push(
-          {reciver}
-        )
-        let fff = test[0].reciver;
-        let count = fff.filter(
-          (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
-        ).length;
-        return count;
-      });
-      data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
-      return data;
-    });
+              ? data.group_messages[0].message_body
+              : data.group_messages[0].attatchment
+            : null;
+        // data.last_message_time =
+        //   data.group_messages.length > 0
+        //     ? data.group_messages[0].created_at
+        //     : null;
+        // let unseen_counter = data.group_messages.map((c) => {
+        //   let rec = c.reciever;
+        //   let test = [];
+        //   let reciver = rec.concat(rec);
+        //   test.push(
+        //     {reciver}
+        //   )
+        //   let fff = test[0].reciver;
+        //   let count = fff.filter(
+        //     (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
+        //   ).length;
+        //   return count;
+        // });
+        // data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
+
+        const getUnseenCounter = await prisma.message_reciever.findMany({
+          where: {
+            reciever_id: user_id,
+            group_id: data.group_id,
+          },
+        });
+        let count = 0;
+        for (let i = 0; i < getUnseenCounter.length; i++) {
+          if (
+            getUnseenCounter[i].reciever_id === user_id &&
+            getUnseenCounter[i].group_id === data.group_id &&
+            getUnseenCounter[i].seen === false
+          ) {
+            count++;
+          }
+        }
+        console.log("count", count);
+        data.un_seen_counter = count;
+        return data;
+      })
+    );
     const fourth = contacts.groups_i_joined;
 
     const my_joined_groups = [];
@@ -1268,33 +1289,55 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         group_messages: ary?.group?.group_messages,
       });
     });
-    const joined = my_joined_groups.map((data) => {
-      data.last_message =
-        data.group_messages.length > 0
-          ? data.group_messages[0].message_body
+    const joined = await Promise.all(
+      my_joined_groups.map(async (data) => {
+        data.last_message =
+          data.group_messages.length > 0
             ? data.group_messages[0].message_body
-            : data.group_messages[0].attatchment
-          : null;
-      // data.last_message_time =
-      //   data.group_messages.length > 0
-      //     ? data.group_messages[0].created_at
-      //     : null;
-      let unseen_counter = data.group_messages.map((c) => {
-        let rec = c.reciever;
-        let test = [];
-        let reciver = rec.concat(rec);
-        test.push(
-          {reciver}
-        )
-        let fff = test[0].reciver;
-        let count = fff.filter(
-          (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
-        ).length;
-        return count;
-      });
-      data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
-      return data;
-    });
+              ? data.group_messages[0].message_body
+              : data.group_messages[0].attatchment
+            : null;
+        // data.last_message_time =
+        //   data.group_messages.length > 0
+        //     ? data.group_messages[0].created_at
+        //     : null;
+        // let unseen_counter = data.group_messages.map((c) => {
+        //   let rec = c.reciever;
+        //   let test = [];
+        //   let reciver = rec.concat(rec);
+        //   test.push(
+        //     {reciver}
+        //   )
+        //   let fff = test[0].reciver;
+        //   console.log("ff",fff);
+        //   let count = fff.filter(
+        //     (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
+        //   ).length;
+        //   console.log("count",count);
+        //   return count;
+        // });
+        // data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
+
+        const getUnseenCounter = await prisma.message_reciever.findMany({
+          where: {
+            reciever_id: user_id,
+            group_id: data.group_id,
+          },
+        });
+        let count = 0;
+        for (let i = 0; i < getUnseenCounter.length; i++) {
+          if (
+            getUnseenCounter[i].reciever_id === user_id &&
+            getUnseenCounter[i].group_id === data.group_id &&
+            getUnseenCounter[i].seen === false
+          ) {
+            count++;
+          }
+        }
+        data.un_seen_counter = count;
+        return data;
+      })
+    );
     const friend = [...send, ...recieve, ...add, ...joined];
     const sorted = _.orderBy(friend, ["last_message_time"], ["desc"]);
     return res.status(200).send(getSuccessData(sorted));
