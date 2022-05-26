@@ -149,6 +149,13 @@ function seenMessagesValidation(data) {
   return seenMessagesSchema.validate(data);
 };
 
+function groupMessageSeen(data) {
+  const seenSchema = Joi.object({
+    group_id: Joi.string().required(),
+  });
+  return seenSchema.validate(data);
+};
+
 module.exports = {
   emailValidation,
   emailPhoneAndOtpValidation,
@@ -163,4 +170,5 @@ module.exports = {
   addMembersInGroup,
   getAllMembers,
   removeMembersFromGroup,
+  groupMessageSeen,
 };

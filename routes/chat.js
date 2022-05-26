@@ -12,6 +12,7 @@ const {
   addMembersInGroup,
   getAllMembers,
   removeMembersFromGroup,
+  groupMessageSeen,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -406,44 +407,39 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   }
 });
 
-// router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
-//   try {
-//     let reciever_id = req?.user?.user_id;
-//     // const findMesages = await prisma.group_messages.findMany({
-//     //   where: {
-//     //     reciver: {
-//     //       some: {
-//     //         reciever_id,
-//     //         seen: false,
-//     //       },
-//     //     }
-//     //   },
-//     //   select: {
-//     //     message_body: true,
-//     //     attatchment: true,
-//     //     message_type: true,
-//     //     id: true,
-//     //   }
-//     // });
-//     const seen = await prisma.message_reciever.updateMany({
-//       where: {
-//         reciever_id,
-//         seen: false,
-//       },
-//       data: {
-//         seen: true,
-//       }
-//     })
-//   } catch (catchError) {
-//     if (catchError && catchError.message) {
-//       return res.status(404).send(getError(catchError.message));
-//     }
-//     return res.status(404).send(getError(catchError));
-//   }
-
-// });
-
-//
+router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
+  try {
+    let reciever_id = req?.user?.user_id;
+    const { error, value } = groupMessageSeen(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const messageSeen = await prisma.message_reciever.updateMany({
+      where: {
+        AND: [{
+          reciever_id,
+        }, {
+          group_id,
+          }, {
+          seen: false,
+        }],
+      },
+      data: {
+        seen: true,
+      },
+    });
+    if (messageSeen?.count <= 0) {
+      return res.status(200).send(getSuccessData("No record found"));
+    }
+    return res.status(200).send(getSuccessData("Seen Successfull"));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+});
 
 router.post(
   "/sendMessages",
@@ -548,6 +544,11 @@ router.post(
           const createMessage = await prisma.group_messages.createMany({
             data: media_data,
           });
+          // for (let i = 0; i < createMessage?.count; i++){
+          //   recieverData.push({
+
+          //   })
+          // }
           const updateLastMessageTime = await prisma.groups.update({
             where: {
               group_id,
@@ -1386,7 +1387,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
       },
     });
     if (is_seen.count <= 0) {
-      return res.status(400).send(getError("No data found"));
+      return res.status(200).send(getError("No data found"));
     }
     // seenMessages(reciever_id, sender_id, message_id, true);
     return res.status(200).send(getSuccessData("Successfully done"));
