@@ -825,10 +825,18 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
-                  user_sender: user_sender_one_to_one,
                 });
                 media.push({
+                  sender_id,
+                  reciever_id,
+                  group_id: chkChannel
+                    ? chkChannel.group_id
+                    : chkChannel.group_id,
+                  media_caption: media_caption ? media_caption : null,
+                  media_type,
+                  message_type,
                   attatchment: Location,
+                  user_sender: user_sender_one_to_one,
                 });
               }
               if (fs.existsSync(file.path)) {
@@ -847,7 +855,7 @@ router.post(
             // media,
             // message_type,
             // chkChannel?.group_id
-            media_data,
+            media,
           );
           if (createMessage?.count > 0) {
             return res.status(200).send(getSuccessData("Sent successful"));
