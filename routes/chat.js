@@ -825,6 +825,7 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
+                  user_sender: user_sender_one_to_one,
                 });
                 media.push({
                   attatchment: Location,
@@ -841,11 +842,12 @@ router.post(
 
           sendMediaMessage(
             sender_id,
-            user_sender_one_to_one,
+            // user_sender_one_to_one,
             reciever_id,
-            media,
-            message_type,
-            chkChannel?.group_id
+            // media,
+            // message_type,
+            // chkChannel?.group_id
+            media_data,
           );
           if (createMessage?.count > 0) {
             return res.status(200).send(getSuccessData("Sent successful"));
@@ -940,7 +942,7 @@ router.post(
       }
       return res.status(404).send(getError(catchError));
     }
-});
+}); 
 
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {

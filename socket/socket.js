@@ -164,19 +164,13 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media
   }
 };
 
-const sendMediaMessage = (sender_id, user_sender, reciever_id, media, message_type, group_id) => {
+const sendMediaMessage = (sender_id, reciever_id, media) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
     if (chkReciever) {
       io.to(chkReciever.socketId).emit("newMediaMessageOneToOne", {
-        sender_id,
-        user_sender: user_sender,
-        reciever_id,
-        attatchment: media,
-        message_type,
-        group_id,
-        message_time: new Date().toLocaleTimeString(),
+        media,
       });
     }
   }
