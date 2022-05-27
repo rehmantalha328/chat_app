@@ -13,6 +13,7 @@ const {
   getAllMembers,
   removeMembersFromGroup,
   groupMessageSeen,
+  chkWhoSeenInGroup,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -35,6 +36,7 @@ const {
   newGroupCreated,
   addMemberToGroup,
   removeMember,
+  sendMediaMessage,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
@@ -837,11 +839,10 @@ router.post(
             data: media_data,
           });
 
-          sendTextMessage(
+          sendMediaMessage(
             sender_id,
             user_sender_one_to_one,
             reciever_id,
-            message_body,
             media,
             message_type,
             chkChannel?.group_id
@@ -939,8 +940,7 @@ router.post(
       }
       return res.status(404).send(getError(catchError));
     }
-  }
-);
+});
 
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {
@@ -1395,16 +1395,16 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("sender id should be different from reciever id."));
     }
-    const message_id = await prisma.group_messages.findMany({
-      where: {
-        sender_id,
-        reciever_id,
-        seen: false,
-      },
-      select: {
-        id: true,
-      },
-    });
+    // const message_id = await prisma.group_messages.findMany({
+    //   where: {
+    //     sender_id,
+    //     reciever_id,
+    //     seen: false,
+    //   },
+    //   select: {
+    //     id: true,
+    //   },
+    // });
     const is_seen = await prisma.group_messages.updateMany({
       where: {
         sender_id,
@@ -1427,7 +1427,54 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {});
+router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = chkWhoSeenInGroup(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id, message_id } = value;
+    const chkGroup = await chkExistingGroup(group_id);
+    if (!chkGroup) {
+      return res.status(404).send(getError("No group exists"));
+    }
+    const getUsers = await prisma.message_reciever.findMany({
+      where: {
+        AND: [
+          {
+            group_id,
+          },
+          {
+            seen: true,
+          },
+          {
+            message_id,
+          },
+        ],
+      },
+      select: {
+        reciever: {
+          select: {
+            user_id: true,
+            username: true,
+            profile_img: true,
+            online_status: true,
+            online_status_time: true,
+          },
+        },
+      },
+    });
+    if (!getUsers) {
+      return res.status(404).send(getError("No user found"));
+    }
+    return res.status(200).send(getSuccessData(getUsers));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
 
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {

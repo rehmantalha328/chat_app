@@ -156,6 +156,14 @@ function groupMessageSeen(data) {
   return seenSchema.validate(data);
 };
 
+function chkWhoSeenInGroup(data) {
+  const seenSchema = chkSeenBySchema = Joi.object({
+    group_id: Joi.string().required(),
+    message_id: Joi.string().required(),
+  });
+  return seenSchema.validate(data);
+}
+
 module.exports = {
   emailValidation,
   emailPhoneAndOtpValidation,
@@ -171,4 +179,5 @@ module.exports = {
   getAllMembers,
   removeMembersFromGroup,
   groupMessageSeen,
+  chkWhoSeenInGroup,
 };
