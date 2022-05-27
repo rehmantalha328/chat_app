@@ -135,7 +135,7 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media
         user_sender: user_sender,
         reciever_id,
         message_body: textMessage,
-        media: media,
+        attatchment: media,
         message_type,
         group_id,
         message_time: new Date().toLocaleTimeString(),
