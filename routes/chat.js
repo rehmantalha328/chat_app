@@ -839,7 +839,9 @@ router.post(
             message_type,
             chkChannel?.group_id
           );
-          return res.status(200).send(getSuccessData(createMessage));
+          if (createMessage?.count>0) {
+            return res.status(200).send(getSuccessData("Sent successful"));
+          }
         }
         if (message_type === MessageType.TEXT) {
           media_data = null;
