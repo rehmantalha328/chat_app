@@ -544,7 +544,14 @@ router.post(
                   attatchment: Location,
                 });
                 media.push({
+                  sender_id,
+                  group_id,
+                  media_caption: media_caption ? media_caption : null,
+                  media_type,
+                  message_type,
                   attatchment: Location,
+                  user_sender: user_sender_group,
+                  message_time: new Date().toLocaleTimeString(),
                 });
               }
               if (fs.existsSync(file.path)) {
@@ -579,14 +586,7 @@ router.post(
               last_message_time: new Date(),
             },
           });
-          sendMediaMessageToGroup(
-            sender_id,
-            user_sender_group,
-            reciever,
-            media,
-            message_type,
-            group_id
-          );
+          sendMediaMessageToGroup(sender_id, reciever, media);
           return res.status(200).send(getSuccessData(addMedia));
         }
         if (message_type === MessageType.TEXT) {
@@ -837,6 +837,7 @@ router.post(
                   message_type,
                   attatchment: Location,
                   user_sender: user_sender_one_to_one,
+                  message_time: new Date().toLocaleTimeString(),
                 });
               }
               if (fs.existsSync(file.path)) {
@@ -855,7 +856,7 @@ router.post(
             // media,
             // message_type,
             // chkChannel?.group_id
-            media,
+            media
           );
           if (createMessage?.count > 0) {
             return res.status(200).send(getSuccessData("Sent successful"));
@@ -950,7 +951,8 @@ router.post(
       }
       return res.status(404).send(getError(catchError));
     }
-}); 
+  }
+);
 
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {

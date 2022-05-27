@@ -124,26 +124,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, media, message_typ
   }
 };
 
-const sendMediaMessageToGroup = (sender_id, user_sender, reciever, message, media, message_type, group_id) => {
-  const chkSender = findSender(sender_id);
-  if (chkSender) {
-    reciever?.forEach((user) => {
-      const reciever_id = user?.member?.user_id;
-      const chkReciever = findReciever(reciever_id);
-      if (chkReciever) {
-        io.to(chkReciever.socketId).emit("newGroupMediaMessage", {
-          sender_id,
-          user_sender: user_sender,
-          message_body: message,
-          attatchment: media,
-          message_type,
-          group_id,
-          message_time: new Date().toLocaleTimeString(),
-        });
-      }
-    });
-  }
-};
+
 
 const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media, message_type, group_id) => {
   const chkSender = findSender(sender_id);
@@ -161,6 +142,21 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media
         message_time: new Date().toLocaleTimeString(),
       });
     }
+  }
+};
+
+const sendMediaMessageToGroup = (sender_id, reciever, media) => {
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    reciever?.forEach((user) => {
+      const reciever_id = user?.member?.user_id;
+      const chkReciever = findReciever(reciever_id);
+      if (chkReciever) {
+        io.to(chkReciever.socketId).emit("newGroupMediaMessage", {
+          media,
+        });
+      }
+    });
   }
 };
 
