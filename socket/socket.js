@@ -115,7 +115,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, me
           sender_id,
           user_sender: user_sender,
           message_body: message,
-          media: media,
+          attatchment: media,
           message_type,
           group_id,
           message_time: new Date().toLocaleTimeString(),
