@@ -585,7 +585,7 @@ router.post(
             data: {
               last_message_time: new Date(),
             },
-          });
+          }); 
           sendMediaMessageToGroup(sender_id, reciever, media);
           return res.status(200).send(getSuccessData(addMedia));
         }
