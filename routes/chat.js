@@ -842,6 +842,7 @@ router.post(
           if (createMessage?.count>0) {
             return res.status(200).send(getSuccessData("Sent successful"));
           }
+          return res.status(404).send(getSuccessData("Issue in sending message"));
         }
         if (message_type === MessageType.TEXT) {
           media_data = null;
