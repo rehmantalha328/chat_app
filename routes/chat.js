@@ -338,6 +338,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               attatchment: true,
               message_body: true,
               message_type: true,
+              media_type: true,
+              media_caption: true,
               sender_id: true,
               reciever_id: true,
               seen: true,
@@ -376,6 +378,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               attatchment: true,
               message_body: true,
               message_type: true,
+              media_caption: true,
+              media_type: true,
               sender_id: true,
               reciever_id: true,
               seen: true,
@@ -811,6 +815,7 @@ router.post(
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
+                  reciever_id,
                   group_id,
                   media_caption: media_caption ? media_caption : null,
                   media_type,
@@ -905,20 +910,21 @@ router.post(
           const createMessage = await prisma.group_messages.create({
             data: {
               sender_id,
-              group_id,
+              reciever_id,
+              group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
               message_body,
               message_type,
             },
           });
 
-          sendMessageToGroup(
+          sendTextMessage(
             sender_id,
-            user_sender_group,
-            reciever,
+            user_sender_one_to_one,
+            reciever_id,
             message_body,
             (media = null),
             message_type,
-            group_id
+            chkChannel?.group_id
           );
           return res.status(200).send(getSuccessData(createMessage));
         }
@@ -1417,9 +1423,9 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
   }
 });
 
-// router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
+router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
 
-// });
+});
 
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {
