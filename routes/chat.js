@@ -417,13 +417,17 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
     const { group_id } = value;
     const messageSeen = await prisma.message_reciever.updateMany({
       where: {
-        AND: [{
-          reciever_id,
-        }, {
-          group_id,
-          }, {
-          seen: false,
-        }],
+        AND: [
+          {
+            reciever_id,
+          },
+          {
+            group_id,
+          },
+          {
+            seen: false,
+          },
+        ],
       },
       data: {
         seen: true,
@@ -541,14 +545,25 @@ router.post(
               }
             }
           }
-          const createMessage = await prisma.group_messages.createMany({
-            data: media_data,
-          });
-          // for (let i = 0; i < createMessage?.count; i++){
-          //   recieverData.push({
-
-          //   })
-          // }
+          // const createMessage = await prisma.group_messages.create({
+          //   data: media_data,
+          // });
+          for (let i = 0; i < media_data?.length; i++) {
+            var addMedia = await prisma.group_messages.create({
+              data: {
+                sender_id: media_data[i].sender_id,
+                group_id: media_data[i].group_id,
+                media_caption: media_data[i].media_caption,
+                media_type: media_data[i].media_type,
+                attatchment: media_data[i].attatchment,
+                reciever: {
+                  createMany: {
+                    data: recieverData,
+                  },
+                },
+              },
+            });
+          }
           const updateLastMessageTime = await prisma.groups.update({
             where: {
               group_id,
@@ -566,7 +581,7 @@ router.post(
             message_type,
             group_id
           );
-          return res.status(200).send(getSuccessData(createMessage));
+          return res.status(200).send(getSuccessData(addMedia));
         }
         if (message_type === MessageType.TEXT) {
           media_data = null;
@@ -1398,6 +1413,10 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
     return res.status(400).send(getError(catchError));
   }
 });
+
+// router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
+
+// });
 
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {
