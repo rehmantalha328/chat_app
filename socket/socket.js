@@ -131,7 +131,7 @@ const sendMediaMessageToGroup = (sender_id, user_sender, reciever, message, medi
       const reciever_id = user?.member?.user_id;
       const chkReciever = findReciever(reciever_id);
       if (chkReciever) {
-        io.to(chkReciever.socketId).emit("newGroupMessage", {
+        io.to(chkReciever.socketId).emit("newGroupMediaMessage", {
           sender_id,
           user_sender: user_sender,
           message_body: message,
@@ -169,7 +169,7 @@ const sendMediaMessage = (sender_id, user_sender, reciever_id, media, message_ty
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
     if (chkReciever) {
-      io.to(chkReciever.socketId).emit("newTextMessage", {
+      io.to(chkReciever.socketId).emit("newMediaMessageOneToOne", {
         sender_id,
         user_sender: user_sender,
         reciever_id,
