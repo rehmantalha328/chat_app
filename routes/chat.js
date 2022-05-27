@@ -816,7 +816,9 @@ router.post(
                 media_data.push({
                   sender_id,
                   reciever_id,
-                  group_id,
+                  group_id: chkChannel
+                    ? chkChannel.group_id
+                    : chkChannel.group_id,
                   media_caption: media_caption ? media_caption : null,
                   media_type,
                   message_type,
@@ -844,10 +846,12 @@ router.post(
             message_type,
             chkChannel?.group_id
           );
-          if (createMessage?.count>0) {
+          if (createMessage?.count > 0) {
             return res.status(200).send(getSuccessData("Sent successful"));
           }
-          return res.status(404).send(getSuccessData("Issue in sending message"));
+          return res
+            .status(404)
+            .send(getSuccessData("Issue in sending message"));
         }
         if (message_type === MessageType.TEXT) {
           media_data = null;
@@ -1423,9 +1427,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
-
-});
+router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {});
 
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {
