@@ -37,6 +37,7 @@ const {
   addMemberToGroup,
   removeMember,
   sendMediaMessage,
+  sendMediaMessageToGroup,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
@@ -578,11 +579,10 @@ router.post(
               last_message_time: new Date(),
             },
           });
-          sendMessageToGroup(
+          sendMediaMessageToGroup(
             sender_id,
             user_sender_group,
             reciever,
-            message_body,
             media,
             message_type,
             group_id

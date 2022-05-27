@@ -104,7 +104,27 @@ const removeMember = (admin_id, member_id, group_id, is_removed_from_group) => {
   }
 };
 
-const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, message_type, group_id) => {
+const sendMessageToGroup = (sender_id, user_sender, reciever, media, message_type, group_id) => {
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    reciever?.forEach((user) => {
+      const reciever_id = user?.member?.user_id;
+      const chkReciever = findReciever(reciever_id);
+      if (chkReciever) {
+        io.to(chkReciever.socketId).emit("newGroupMessage", {
+          sender_id,
+          user_sender: user_sender,
+          attatchment: media,
+          message_type,
+          group_id,
+          message_time: new Date().toLocaleTimeString(),
+        });
+      }
+    });
+  }
+};
+
+const sendMediaMessageToGroup = (sender_id, user_sender, reciever, message, media, message_type, group_id) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
@@ -171,4 +191,5 @@ module.exports = {
   addMemberToGroup,
   removeMember,
   sendMediaMessage,
+  sendMediaMessageToGroup,
 };
