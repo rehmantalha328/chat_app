@@ -7,7 +7,7 @@ function getUserFromId(id) {
       user_id: id,
     },
   });
-};
+}
 
 function getUserFromphone(phone) {
   return prisma.user.findFirst({
@@ -15,7 +15,7 @@ function getUserFromphone(phone) {
       phone,
     },
   });
-};
+}
 
 function chkExistingUserName(username) {
   return prisma.user.findFirst({
@@ -23,20 +23,29 @@ function chkExistingUserName(username) {
       username,
     },
   });
-};
+}
 
-function chkExistingOtp(phone,otp) {
+function chkExistingOtp(phone, otp) {
   return prisma.user.findFirst({
     where: {
       phone,
       Otp: otp,
-    }
+    },
   });
-};
+}
+
+function chkExistingUsername(username) {
+  return prisma.user.findFirst({
+    where: {
+      username,
+    },
+  });
+}
 
 module.exports = {
   getUserFromphone,
   getUserFromId,
   chkExistingUserName,
   chkExistingOtp,
+  chkExistingUsername,
 };

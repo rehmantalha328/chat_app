@@ -8,6 +8,14 @@ function emailValidation(data) {
   return emailSchema.validate(data);
 };
 
+function loginUser(data) {
+  const loginSchema = Joi.object({
+    phone: Joi.string().required(),
+    password: Joi.string().required(),
+  });
+  return loginSchema.validate(data);
+}
+
 function phoneAndOtpValidation(data) {
   const phoneAndOtpSchema = Joi.object({
     phone: Joi.string().required(),
@@ -29,10 +37,16 @@ function phoneValidation(data) {
 function signUpValidation(data) {
   const signupschema = Joi.object({
     phone: Joi.string().required(),
-    username: Joi.string().required(),
+    name: Joi.string().required(),
     password: Joi.string().min(6).required(),
   });
   return signupschema.validate(data);
+};
+function chkUsername(data) {
+  const usernameschema = Joi.object({
+    username: Joi.string().required(),
+  });
+  return usernameschema.validate(data);
 };
 
 function updatePasswordValidation(data) {
@@ -166,6 +180,8 @@ function chkWhoSeenInGroup(data) {
 
 module.exports = {
   emailValidation,
+  chkUsername,
+  loginUser,
   emailPhoneAndOtpValidation,
   phoneAndOtpValidation,
   phoneValidation,
