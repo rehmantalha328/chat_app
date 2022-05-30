@@ -5,21 +5,24 @@ const authToken = getEnv("TWILIO_AUTH_TOKEN");
 const myNumber = getEnv("MY_NUMBER");
 const client = require("twilio")(accountSid, authToken);
 
-const send_message = ({ body, number }) => {
+const send_message = async ({ body, number }) => {
   // return true;
   try {
-    return client.messages.create({
+    const chk = await client.messages.create({
       body,
       from: "DEFIGRAM",
       to: number,
     });
-  } catch (err) {
+    if (chk) {
+      return true;
+    }
+  } catch (Error) {
     return client.messages.create({
       body,
       from: myNumber,
       to: number,
     });
-  };
+  }
 };
 
 module.exports = { send_message };

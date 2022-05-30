@@ -162,7 +162,7 @@ function chkWhoSeenInGroup(data) {
     message_id: Joi.string().required(),
   });
   return seenSchema.validate(data);
-}
+};
 
 module.exports = {
   emailValidation,
