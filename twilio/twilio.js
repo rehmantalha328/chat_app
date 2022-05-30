@@ -8,14 +8,11 @@ const client = require("twilio")(accountSid, authToken);
 const send_message = async ({ body, number }) => {
   // return true;
   try {
-    const chk = await client.messages.create({
+    return await client.messages.create({
       body,
       from: "DEFIGRAM",
       to: number,
     });
-    if (chk) {
-      return true;
-    }
   } catch (Error) {
     return client.messages.create({
       body,
