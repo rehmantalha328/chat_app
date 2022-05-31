@@ -570,6 +570,7 @@ router.post(
                 media_caption: media_data[i].media_caption,
                 media_type: media_data[i].media_type,
                 attatchment: media_data[i].attatchment,
+                message_type: media_data[i].message_type,
                 reciever: {
                   createMany: {
                     data: recieverData,

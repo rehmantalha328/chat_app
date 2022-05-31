@@ -42,9 +42,10 @@ function signUpValidation(data) {
   });
   return signupschema.validate(data);
 };
+
 function chkUsername(data) {
   const usernameschema = Joi.object({
-    username: Joi.string().required(),
+    user_name: Joi.string().required(),
   });
   return usernameschema.validate(data);
 };
@@ -56,6 +57,13 @@ function updatePasswordValidation(data) {
   });
   return updatePasswordSchema.validate(data);
 };
+
+function updateProfile(data) {
+  const userProfileSchema = Joi.object({
+    user_name: Joi.string().required(),
+  });
+  return userProfileSchema.validate(data);
+}
 
 function emailPhoneAndOtpValidation(data) {
   const phoneEmailAndOtpSchema = Joi.object({
@@ -196,4 +204,5 @@ module.exports = {
   removeMembersFromGroup,
   groupMessageSeen,
   chkWhoSeenInGroup,
+  updateProfile,
 };

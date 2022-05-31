@@ -168,27 +168,6 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
   }
 });
 
-// add username
-router.post("/chkUsername", trimRequest.all, async (req, res) => {
-  try {
-    const { error, value } = chkUsername(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const { username: _username } = value;
-    const username = _username.toLowerCase();
-    const getExistingUser = await chkExistingUsername(username);
-    if (getExistingUser) {
-      return res.status(404).send(getError("This username exists"));
-    }
-    return res.status(200).send(getSuccessData("This username is available"));
-  } catch (catchError) {
-    if (catchError && catchError.message) {
-      return res.status(404).send(getError(catchError.message));
-    }
-    return res.status(404).send(getError(catchError));
-  }
-});
 
 
 module.exports = router;
