@@ -124,7 +124,7 @@ function messageValidation(data) {
       then: Joi.string().required(),
       otherwise: Joi.string(),
     }),
-    message_type: Joi.string().valid(MessageType.TEXT.toString(), MessageType.MEDIA.toString()).required(),
+    message_type: Joi.string().valid(MessageType.TEXT.toString(), MessageType.MEDIA.toString(), MessageType.LINK.toString(),MessageType.CONTACT.toString()).required(),
     media: Joi.when("message_type", {
       is: MessageType.MEDIA.toString(),
       then: Joi.string(),
@@ -141,6 +141,19 @@ function messageValidation(data) {
     message_body: Joi.when("message_type", {
       is: MessageType.TEXT.toString(),
       then: Joi.string().required(),
+      otherwise: Joi.string(),
+    }),
+    message_body: Joi.when("message_type", {
+      is: MessageType.LINK.toString(),
+      then: Joi.string().uri().required(),
+      otherwise: Joi.string(),
+    }),
+    contact: Joi.when("message_type", {
+      is: MessageType.CONTACT.toString(),
+      then: Joi.array().required().items({
+        contact_name: Joi.string().required(),
+        contact_number: Joi.string().required(),
+      }),
       otherwise: Joi.string(),
     }),
   });

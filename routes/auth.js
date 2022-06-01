@@ -95,10 +95,10 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       deleteExistigImg(req);
       return res.status(404).send(getError("This user already exists"));
     }
-    if (getExistingUser?.username == username) {
-      deleteExistigImg(req);
-      return res.status(404).send(getError("This username already exists"));
-    }
+    // if (getExistingUser?.username == username) {
+    //   deleteExistigImg(req);
+    //   return res.status(404).send(getError("This username already exists"));
+    // }
 
     // s3 bucket for profile
     if (req?.file) {

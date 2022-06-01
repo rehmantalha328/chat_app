@@ -945,6 +945,30 @@ router.post(
           );
           return res.status(200).send(getSuccessData(createMessage));
         }
+        if (message_type === MessageType.CONTACT) {
+          let contacts = [];
+          if (req.body.contact?.length == 0) {
+          return res.status(404).send(getError("Array is not allowed to be empty"));
+          }
+          if (req.body.contact) {
+            req.body.contact.forEach((data) => {
+              contacts.push({
+                contact_name: data.contact_name,
+                contact_number: data.contact_number,
+                sender_id,
+                reciever_id,
+                group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
+                message_type,
+              })
+            });
+          }
+          const createContactMessage = await prisma.group_messages.createMany({
+            data: contacts,
+          });
+          if (createContactMessage?.count>0) {
+            return res.status(200).send(getSuccessData("Sent successful"));
+          }
+        }
       }
     } catch (catchError) {
       if (catchError && catchError.message) {
