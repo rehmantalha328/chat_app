@@ -37,7 +37,7 @@ function phoneValidation(data) {
 function signUpValidation(data) {
   const signupschema = Joi.object({
     phone: Joi.string().required(),
-    name: Joi.string().required(),
+    username: Joi.string().required(),
     password: Joi.string().min(6).required(),
   });
   return signupschema.validate(data);
