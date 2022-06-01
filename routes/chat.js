@@ -328,6 +328,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
     }
     const { is_group_chat, reciever_id, group_id, page } = value;
     const offset = page >= 1 ? parseInt(page) - 1 : 0;
+    console.log("page value",offset);
     if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
