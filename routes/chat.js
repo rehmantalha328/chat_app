@@ -372,7 +372,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       });
       // const get = fetchGroupMessages?.group_messages;
       // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(fetchGroupMessages));
+      return res.status(200).send(getSuccessData(fetchGroupMessages.group_messages));
     } else {
       const getGroup = await chkMessageChannel(sender_id, reciever_id);
       if (!getGroup) {
@@ -417,7 +417,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       });
       // const get = getMessages?.group_messages;
       // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(fetchGroupMessages));
+      return res.status(200).send(getSuccessData(fetchGroupMessages.group_messages));
     }
   } catch (catchError) {
     if (catchError && catchError.message) {
