@@ -144,6 +144,21 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media
   }
 };
 
+const sendContactMessageToGroup = (sender_id, reciever, contacts) => {
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    reciever?.forEach((user) => {
+      const reciever_id = user?.member?.user_id;
+      const chkReciever = findReciever(reciever_id);
+      if (chkReciever) {
+        io.to(chkReciever.socketId).emit("newContactMessageGroup", {
+          contacts,
+        });
+      }
+    });
+  }
+};
+
 const sendMediaMessageToGroup = (sender_id, reciever, media) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
@@ -171,6 +186,18 @@ const sendMediaMessage = (sender_id, reciever_id, media) => {
   }
 };
 
+const sendContactMessage = (sender_id, reciever_id, contacts) => {
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    const chkReciever = findReciever(reciever_id);
+    if (chkReciever) {
+      io.to(chkReciever.socketId).emit("newContactMessageOneToOne", {
+        contacts,
+      });
+    }
+  }
+};
+
 
 module.exports = {
   setUpSocket,
@@ -181,4 +208,6 @@ module.exports = {
   removeMember,
   sendMediaMessage,
   sendMediaMessageToGroup,
+  sendContactMessage,
+  sendContactMessageToGroup,
 };

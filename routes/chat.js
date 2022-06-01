@@ -38,6 +38,8 @@ const {
   removeMember,
   sendMediaMessage,
   sendMediaMessageToGroup,
+  sendContactMessage,
+  sendContactMessageToGroup,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
@@ -324,7 +326,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
-    const { is_group_chat, reciever_id, group_id } = value;
+    const { is_group_chat, reciever_id, group_id, page } = value;
+    const offset = page >= 1 ? parseInt(page) - 1 : 0;
     if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
@@ -359,18 +362,23 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
                 },
               },
             },
+            skip: offset * 25,
+            take: 25,
+            orderBy: {
+              created_at: "desc",
+            },
           },
         },
       });
-      const get = fetchGroupMessages?.group_messages;
-      const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(msgs));
+      // const get = fetchGroupMessages?.group_messages;
+      // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
+      return res.status(200).send(getSuccessData(fetchGroupMessages));
     } else {
       const getGroup = await chkMessageChannel(sender_id, reciever_id);
       if (!getGroup) {
         return res.status(404).send(getSuccessData("No Channel Exists"));
       }
-      const getMessages = await prisma.groups.findFirst({
+      const fetchGroupMessages = await prisma.groups.findFirst({
         where: {
           group_id: getGroup?.group_id,
         },
@@ -399,12 +407,17 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
                 },
               },
             },
+            skip: offset * 25,
+            take: 25,
+            orderBy: {
+              created_at: "desc",
+            },
           },
         },
       });
-      const get = getMessages?.group_messages;
-      const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(msgs));
+      // const get = getMessages?.group_messages;
+      // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
+      return res.status(200).send(getSuccessData(fetchGroupMessages));
     }
   } catch (catchError) {
     if (catchError && catchError.message) {
@@ -586,7 +599,7 @@ router.post(
             data: {
               last_message_time: new Date(),
             },
-          }); 
+          });
           sendMediaMessageToGroup(sender_id, reciever, media);
           return res.status(200).send(getSuccessData(addMedia));
         }
@@ -659,6 +672,62 @@ router.post(
             group_id
           );
           return res.status(200).send(getSuccessData(createMessage));
+        }
+        if (message_type === MessageType.CONTACT) {
+          media = null;
+          let contacts = [];
+          let newContacts = [];
+          if (req.body.contact?.length == 0) {
+            return res
+              .status(404)
+              .send(getError("Array is not allowed to be empty"));
+          }
+          if (req.body.contact) {
+            req.body.contact.forEach((data) => {
+              contacts.push({
+                sender_id,
+                contact_name: data.contact_name,
+                contact_number: data.contact_number,
+                group_id,
+                message_type,
+              });
+              newContacts.push({
+                contact_name: data.contact_name,
+                contact_number: data.contact_number,
+                sender_id,
+                group_id,
+                user_sender: user_sender_group,
+                message_type,
+                message_time: new Date().toLocaleTimeString(),
+              });
+            });
+          }
+          for (let i = 0; i < contacts?.length; i++) {
+            var create_contact_message = await prisma.group_messages.create({
+              data: {
+                sender_id: contacts[i].sender_id,
+                group_id: contacts[i].group_id,
+                message_type: contacts[i].message_type,
+                contact_name: contacts[i].contact_name,
+                contact_number: contacts[i].contact_number,
+                reciever: {
+                  createMany: {
+                    data: recieverData,
+                  },
+                },
+              },
+            });
+          }
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: new Date(),
+            },
+          });
+          sendContactMessageToGroup(sender_id, reciever, newContacts);
+          return res.status(200).send(getSuccessData(create_contact_message));
         }
       } else {
         // const isBlock = await prisma.blockProfile.findFirst({
@@ -946,9 +1015,13 @@ router.post(
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.CONTACT) {
+          media = null;
           let contacts = [];
+          let newContacts = [];
           if (req.body.contact?.length == 0) {
-          return res.status(404).send(getError("Array is not allowed to be empty"));
+            return res
+              .status(404)
+              .send(getError("Array is not allowed to be empty"));
           }
           if (req.body.contact) {
             req.body.contact.forEach((data) => {
@@ -957,17 +1030,34 @@ router.post(
                 contact_number: data.contact_number,
                 sender_id,
                 reciever_id,
-                group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
+                group_id: chkChannel
+                  ? chkChannel.group_id
+                  : chkChannel.group_id,
                 message_type,
-              })
+              });
+              newContacts.push({
+                contact_name: data.contact_name,
+                contact_number: data.contact_number,
+                sender_id,
+                reciever_id,
+                group_id: chkChannel
+                  ? chkChannel.group_id
+                  : chkChannel.group_id,
+                message_type,
+                message_time: new Date().toLocaleTimeString(),
+              });
             });
           }
           const createContactMessage = await prisma.group_messages.createMany({
             data: contacts,
           });
-          if (createContactMessage?.count>0) {
+          sendContactMessage(sender_id, reciever_id, newContacts);
+          if (createContactMessage?.count > 0) {
             return res.status(200).send(getSuccessData("Sent successful"));
           }
+          return res
+            .status(404)
+            .send(getSuccessData("Issue in sending contact message"));
         }
       }
     } catch (catchError) {

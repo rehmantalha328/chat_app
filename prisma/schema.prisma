@@ -11,27 +11,30 @@ datasource db {
 }
 
 model User {
-  user_id                     String             @id @default(cuid())
-  phone                       String?            @db.VarChar(255)
-  username                    String?            @db.VarChar(255)
-  user_name                   String?            @db.VarChar(255)
-  password                    String?            @db.VarChar(255)
-  Otp                         Int?
-  Otp_verified                Boolean?           @default(false)
-  forgot_password_otp_verify  Boolean?           @default(false)
-  profile_img                 String?            @db.VarChar(255)
-  is_registered               Boolean?           @default(false)
-  created_at                  DateTime           @default(now())
-  updated_at                  DateTime           @updatedAt
-  online_status               Boolean?           @default(false)
-  online_status_time          DateTime?          @updatedAt
-  primary_user_channel        groups[]           @relation("primary_user")
-  secondary_user_channel      groups[]           @relation("secondary_user")
-  i_send_messages             group_messages[]   @relation("user_sender")
-  i_recieve_messages          group_messages[]   @relation("user_reciever")
-  groups_i_joined             group_members[]    @relation("member")
-  groups_i_created            groups[]           @relation("creator")
-  i_recieve_messages_in_group message_reciever[] @relation("reciever_in_group")
+  user_id                       String             @id @default(cuid())
+  phone                         String?            @db.VarChar(255)
+  username                      String?            @db.VarChar(255)
+  user_name                     String?            @db.VarChar(255)
+  password                      String?            @db.VarChar(255)
+  Otp                           Int?
+  Otp_verified                  Boolean?           @default(false)
+  forgot_password_otp_verify    Boolean?           @default(false)
+  profile_img                   String?            @db.VarChar(255)
+  is_registered                 Boolean?           @default(false)
+  notifications                 Boolean?           @default(false)
+  is_private_chat_notifications Boolean?           @default(true)
+  is_group_chat_notifications   Boolean?           @default(true)
+  created_at                    DateTime           @default(now())
+  updated_at                    DateTime           @updatedAt
+  online_status                 Boolean?           @default(false)
+  online_status_time            DateTime?          @updatedAt
+  primary_user_channel          groups[]           @relation("primary_user")
+  secondary_user_channel        groups[]           @relation("secondary_user")
+  i_send_messages               group_messages[]   @relation("user_sender")
+  i_recieve_messages            group_messages[]   @relation("user_reciever")
+  groups_i_joined               group_members[]    @relation("member")
+  groups_i_created              groups[]           @relation("creator")
+  i_recieve_messages_in_group   message_reciever[] @relation("reciever_in_group")
 
 }
 
