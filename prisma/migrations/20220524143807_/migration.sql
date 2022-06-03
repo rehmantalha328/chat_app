@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "groups" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "last_message_time" DROP NOT NULL,
+ALTER COLUMN "last_message_time" DROP DEFAULT;
