@@ -22,6 +22,7 @@ const {
   chkAdmin,
   chkExistingMember,
 } = require("../database_queries/chat");
+const { isNotificationAllowed,isPrivateChatNotificationAllowed,isGroupChatNotificationAllowed } = require("../database_queries/notifications");
 const { getUserFromId } = require("../database_queries/auth");
 const {
   getError,
@@ -573,9 +574,6 @@ router.post(
               }
             }
           }
-          // const createMessage = await prisma.group_messages.create({
-          //   data: media_data,
-          // });
           for (let i = 0; i < media_data?.length; i++) {
             var addMedia = await prisma.group_messages.create({
               data: {
@@ -782,91 +780,6 @@ router.post(
         if (!chkChannel) {
           chkChannel = await createMessageChannel(sender_id, reciever_id);
         }
-
-        // if (req.files) {
-        //   req.files.forEach((file) => {
-        //     const fileName = file ? file.filename : null;
-        //     if (fileName) {
-        //       files.push({
-        //         media: fileName,
-        //         media_caption: media_caption? media_caption : null,
-        //         sender_id,
-        //         reciever_id,
-        //         msg_channel_id: chkChannel
-        //           ? chkChannel.channel_id
-        //           : chkChannel.channel_id,
-        //         message_type,
-        //       });
-        //       // media.push({
-        //       //   media: fileName,
-        //       //   media_caption: media_caption? media_caption : null,
-        //       // });
-        //     }
-        //   });
-        // }
-        // console.log(files);
-        // return;
-        // s3 bucket for media
-        // if (req.files) {
-        //   for (const file of req.files) {
-        //     if (file) {
-        //       let { Location } = await uploadFile(file);
-        //       files.push({
-        //         attatchment: Location,
-        //         sender_id,
-        //         reciever_id,
-        //         msg_channel_id: chkChannel
-        //           ? chkChannel.channel_id
-        //           : chkChannel.channel_id,
-        //         message_type,
-        //       });
-        //       media.push({
-        //         attatchment: Location,
-        //       });
-        //     }
-        //     if (fs.existsSync(file.path)) {
-        //       fs.unlinkSync(file.path);
-        //     }
-        //   }
-        // }
-        // if (message_type === MessageType.MEDIA && files.length >= 0) {
-        //   const createMedia = await prisma.messages.createMany({
-        //     data: files,
-        //   });
-        //   sendMediaMessage(sender_id, reciever_id, media, message_type);
-        //   // Notifications
-        //   // const isNotificationAllowed = await prisma.users.findFirst({
-        //   //   where: {
-        //   //     user_id: reciever_id,
-        //   //     notifications: true,
-        //   //   },
-        //   // });
-        //   // if (isNotificationAllowed) {
-        //   //   const getFcmToken = await prisma.users.findFirst({
-        //   //     where: {
-        //   //       user_id: reciever_id,
-        //   //     },
-        //   //     select: {
-        //   //       fcm_token: true,
-        //   //     },
-        //   //   });
-        //   //   if (getFcmToken?.fcm_token) {
-        //   //     SendNotification(getFcmToken.fcm_token, {
-        //   //       // profile: profile_picture,
-        //   //       title: fname + "" + lname,
-        //   //       body: "Send you a attachment",
-        //   //     })
-        //   //       .then((res) => {
-        //   //         console.log(res, "done");
-        //   //       })
-        //   //       .catch((error) => {
-        //   //         console.log(error, "Error sending notification");
-        //   //       });
-        //   //   }
-        //   // }
-        //   // sendNotificationCounter(sender_id, reciever_id, true);
-        //   return res.status(200).send(getSuccessData(createMedia));
-        // }
         if (message_type === MessageType.MEDIA) {
           if (
             media_type != MediaType.AUDIO &&
@@ -930,6 +843,26 @@ router.post(
             media
           );
           if (createMessage?.count > 0) {
+            // Notifications
+          // const isAllowed = await isNotificationAllowed(reciever_id);
+          // if (isAllowed) {
+          //   if (isAllowed?.is_private_chat_notifications === true) {
+          //     const getFcmToken = isAllowed?.fcm_token;
+          //     if (getFcmToken) {
+          //       SendNotification(getFcmToken, {
+          //         // profile: profile_picture,
+          //         title: fname + "" + lname,
+          //         body: `Sent you ${media_type}`,
+          //       })
+          //         .then((res) => {
+          //           console.log(res, "done");
+          //         })
+          //         .catch((error) => {
+          //           console.log(error, "Error sending notification");
+          //         });
+          //     }
+          //   }
+          // }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           return res
@@ -959,33 +892,23 @@ router.post(
             chkChannel?.group_id
           );
           // Notifications
-          // const isNotificationAllowed = await prisma.users.findFirst({
-          //   where: {
-          //     user_id: reciever_id,
-          //     notifications: true,
-          //   },
-          // });
-          // if (isNotificationAllowed) {
-          //   const getFcmToken = await prisma.users.findFirst({
-          //     where: {
-          //       user_id: reciever_id,
-          //     },
-          //     select: {
-          //       fcm_token: true,
-          //     },
-          //   });
-          //   if (getFcmToken?.fcm_token) {
-          //     SendNotification(getFcmToken.fcm_token, {
-          //       // profile: profile_picture,
-          //       title: fname + "" + lname,
-          //       body: "Send you a message",
-          //     })
-          //       .then((res) => {
-          //         console.log(res, "done");
+          // const isAllowed = await isNotificationAllowed(reciever_id);
+          // if (isAllowed) {
+          //   if (isAllowed?.is_private_chat_notifications === true) {
+          //     const getFcmToken = isAllowed?.fcm_token;
+          //     if (getFcmToken) {
+          //       SendNotification(getFcmToken, {
+          //         // profile: profile_picture,
+          //         title: fname + "" + lname,
+          //         body: `Sent you ${message_type} message`,
           //       })
-          //       .catch((error) => {
-          //         console.log(error, "Error sending notification");
-          //       });
+          //         .then((res) => {
+          //           console.log(res, "done");
+          //         })
+          //         .catch((error) => {
+          //           console.log(error, "Error sending notification");
+          //         });
+          //     }
           //   }
           // }
           // sendNotificationCounter(sender_id, reciever_id, true);
@@ -1013,6 +936,26 @@ router.post(
             message_type,
             chkChannel?.group_id
           );
+          // Notifications
+          // const isAllowed = await isNotificationAllowed(reciever_id);
+          // if (isAllowed) {
+          //   if (isAllowed?.is_private_chat_notifications === true) {
+          //     const getFcmToken = isAllowed?.fcm_token;
+          //     if (getFcmToken) {
+          //       SendNotification(getFcmToken, {
+          //         // profile: profile_picture,
+          //         title: fname + "" + lname,
+          //         body: `Sent you ${message_type}`,
+          //       })
+          //         .then((res) => {
+          //           console.log(res, "done");
+          //         })
+          //         .catch((error) => {
+          //           console.log(error, "Error sending notification");
+          //         });
+          //     }
+          //   }
+          // }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.CONTACT) {
@@ -1054,6 +997,26 @@ router.post(
           });
           sendContactMessage(sender_id, reciever_id, newContacts);
           if (createContactMessage?.count > 0) {
+            // Notifications
+          // const isAllowed = await isNotificationAllowed(reciever_id);
+          // if (isAllowed) {
+          //   if (isAllowed?.is_private_chat_notifications === true) {
+          //     const getFcmToken = isAllowed?.fcm_token;
+          //     if (getFcmToken) {
+          //       SendNotification(getFcmToken, {
+          //         // profile: profile_picture,
+          //         title: fname + "" + lname,
+          //         body: `Sent you ${message_type}`,
+          //       })
+          //         .then((res) => {
+          //           console.log(res, "done");
+          //         })
+          //         .catch((error) => {
+          //           console.log(error, "Error sending notification");
+          //         });
+          //     }
+          //   }
+          // }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           return res

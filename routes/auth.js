@@ -72,7 +72,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     }
     if (req.file_error) {
       deleteExistigImg(req);
-      return res.status(404).send(req.file_error);
+      return res.status(404).send(getError(req.file_error));
     }
     if (!req.file) {
       deleteExistigImg(req);

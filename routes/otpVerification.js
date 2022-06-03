@@ -12,6 +12,8 @@ const {
   phoneAndOtpValidation,
   phoneValidation,
   emailPhoneAndOtpValidation,
+  updateProfile,
+  changePhoneNumberValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -22,10 +24,10 @@ const {
 const { send_message } = require("../twilio/twilio");
 
 router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
-  const { error, value } = phoneValidation(req.body);
-  if (error) return res.status(404).send(getError(error.details[0].message));
-  const phone = "+" + clean(value.phone);
   try {
+    const { error, value } = phoneValidation(req.body);
+    if (error) return res.status(404).send(getError(error.details[0].message));
+    const phone = "+" + clean(value.phone);
     const random = rn.generator({
       min: 1111,
       max: 9999,
@@ -138,7 +140,10 @@ router.post(
       })();
 
       const PhoneExists = await getUserFromphone(phone);
-      if (PhoneExists.Otp_verified == true && PhoneExists?.is_registered == true) {
+      if (
+        PhoneExists.Otp_verified == true &&
+        PhoneExists?.is_registered == true
+      ) {
         if (PhoneExists?.forgot_password_otp_verify == false) {
           await prisma.user.update({
             where: {
@@ -185,34 +190,41 @@ router.post(
   }
 );
 
-router.post("/forgotpassowrd_verify_phone_otp", trimRequest.all, async (req, res) => {
-  
-    try{
-    const { error, value } = phoneAndOtpValidation(req.body);
-    if (error) return res.status(404).send(getError(error.details[0].message));
-    const { otp } = value;
-    const phone = "+" + clean(value.phone);
-    const PhoneExists = await getUserFromphone(phone);
-    if (!PhoneExists && !PhoneExists.Otp_verified == true && !PhoneExists.is_registered == true) {
+router.post(
+  "/forgotpassowrd_verify_phone_otp",
+  trimRequest.all,
+  async (req, res) => {
+    try {
+      const { error, value } = phoneAndOtpValidation(req.body);
+      if (error)
+        return res.status(404).send(getError(error.details[0].message));
+      const { otp } = value;
+      const phone = "+" + clean(value.phone);
+      const PhoneExists = await getUserFromphone(phone);
+      if (
+        !PhoneExists &&
+        !PhoneExists.Otp_verified == true &&
+        !PhoneExists.is_registered == true
+      ) {
+        return res
+          .status(404)
+          .send(getError("This phone number is not registered"));
+      }
+      const existingOtp = await chkExistingOtp(phone, otp);
+      if (!existingOtp) {
+        return res.status(404).send(getError("Otp doesn't match"));
+      }
+      await prisma.user.update({
+        where: {
+          user_id: PhoneExists?.user_id,
+        },
+        data: {
+          forgot_password_otp_verify: true,
+        },
+      });
       return res
-        .status(404)
-        .send(getError("This phone number is not registered"));
-    }
-    const existingOtp = await chkExistingOtp(phone, otp);
-    if (!existingOtp) {
-      return res
-        .status(404)
-        .send(getError("Otp doesn't match"));
-    }
-    await prisma.user.update({
-      where: {
-        user_id: PhoneExists?.user_id,
-      },
-      data: {
-        forgot_password_otp_verify: true,
-      },
-    });
-    return res.status(200).send(getSuccessData("Phone successfully verified"));
+        .status(200)
+        .send(getSuccessData("Phone successfully verified"));
     } catch (err) {
       if (err && err.message) {
         return res.status(500).send(getError(err.message));
@@ -221,5 +233,7 @@ router.post("/forgotpassowrd_verify_phone_otp", trimRequest.all, async (req, res
     }
   }
 );
+
+
 
 module.exports = router;

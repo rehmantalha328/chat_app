@@ -15,15 +15,19 @@ model User {
   phone                         String?            @db.VarChar(255)
   username                      String?            @db.VarChar(255)
   user_name                     String?            @db.VarChar(255)
+  about_me                      String?
+  gender                        String?
+  birthday                      String?
   password                      String?            @db.VarChar(255)
   Otp                           Int?
   Otp_verified                  Boolean?           @default(false)
   forgot_password_otp_verify    Boolean?           @default(false)
   profile_img                   String?            @db.VarChar(255)
   is_registered                 Boolean?           @default(false)
-  notifications                 Boolean?           @default(false)
+  notifications                 Boolean?           @default(true)
   is_private_chat_notifications Boolean?           @default(true)
   is_group_chat_notifications   Boolean?           @default(true)
+  fcm_token                     String?
   created_at                    DateTime           @default(now())
   updated_at                    DateTime           @updatedAt
   online_status                 Boolean?           @default(false)

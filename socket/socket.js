@@ -180,8 +180,6 @@ const sendMediaMessage = (sender_id, reciever_id, media) => {
     const chkReciever = findReciever(reciever_id);
     if (chkReciever) {
       io.to(chkReciever.socketId).emit("newMediaMessageOneToOne", {
-        sender_id,
-        reciever_id,
         media,
       });
     }

@@ -34,6 +34,26 @@ function phoneValidation(data) {
   return phoneSchema.validate(data);
 };
 
+function changePhoneNumberSendOtpValidation(data) {
+  const phoneSchema = Joi.object({
+    phone: Joi.string().required(),
+    old_phone: Joi.string().required(),
+  });
+  return phoneSchema.validate(data);
+};
+
+function changePhoneNumberValidation(data) {
+  const updatePhoneSchema = Joi.object({
+    old_phone: Joi.string().required(),
+    phone: Joi.string().required(),
+    otp: Joi.number().integer().greater(1111).less(9999).required().messages({
+      "number.greater": "otp must be 4 digit number.",
+      "number.less": "otp must be 4 digit number.",
+    }),
+  });
+  return updatePhoneSchema.validate(data);
+}
+
 function signUpValidation(data) {
   const signupschema = Joi.object({
     phone: Joi.string().required(),
@@ -60,7 +80,10 @@ function updatePasswordValidation(data) {
 
 function updateProfile(data) {
   const userProfileSchema = Joi.object({
-    user_name: Joi.string().required(),
+    user_name: Joi.string(),
+    about_me: Joi.string(),
+    gender: Joi.string(),
+    birthday: Joi.string(),
   });
   return userProfileSchema.validate(data);
 }
@@ -219,4 +242,6 @@ module.exports = {
   groupMessageSeen,
   chkWhoSeenInGroup,
   updateProfile,
+  changePhoneNumberSendOtpValidation,
+  changePhoneNumberValidation,
 };

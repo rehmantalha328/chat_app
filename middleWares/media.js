@@ -55,9 +55,9 @@ const multerFilter = (req, file, cb) => {
 const upload = multer({
     storage: multerStorage,
     fileFilter: multerFilter,
-    // limits: {
-    //     fileSize: 1048576,
-    // },
+    limits: {
+        fileSize: 1048576,
+    },
 });
 
 module.exports = async function(req, res, next) {
