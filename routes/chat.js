@@ -22,7 +22,11 @@ const {
   chkAdmin,
   chkExistingMember,
 } = require("../database_queries/chat");
-const { isNotificationAllowed,isPrivateChatNotificationAllowed,isGroupChatNotificationAllowed } = require("../database_queries/notifications");
+const {
+  isNotificationAllowed,
+  isPrivateChatNotificationAllowed,
+  isGroupChatNotificationAllowed,
+} = require("../database_queries/notifications");
 const { getUserFromId } = require("../database_queries/auth");
 const {
   getError,
@@ -329,7 +333,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
     }
     const { is_group_chat, reciever_id, group_id, page } = value;
     const offset = page >= 1 ? parseInt(page) - 1 : 0;
-    console.log("page value",offset);
+    console.log("page value", offset);
     if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
@@ -374,7 +378,9 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       });
       // const get = fetchGroupMessages?.group_messages;
       // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(fetchGroupMessages.group_messages));
+      return res
+        .status(200)
+        .send(getSuccessData(fetchGroupMessages.group_messages));
     } else {
       const getGroup = await chkMessageChannel(sender_id, reciever_id);
       if (!getGroup) {
@@ -419,7 +425,9 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       });
       // const get = getMessages?.group_messages;
       // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
-      return res.status(200).send(getSuccessData(fetchGroupMessages.group_messages));
+      return res
+        .status(200)
+        .send(getSuccessData(fetchGroupMessages.group_messages));
     }
   } catch (catchError) {
     if (catchError && catchError.message) {
@@ -844,25 +852,25 @@ router.post(
           );
           if (createMessage?.count > 0) {
             // Notifications
-          // const isAllowed = await isNotificationAllowed(reciever_id);
-          // if (isAllowed) {
-          //   if (isAllowed?.is_private_chat_notifications === true) {
-          //     const getFcmToken = isAllowed?.fcm_token;
-          //     if (getFcmToken) {
-          //       SendNotification(getFcmToken, {
-          //         // profile: profile_picture,
-          //         title: fname + "" + lname,
-          //         body: `Sent you ${media_type}`,
-          //       })
-          //         .then((res) => {
-          //           console.log(res, "done");
-          //         })
-          //         .catch((error) => {
-          //           console.log(error, "Error sending notification");
-          //         });
-          //     }
-          //   }
-          // }
+            // const isAllowed = await isNotificationAllowed(reciever_id);
+            // if (isAllowed) {
+            //   if (isAllowed?.is_private_chat_notifications === true) {
+            //     const getFcmToken = isAllowed?.fcm_token;
+            //     if (getFcmToken) {
+            //       SendNotification(getFcmToken, {
+            //         // profile: profile_picture,
+            //         title: fname + "" + lname,
+            //         body: `Sent you ${media_type}`,
+            //       })
+            //         .then((res) => {
+            //           console.log(res, "done");
+            //         })
+            //         .catch((error) => {
+            //           console.log(error, "Error sending notification");
+            //         });
+            //     }
+            //   }
+            // }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           return res
@@ -998,25 +1006,25 @@ router.post(
           sendContactMessage(sender_id, reciever_id, newContacts);
           if (createContactMessage?.count > 0) {
             // Notifications
-          // const isAllowed = await isNotificationAllowed(reciever_id);
-          // if (isAllowed) {
-          //   if (isAllowed?.is_private_chat_notifications === true) {
-          //     const getFcmToken = isAllowed?.fcm_token;
-          //     if (getFcmToken) {
-          //       SendNotification(getFcmToken, {
-          //         // profile: profile_picture,
-          //         title: fname + "" + lname,
-          //         body: `Sent you ${message_type}`,
-          //       })
-          //         .then((res) => {
-          //           console.log(res, "done");
-          //         })
-          //         .catch((error) => {
-          //           console.log(error, "Error sending notification");
-          //         });
-          //     }
-          //   }
-          // }
+            // const isAllowed = await isNotificationAllowed(reciever_id);
+            // if (isAllowed) {
+            //   if (isAllowed?.is_private_chat_notifications === true) {
+            //     const getFcmToken = isAllowed?.fcm_token;
+            //     if (getFcmToken) {
+            //       SendNotification(getFcmToken, {
+            //         // profile: profile_picture,
+            //         title: fname + "" + lname,
+            //         body: `Sent you ${message_type}`,
+            //       })
+            //         .then((res) => {
+            //           console.log(res, "done");
+            //         })
+            //         .catch((error) => {
+            //           console.log(error, "Error sending notification");
+            //         });
+            //     }
+            //   }
+            // }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           return res
@@ -1348,25 +1356,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
-        // data.last_message_time =
-        //   data.group_messages.length > 0
-        //     ? data.group_messages[0].created_at
-        //     : null;
-        // let unseen_counter = data.group_messages.map((c) => {
-        //   let rec = c.reciever;
-        //   let test = [];
-        //   let reciver = rec.concat(rec);
-        //   test.push(
-        //     {reciver}
-        //   )
-        //   let fff = test[0].reciver;
-        //   let count = fff.filter(
-        //     (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
-        //   ).length;
-        //   return count;
-        // });
-        // data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
-
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
@@ -1383,7 +1372,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             count++;
           }
         }
-        console.log("count", count);
+        // console.log("count", count);
         data.un_seen_counter = count;
         return data;
       })
@@ -1417,27 +1406,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
-        // data.last_message_time =
-        //   data.group_messages.length > 0
-        //     ? data.group_messages[0].created_at
-        //     : null;
-        // let unseen_counter = data.group_messages.map((c) => {
-        //   let rec = c.reciever;
-        //   let test = [];
-        //   let reciver = rec.concat(rec);
-        //   test.push(
-        //     {reciver}
-        //   )
-        //   let fff = test[0].reciver;
-        //   console.log("ff",fff);
-        //   let count = fff.filter(
-        //     (chk) => chk.reciever_id === user_id && chk.seen === false && chk.group_id === data.group_id
-        //   ).length;
-        //   console.log("count",count);
-        //   return count;
-        // });
-        // data.un_seen_counter = data.group_messages.length > 0? unseen_counter[0] : 0 ;
-
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,

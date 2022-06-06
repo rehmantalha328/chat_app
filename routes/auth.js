@@ -85,7 +85,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     const getExistingUser = await getUserFromphone(phone);
     if (!getExistingUser) {
       deleteExistigImg(req);
-      return res.status(404).send(getError("User not found"));
+      return res.status(404).send(getError("User with this phone doesn't exists"));
     }
     if (getExistingUser?.Otp_verified == false) {
       deleteExistigImg(req);
@@ -95,10 +95,6 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       deleteExistigImg(req);
       return res.status(404).send(getError("This user already exists"));
     }
-    // if (getExistingUser?.username == username) {
-    //   deleteExistigImg(req);
-    //   return res.status(404).send(getError("This username already exists"));
-    // }
 
     // s3 bucket for profile
     if (req?.file) {
@@ -159,7 +155,9 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     if (getExistingUser?.password !== password) {
       return res.status(404).send(getError("Passwword is incorrect"));
     }
-    return res.status(200).send(getSuccessData(await createToken(getExistingUser)));
+    return res
+      .status(200)
+      .send(getSuccessData(await createToken(getExistingUser)));
   } catch (catchError) {
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
@@ -167,7 +165,5 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
-
-
 
 module.exports = router;
