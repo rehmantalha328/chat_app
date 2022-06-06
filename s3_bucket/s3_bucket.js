@@ -24,7 +24,7 @@ let uploadFile = function (file) {
     // Setting up S3 upload parameters
     const params = {
       Bucket: BUCKET_NAME,
-      Key: file.filename, // File name you want to save as in S3
+      Key: v4(), // File name you want to save as in S3
       Body: fileContent,
       ContentEncoding: "base64",
       ContentType: file?.mimetype,
