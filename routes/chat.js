@@ -576,6 +576,7 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
+                  attatchment_name: file.filename,
                   user_sender: user_sender_group,
                   message_time: new Date().toLocaleTimeString(),
                 });
@@ -833,6 +834,7 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
+                  attatchment_name: file.filename,
                   user_sender: user_sender_one_to_one,
                   message_time: new Date().toLocaleTimeString(),
                 });
