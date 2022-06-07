@@ -7,6 +7,7 @@ const {
   updateProfile,
   changePhoneNumberValidation,
   changePhoneNumberSendOtpValidation,
+  blockUserValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -23,6 +24,10 @@ const {
 const imageMulter = require("../middleWares/imageMulter");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const { fs } = require("file-system");
+const {
+  blockUser,
+  chkIsAlreadyBlocked,
+} = require("../database_queries/blockUsers");
 
 // add username
 router.post("/chkUsername", trimRequest.all, async (req, res) => {
@@ -48,12 +53,12 @@ router.post("/chkUsername", trimRequest.all, async (req, res) => {
 
 router.post("/getMyProfile", trimRequest.all, async (req, res) => {
   try {
-    const {user_id} = req.user;
+    const { user_id } = req.user;
     const getMyProfile = await prisma.user.findFirst({
-      where:{
-        user_id
+      where: {
+        user_id,
       },
-      select:{
+      select: {
         user_id: true,
         user_name: true,
         username: true,
@@ -65,7 +70,7 @@ router.post("/getMyProfile", trimRequest.all, async (req, res) => {
         online_status: true,
         online_status_time: true,
         created_at: true,
-      }
+      },
     });
     if (!getMyProfile) {
       return res.status(404).send(getError("No data found"));
@@ -247,6 +252,36 @@ router.post(
     }
   }
 );
-// 
+
+router.post("/blockUser", trimRequest.all, async (req, res) => {
+  try {
+    const blocker_id = req.user.user_id;
+    const { error, value } = blockUserValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { blocked_id } = value;
+    const isUserExists = await getUserFromId(blocked_id);
+    if (!isUserExists) {
+      return res.status(404).send(getError("Blocked_ID doesn't exists"));
+    }
+    if (blocked_id === blocker_id) {
+      return res
+        .status(404)
+        .send(getError("Actions cannot perform on same ID's"));
+    }
+    const isAlreadyBlocked = await chkIsAlreadyBlocked(blocker_id, blocked_id);
+    if (isAlreadyBlocked) {
+      return res.status(404).send(getError("You already blocked this user"));
+    }
+    const blockUser = await blockUser(blocker_id, blocked_id);
+    return res.status(200).send(getSuccessData("User blocked successfully"));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+});
 
 module.exports = router;
