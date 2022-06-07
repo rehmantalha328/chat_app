@@ -348,6 +348,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
             select: {
               id: true,
               attatchment: true,
+              attatchment_name: true,
               message_body: true,
               message_type: true,
               media_type: true,
@@ -395,6 +396,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
             select: {
               id: true,
               attatchment: true,
+              attatchment_name: true,
               message_body: true,
               message_type: true,
               media_caption: true,
