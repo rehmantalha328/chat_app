@@ -127,6 +127,13 @@ function removeMembersFromGroup(data) {
   return removeMembersSchema.validate(data);
 };
 
+function leaveGroupValidation(data){
+  const leaveGroupSchema = Joi.object({
+    group_id: Joi.string().required(),
+  });
+  return leaveGroupSchema.validate(data);
+}
+
 function getAllMembers(data) {
   const membersSchema = Joi.object({
     group_id: Joi.string().required(),
@@ -244,4 +251,5 @@ module.exports = {
   updateProfile,
   changePhoneNumberSendOtpValidation,
   changePhoneNumberValidation,
+  leaveGroupValidation,
 };

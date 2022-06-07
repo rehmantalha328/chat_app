@@ -14,6 +14,7 @@ const {
   removeMembersFromGroup,
   groupMessageSeen,
   chkWhoSeenInGroup,
+  leaveGroupValidation,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -319,6 +320,36 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
+router.post("/leaveGroup",trimRequest.all,async(req,res)=>{
+  try{
+    const {user_id} = req.user;
+    const {error,value} = leaveGroupValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const {group_id} = value;
+    const isGroupExists = await chkExistingGroup(group_id);
+    if (!isGroupExists) {
+      return res.status(404).send(getError("No group exixts"));
+    }
+    const isMemberExists = await chkExistingMember(user_id, group_id);
+    if (!isMemberExists) {
+      return res.status(404).send(getError("Member not found"));
+    }
+    const removeUserFromGroup = await prisma.group_members.delete({
+      where: {
+        id: isMemberExists?.id,
+      },
+    });
+    return res.status(200).send(getSuccessData("leave successfull"));
+  }catch(error){
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message))
     }
     return res.status(404).send(getError(error));
   }
