@@ -565,6 +565,7 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
+                  attatchment_name: file.filename,
                 });
                 media.push({
                   sender_id,
@@ -591,6 +592,7 @@ router.post(
                 media_type: media_data[i].media_type,
                 attatchment: media_data[i].attatchment,
                 message_type: media_data[i].message_type,
+                attatchment_name: media_data[i].attatchment_name,
                 reciever: {
                   createMany: {
                     data: recieverData,
@@ -817,6 +819,7 @@ router.post(
                   media_type,
                   message_type,
                   attatchment: Location,
+                  attatchment_name: file.filename,
                 });
                 media.push({
                   sender_id,

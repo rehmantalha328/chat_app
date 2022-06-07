@@ -78,24 +78,25 @@ model group_members {
 }
 
 model group_messages {
-  id             String             @id @default(cuid())
-  sender_id      String?            @db.VarChar(255)
-  reciever_id    String?            @db.VarChar(255)
-  group_id       String?            @db.VarChar(255)
-  message_body   String?            @db.VarChar(255)
-  attatchment    String?
-  contact_name   String?
-  contact_number String?
-  media_type     MediaType?
-  media_caption  String?
-  seen           Boolean            @default(false)
-  message_type   MessageType?       @default(TEXT)
-  created_at     DateTime           @default(now())
-  updated_at     DateTime           @updatedAt
-  user_sender    User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
-  user_reciever  User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
-  groups         groups?            @relation(fields: [group_id], references: [group_id])
-  reciever       message_reciever[]
+  id               String             @id @default(cuid())
+  sender_id        String?            @db.VarChar(255)
+  reciever_id      String?            @db.VarChar(255)
+  group_id         String?            @db.VarChar(255)
+  message_body     String?            @db.VarChar(255)
+  attatchment      String?
+  attatchment_name String?
+  contact_name     String?
+  contact_number   String?
+  media_type       MediaType?
+  media_caption    String?
+  seen             Boolean            @default(false)
+  message_type     MessageType?       @default(TEXT)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  user_sender      User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
+  user_reciever    User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
+  groups           groups?            @relation(fields: [group_id], references: [group_id])
+  reciever         message_reciever[]
 }
 
 model message_reciever {
