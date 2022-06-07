@@ -46,6 +46,39 @@ router.post("/chkUsername", trimRequest.all, async (req, res) => {
   }
 });
 
+router.post("/getMyProfile", trimRequest.all, async (req, res) => {
+  try {
+    const {user_id} = req.user;
+    const getMyProfile = await prisma.user.findFirst({
+      where:{
+        user_id
+      },
+      select:{
+        user_id: true,
+        user_name: true,
+        username: true,
+        profile_img: true,
+        phone: true,
+        about_me: true,
+        birthday: true,
+        gender: true,
+        online_status: true,
+        online_status_time: true,
+        created_at: true,
+      }
+    });
+    if (!getMyProfile) {
+      return res.status(404).send(getError("No data found"));
+    }
+    return res.status(200).send(getSuccessData(getMyProfile));
+  } catch (catchError) {
+    if (catchError && catchError.message) {
+      return res.status(404).send(getError(catchError.message));
+    }
+    return res.status(404).send(getError(catchError));
+  }
+});
+
 // update User profile info
 router.post(
   "/updateUserProfile",
