@@ -111,6 +111,15 @@ function groupCreateValidation(data) {
   return createGroupSchema.validate(data);
 };
 
+function updateGroupInfoValidate(data){
+  const updateGroupSchema = Joi.object({
+    group_id: Joi.string().required(),
+    group_name: Joi.string(),
+    group_description: Joi.string(),
+  });
+  return updateGroupSchema.validate(data);
+}
+
 function addMembersInGroup(data) {
   const addMembersSchema = Joi.object({
     group_id: Joi.string().required(),
@@ -260,4 +269,5 @@ module.exports = {
   changePhoneNumberValidation,
   leaveGroupValidation,
   blockUserValidation,
+  updateGroupInfoValidate,
 };

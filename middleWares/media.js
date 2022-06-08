@@ -1,7 +1,6 @@
 const multer = require("multer");
 var fs = require("fs");
 const { v4 } = require("uuid");
-
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         let path = "public/";

@@ -15,6 +15,7 @@ const {
   groupMessageSeen,
   chkWhoSeenInGroup,
   leaveGroupValidation,
+  updateGroupInfoValidate,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -51,7 +52,9 @@ const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
+const Sharp = require("sharp");
 
+// Create Group
 router.post(
   "/createGroup",
   [imagemulter, trimRequest.all],
@@ -154,6 +157,61 @@ router.post(
         return res.status(404).send(error.message);
       }
       return res.status(404).send(error);
+    }
+  }
+);
+
+// Update group info
+router.post(
+  "/updateGroupInfo",
+  [trimRequest.all, imagemulter],
+  async (req, res) => {
+    try {
+      const admin_id = req.user.user_id;
+      const { error, value } = updateGroupInfoValidate(req.body);
+      if (error) {
+        deleteExistigImg(req);
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      const { group_id, group_name, group_description} = value;
+      const isAdmin = await chkAdmin(group_id,admin_id);
+      if (!isAdmin) {
+        return res.status(404).send(getError("Only admins can update the group info"));
+      }
+      const isGroupExists = await chkExistingGroup(group_id);
+      if (!isGroupExists) {
+        deleteExistigImg(req);
+        return res.status(404).send(getError("Group doesn't exists"));
+      }
+      if (isGroupExists?.is_group_chat !== true) {
+        return res.status(404).send(getError("Sorry you cannot update one-to-one group chat"));
+      }
+      if (req.file) {
+        const getCurrentGroupImg = isGroupExists?.group_image;
+        const delPrevImg = deleteFile(getCurrentGroupImg);
+        const file = req?.file;
+        let { Location } = await uploadFile(file);
+        var group_image = Location;
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      }
+      const updateInfo = await prisma.groups.update({
+        where:{
+          group_id,
+        },
+        data:{
+          group_name,
+          group_description,
+          group_image,
+        }
+      });
+      return res.status(200).send(getSuccessData("Group info updated successfully"));
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
     }
   }
 );
@@ -325,14 +383,14 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/leaveGroup",trimRequest.all,async(req,res)=>{
-  try{
-    const {user_id} = req.user;
-    const {error,value} = leaveGroupValidation(req.body);
+router.post("/leaveGroup", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = leaveGroupValidation(req.body);
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
-    const {group_id} = value;
+    const { group_id } = value;
     const isGroupExists = await chkExistingGroup(group_id);
     if (!isGroupExists) {
       return res.status(404).send(getError("No group exixts"));
@@ -347,9 +405,9 @@ router.post("/leaveGroup",trimRequest.all,async(req,res)=>{
       },
     });
     return res.status(200).send(getSuccessData("leave successfull"));
-  }catch(error){
+  } catch (error) {
     if (error && error.message) {
-      return res.status(404).send(getError(error.message))
+      return res.status(404).send(getError(error.message));
     }
     return res.status(404).send(getError(error));
   }
@@ -590,6 +648,7 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
+                
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
@@ -842,6 +901,13 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
+                // const thumbnail = Sharp(file.path).resize(200,200).toFile('public/'+'thumbnail'+ file.filename,(err,result)=>{
+                //   if (err) {
+                //     console.log(err);
+                //   }
+                //   console.log(result);
+                // });
+                // console.log('thumbnail',thumbnail);
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
@@ -1633,6 +1699,5 @@ router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
     return res.status(404).send(error);
   }
 });
-// 
 
 module.exports = router;

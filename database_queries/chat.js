@@ -36,7 +36,9 @@ function chkExistingGroup(group_id) {
       group_id: true,
       group_name: true,
       group_image: true,
+      is_group_chat: true,
       last_message_time: true,
+      created_at: true,
       updated_at: true,
       group_members: {
         include: {
