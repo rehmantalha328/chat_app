@@ -41,29 +41,29 @@ model User {
   i_recieve_messages_in_group   message_reciever[] @relation("reciever_in_group")
   user_i_block                  blockProfile[]     @relation("blocker")
   user_blocked_me               blockProfile[]     @relation("blocked")
+  user_i_report                 reportUser[]       @relation("reporter")
+  user_report_me                reportUser[]       @relation("reported")
+  groups_i_report               groupReports[]     @relation("group_reporter")
 }
 
 model groups {
-  group_id          String           @id @default(cuid())
-  group_name        String?          @db.VarChar(255)
-  group_image       String?          @db.VarChar(255)
-  group_description String?          @db.VarChar(255)
-  group_creator_id  String?          @db.VarChar(255)
-  sender_id         String?          @db.VarChar(255)
-  reciever_id       String?          @db.VarChar(255)
-  // last_message_id        String?          @db.VarChar(255)
-  // last_message           String?          @db.VarChar(255)
-  // last_message_sender    String?          @db.VarChar(255)
-  // last_message_sender_id String?          @db.VarChar(255)
-  is_group_chat     Boolean          @default(false)
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
-  last_message_time DateTime?
-  sender            User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
-  reciever          User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
-  group_members     group_members[]
-  group_messages    group_messages[]
-  group_creator     User?            @relation(fields: [group_creator_id], references: [user_id], name: "creator")
+  group_id            String           @id @default(cuid())
+  group_name          String?          @db.VarChar(255)
+  group_image         String?          @db.VarChar(255)
+  group_description   String?          @db.VarChar(255)
+  group_creator_id    String?          @db.VarChar(255)
+  sender_id           String?          @db.VarChar(255)
+  reciever_id         String?          @db.VarChar(255)
+  is_group_chat       Boolean          @default(false)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  last_message_time   DateTime?
+  sender              User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
+  reciever            User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
+  group_members       group_members[]
+  group_messages      group_messages[]
+  group_creator       User?            @relation(fields: [group_creator_id], references: [user_id], name: "creator")
+  total_group_reports groupReports[]   @relation("reported_group")
 }
 
 model group_members {
@@ -120,6 +120,28 @@ model blockProfile {
   blocker    User?    @relation(fields: [blocker_id], references: [user_id], name: "blocker")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model reportUser {
+  id            String   @id @default(cuid())
+  reporter_id   String?
+  reported_id   String?
+  report_reason String?
+  reported      User?    @relation(fields: [reported_id], references: [user_id], name: "reported")
+  reporter      User?    @relation(fields: [reporter_id], references: [user_id], name: "reporter")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model groupReports {
+  id            String   @id @default(cuid())
+  reporter_id   String?
+  group_id      String?
+  report_reason String?
+  reporter      User?    @relation(fields: [reporter_id], references: [user_id], name: "group_reporter")
+  group         groups?  @relation(fields: [group_id], references: [group_id], name: "reported_group")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 }
 
 enum MessageType {

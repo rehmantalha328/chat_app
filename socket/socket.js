@@ -198,6 +198,19 @@ const sendContactMessage = (sender_id, reciever_id, contacts) => {
   }
 };
 
+const seenMessages = (reciever_id,sender_id)=>{
+  const chkSender = findSender(sender_id);
+  if (chkSender) {
+    const chkReciever = findReciever(reciever_id);
+    if (chkReciever) {
+      io.to(chkReciever.socketId).emit("seenMessageOneToOne", {
+        sender_id,
+        reciever_id,
+        seen: true,
+      });
+    }
+  }
+};
 
 module.exports = {
   setUpSocket,
@@ -210,4 +223,5 @@ module.exports = {
   sendMediaMessageToGroup,
   sendContactMessage,
   sendContactMessageToGroup,
+  seenMessages,
 };

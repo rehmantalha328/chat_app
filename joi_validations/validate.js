@@ -6,7 +6,7 @@ function emailValidation(data) {
     email: Joi.string().email().required(),
   });
   return emailSchema.validate(data);
-};
+}
 
 function loginUser(data) {
   const loginSchema = Joi.object({
@@ -25,14 +25,14 @@ function phoneAndOtpValidation(data) {
     }),
   });
   return phoneAndOtpSchema.validate(data);
-};
+}
 
 function phoneValidation(data) {
   const phoneSchema = Joi.object({
     phone: Joi.string().required(),
   });
   return phoneSchema.validate(data);
-};
+}
 
 function changePhoneNumberSendOtpValidation(data) {
   const phoneSchema = Joi.object({
@@ -40,7 +40,7 @@ function changePhoneNumberSendOtpValidation(data) {
     old_phone: Joi.string().required(),
   });
   return phoneSchema.validate(data);
-};
+}
 
 function changePhoneNumberValidation(data) {
   const updatePhoneSchema = Joi.object({
@@ -61,14 +61,14 @@ function signUpValidation(data) {
     password: Joi.string().min(6).required(),
   });
   return signupschema.validate(data);
-};
+}
 
 function chkUsername(data) {
   const usernameschema = Joi.object({
     user_name: Joi.string().required(),
   });
   return usernameschema.validate(data);
-};
+}
 
 function updatePasswordValidation(data) {
   const updatePasswordSchema = Joi.object({
@@ -76,7 +76,7 @@ function updatePasswordValidation(data) {
     password: Joi.string().required(),
   });
   return updatePasswordSchema.validate(data);
-};
+}
 
 function updateProfile(data) {
   const userProfileSchema = Joi.object({
@@ -100,7 +100,7 @@ function emailPhoneAndOtpValidation(data) {
     }),
   });
   return phoneEmailAndOtpSchema.validate(data);
-};
+}
 
 function groupCreateValidation(data) {
   const createGroupSchema = Joi.object({
@@ -109,9 +109,9 @@ function groupCreateValidation(data) {
     member_id: Joi.array().required(),
   });
   return createGroupSchema.validate(data);
-};
+}
 
-function updateGroupInfoValidate(data){
+function updateGroupInfoValidate(data) {
   const updateGroupSchema = Joi.object({
     group_id: Joi.string().required(),
     group_name: Joi.string(),
@@ -126,7 +126,7 @@ function addMembersInGroup(data) {
     member_id: Joi.array().required(),
   });
   return addMembersSchema.validate(data);
-};
+}
 
 function removeMembersFromGroup(data) {
   const removeMembersSchema = Joi.object({
@@ -134,9 +134,9 @@ function removeMembersFromGroup(data) {
     member_id: Joi.string().required(),
   });
   return removeMembersSchema.validate(data);
-};
+}
 
-function leaveGroupValidation(data){
+function leaveGroupValidation(data) {
   const leaveGroupSchema = Joi.object({
     group_id: Joi.string().required(),
   });
@@ -148,7 +148,7 @@ function getAllMembers(data) {
     group_id: Joi.string().required(),
   });
   return membersSchema.validate(data);
-};
+}
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
@@ -163,7 +163,14 @@ function messageValidation(data) {
       then: Joi.string().required(),
       otherwise: Joi.string(),
     }),
-    message_type: Joi.string().valid(MessageType.TEXT.toString(), MessageType.MEDIA.toString(), MessageType.LINK.toString(),MessageType.CONTACT.toString()).required(),
+    message_type: Joi.string()
+      .valid(
+        MessageType.TEXT.toString(),
+        MessageType.MEDIA.toString(),
+        MessageType.LINK.toString(),
+        MessageType.CONTACT.toString()
+      )
+      .required(),
     media: Joi.when("message_type", {
       is: MessageType.MEDIA.toString(),
       then: Joi.string(),
@@ -197,7 +204,7 @@ function messageValidation(data) {
     }),
   });
   return messageSchema.validate(data);
-};
+}
 
 function fetchMessageValidation(data) {
   const groupChatChkSchema = Joi.object({
@@ -215,36 +222,62 @@ function fetchMessageValidation(data) {
     }),
   });
   return groupChatChkSchema.validate(data);
-};
+}
 
 function seenMessagesValidation(data) {
   const seenMessagesSchema = Joi.object({
     sender_id: Joi.string().required(),
   });
   return seenMessagesSchema.validate(data);
-};
+}
 
 function groupMessageSeen(data) {
   const seenSchema = Joi.object({
     group_id: Joi.string().required(),
   });
   return seenSchema.validate(data);
-};
+}
 
 function chkWhoSeenInGroup(data) {
-  const seenSchema = chkSeenBySchema = Joi.object({
+  const seenSchema = (chkSeenBySchema = Joi.object({
     group_id: Joi.string().required(),
     message_id: Joi.string().required(),
-  });
+  }));
   return seenSchema.validate(data);
-};
+}
 
-function blockUserValidation(data){
+function blockUserValidation(data) {
   const blockSchema = Joi.object({
     blocker_id: Joi.string().required(),
   });
   return blockSchema.validate(data);
 }
+
+function reportuserValidation(data){
+  const reportUserSchema = Joi.object({
+    reported_id: Joi.string().required(),
+    report_reason: Joi.string().required(),
+  });
+  return reportUserSchema.validate(data);
+}
+
+function reportGroupValidation(data){
+  const reportGroupSchema = Joi.object({
+    report_reason: Joi.string().required(),
+    group_id: Joi.string().required(),
+  });
+  return reportGroupSchema.validate(data);
+}
+
+// function getMyContacts(data) {
+//   const contactsSchema = Joi.object({
+//     contacts: Joi.array().required().items({
+//       contact_number: Joi.string().required(),
+//     }),
+//   });
+//   return contactsSchema.validate(data);
+// }
+
 
 module.exports = {
   emailValidation,
@@ -270,4 +303,6 @@ module.exports = {
   leaveGroupValidation,
   blockUserValidation,
   updateGroupInfoValidate,
+  reportGroupValidation,
+  reportuserValidation,
 };

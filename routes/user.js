@@ -8,6 +8,7 @@ const {
   changePhoneNumberValidation,
   changePhoneNumberSendOtpValidation,
   blockUserValidation,
+  reportuserValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -27,6 +28,9 @@ const { fs } = require("file-system");
 const {
   blockUser,
   chkIsAlreadyBlocked,
+  chkIsAlreadyReported,
+  reportUser,
+  unblockUser,
 } = require("../database_queries/blockUsers");
 
 // add username
@@ -272,9 +276,12 @@ router.post("/blockUser", trimRequest.all, async (req, res) => {
     }
     const isAlreadyBlocked = await chkIsAlreadyBlocked(blocker_id, blocked_id);
     if (isAlreadyBlocked) {
-      return res.status(404).send(getError("You already blocked this user"));
+      const unblock = await unblockUser(isAlreadyBlocked?.id);
+      return res
+        .status(200)
+        .send(getSuccessData("You successfully unblock the user"));
     }
-    const blockUser = await blockUser(blocker_id, blocked_id);
+    const blockProfile = await blockUser(blocker_id, blocked_id);
     return res.status(200).send(getSuccessData("User blocked successfully"));
   } catch (catchError) {
     if (catchError && catchError.message) {
@@ -284,6 +291,59 @@ router.post("/blockUser", trimRequest.all, async (req, res) => {
   }
 });
 
-router.get("/getMyBlockedOnes",trimRequest.all, async(req,res)=>{});
+router.get("/getMyBlockedOnes", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const getMyBlockedUsers = await prisma.user.findFirst({
+      where: {
+        user_id,
+      },
+      select: {
+        user_i_block: {
+          include: {
+            blocked: true,
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
+      },
+    });
+    return res.status(200).send(getSuccessData(getMyBlockedUsers));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
+router.post("/reportUser", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = reportuserValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { reported_id,report_reason } = value;
+    const isUserExists = await getUserFromId(reported_id);
+    if (!isUserExists) {
+      return res.status(404).send(getError("No user found"));
+    }
+    const chkIsExistsReport = await chkIsAlreadyReported(user_id, reported_id);
+    if (chkIsExistsReport) {
+      return res
+        .status(404)
+        .send(getError("You have already reported this user"));
+    }
+    const createReport = await reportUser(user_id, reported_id,report_reason);
+    return res.status(200).send(getSuccessData("User reported successfully"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
 
 module.exports = router;

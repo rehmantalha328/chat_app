@@ -47,12 +47,12 @@ const {
   sendMediaMessageToGroup,
   sendContactMessage,
   sendContactMessageToGroup,
+  seenMessages,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
-const Sharp = require("sharp");
 
 // Create Group
 router.post(
@@ -1558,16 +1558,6 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("sender id should be different from reciever id."));
     }
-    // const message_id = await prisma.group_messages.findMany({
-    //   where: {
-    //     sender_id,
-    //     reciever_id,
-    //     seen: false,
-    //   },
-    //   select: {
-    //     id: true,
-    //   },
-    // });
     const is_seen = await prisma.group_messages.updateMany({
       where: {
         sender_id,
@@ -1580,7 +1570,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
     if (is_seen.count <= 0) {
       return res.status(200).send(getError("No data found"));
     }
-    // seenMessages(reciever_id, sender_id, message_id, true);
+    seenMessages(reciever_id, sender_id);
     return res.status(200).send(getSuccessData("Successfully done"));
   } catch (catchError) {
     if (catchError && catchError.message) {
