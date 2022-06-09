@@ -284,4 +284,6 @@ router.post("/blockUser", trimRequest.all, async (req, res) => {
   }
 });
 
+router.get("/getMyBlockedOnes",trimRequest.all, async(req,res)=>{});
+
 module.exports = router;
