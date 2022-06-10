@@ -53,6 +53,11 @@ const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
+// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+// const ffmpeg = require("fluent-ffmpeg");
+// ffmpeg.setFfmpegPath(ffmpegPath);
+// const { v4 } = require("uuid");
+
 
 // Create Group
 router.post(
@@ -173,10 +178,12 @@ router.post(
         deleteExistigImg(req);
         return res.status(404).send(getError(error.details[0].message));
       }
-      const { group_id, group_name, group_description} = value;
-      const isAdmin = await chkAdmin(group_id,admin_id);
+      const { group_id, group_name, group_description } = value;
+      const isAdmin = await chkAdmin(group_id, admin_id);
       if (!isAdmin) {
-        return res.status(404).send(getError("Only admins can update the group info"));
+        return res
+          .status(404)
+          .send(getError("Only admins can update the group info"));
       }
       const isGroupExists = await chkExistingGroup(group_id);
       if (!isGroupExists) {
@@ -184,7 +191,9 @@ router.post(
         return res.status(404).send(getError("Group doesn't exists"));
       }
       if (isGroupExists?.is_group_chat !== true) {
-        return res.status(404).send(getError("Sorry you cannot update one-to-one group chat"));
+        return res
+          .status(404)
+          .send(getError("Sorry you cannot update one-to-one group chat"));
       }
       if (req.file) {
         const getCurrentGroupImg = isGroupExists?.group_image;
@@ -197,16 +206,18 @@ router.post(
         }
       }
       const updateInfo = await prisma.groups.update({
-        where:{
+        where: {
           group_id,
         },
-        data:{
+        data: {
           group_name,
           group_description,
           group_image,
-        }
+        },
       });
-      return res.status(200).send(getSuccessData("Group info updated successfully"));
+      return res
+        .status(200)
+        .send(getSuccessData("Group info updated successfully"));
     } catch (error) {
       if (error && error.message) {
         return res.status(404).send(getError(error.message));
@@ -570,9 +581,6 @@ router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
   async (req, res) => {
-    console.log("req.files",req.files);
-    console.log("req.files",req.body.thumbnails);
-    return;
     try {
       let recieverData = [];
       let sender_id = req.user.user_id;
@@ -903,6 +911,26 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
+                // for (let i = 0; i < req.files.length; i++) {
+                //   let thumbnail;
+                //   ffmpeg({ source: file.path })
+                //     .on("path", (path) => {
+                //       console.log("Created file names", path);
+                //     })
+                //     .on("end", () => {
+                //       console.log("Job done");
+                //     })
+                //     .on("error", (err) => {
+                //       console.log("Error", err);
+                //     })
+                //     .takeScreenshots(
+                //       {
+                //         filename: `${v4()}.png`,
+                //         timemarks: [2],
+                //       },
+                //       "public/"
+                //     );
+                // }
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
@@ -1388,7 +1416,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? arr.group_messages[0].message_body
             : arr.group_messages[0].attatchment
           : null;
-          obj.seen = arr.group_messages.length>0?arr.group_messages[0].seen :null;
+      obj.seen =
+        arr.group_messages.length > 0 ? arr.group_messages[0].seen : null;
       obj.last_message_time =
         arr.group_messages.length > 0 ? arr.group_messages[0].created_at : null;
       obj.un_seen_counter = arr.group_messages.filter(
@@ -1433,7 +1462,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? ary.group_messages[0].message_body
             : ary.group_messages[0].attatchment
           : null;
-          obj.seen = ary.group_messages.length>0?ary.group_messages[0].seen :null
+      obj.seen =
+        ary.group_messages.length > 0 ? ary.group_messages[0].seen : null;
       obj.last_message_time =
         ary.group_messages.length > 0 ? ary.group_messages[0].created_at : null;
       obj.un_seen_counter = ary.group_messages.filter(
@@ -1457,7 +1487,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
-          data.seen = data.group_messages.length>0?data.group_messages[0].seen :null;
+        data.seen =
+          data.group_messages.length > 0 ? data.group_messages[0].seen : null;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
@@ -1508,7 +1539,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
-          data.seen = data.group_messages.length>0?data.group_messages[0].seen :null;
+        data.seen =
+          data.group_messages.length > 0 ? data.group_messages[0].seen : null;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
