@@ -571,7 +571,7 @@ router.post(
   [mediaMulter, trimRequest.all],
   async (req, res) => {
     console.log("req.files",req.files);
-    console.log("req.files",req.thumbnails);
+    console.log("req.files",req.body.thumbnails);
     return;
     try {
       let recieverData = [];
