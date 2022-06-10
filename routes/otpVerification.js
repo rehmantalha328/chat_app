@@ -59,11 +59,11 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         },
       });
     }
-    const messageSent = await send_message({
-      body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
-      number: phone,
-    });
-    if (messageSent) {
+    // const messageSent = await send_message({
+    //   body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
+    //   number: phone,
+    // });
+    // if (messageSent) {
       return res
         .status(200)
         .send(
@@ -71,9 +71,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
             "Otp sent to your phone, which is valid only for 5 minutes"
           )
         );
-    } else {
-      return res.status(404).send(getError("Please try again"));
-    }
+    // } else {
+    //   return res.status(404).send(getError("Please try again"));
+    // }
   } catch (err) {
     if (err && err.message) {
       return res.status(500).send(getError(err.message));

@@ -901,13 +901,6 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
-                // const thumbnail = Sharp(file.path).resize(200,200).toFile('public/'+'thumbnail'+ file.filename,(err,result)=>{
-                //   if (err) {
-                //     console.log(err);
-                //   }
-                //   console.log(result);
-                // });
-                // console.log('thumbnail',thumbnail);
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
