@@ -47,23 +47,24 @@ model User {
 }
 
 model groups {
-  group_id            String           @id @default(cuid())
-  group_name          String?          @db.VarChar(255)
-  group_image         String?          @db.VarChar(255)
-  group_description   String?          @db.VarChar(255)
-  group_creator_id    String?          @db.VarChar(255)
-  sender_id           String?          @db.VarChar(255)
-  reciever_id         String?          @db.VarChar(255)
-  is_group_chat       Boolean          @default(false)
-  created_at          DateTime         @default(now())
-  updated_at          DateTime         @updatedAt
-  last_message_time   DateTime?
-  sender              User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
-  reciever            User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
-  group_members       group_members[]
-  group_messages      group_messages[]
-  group_creator       User?            @relation(fields: [group_creator_id], references: [user_id], name: "creator")
-  total_group_reports groupReports[]   @relation("reported_group")
+  group_id                   String           @id @default(cuid())
+  group_name                 String?          @db.VarChar(255)
+  group_image                String?          @db.VarChar(255)
+  group_description          String?          @db.VarChar(255)
+  group_creator_id           String?          @db.VarChar(255)
+  sender_id                  String?          @db.VarChar(255)
+  reciever_id                String?          @db.VarChar(255)
+  is_group_chat              Boolean          @default(false)
+  is_group_notification_mute Boolean?         @default(false)
+  created_at                 DateTime         @default(now())
+  updated_at                 DateTime         @updatedAt
+  last_message_time          DateTime?
+  sender                     User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
+  reciever                   User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
+  group_members              group_members[]
+  group_messages             group_messages[]
+  group_creator              User?            @relation(fields: [group_creator_id], references: [user_id], name: "creator")
+  total_group_reports        groupReports[]   @relation("reported_group")
 }
 
 model group_members {

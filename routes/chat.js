@@ -570,6 +570,9 @@ router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
   async (req, res) => {
+    console.log("req.files",req.files);
+    console.log("req.files",req.thumbnails);
+    return;
     try {
       let recieverData = [];
       let sender_id = req.user.user_id;
@@ -648,7 +651,6 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
-                
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
