@@ -1437,6 +1437,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? ary.group_messages[0].message_body
             : ary.group_messages[0].attatchment
           : null;
+          obj.seen = ary.group_messages.length>0?ary.group_messages[0].seen :null;
       obj.last_message_time =
         ary.group_messages.length > 0 ? ary.group_messages[0].created_at : null;
       obj.un_seen_counter = ary.group_messages.filter(
@@ -1460,6 +1461,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
+          data.seen = ary.group_messages.length>0?ary.group_messages[0].seen :null;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
@@ -1510,6 +1512,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
             : null;
+          data.seen = ary.group_messages.length>0?ary.group_messages[0].seen :null;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
