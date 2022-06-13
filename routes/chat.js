@@ -916,26 +916,26 @@ router.post(
           if (req.files) {
             for (const file of req.files) {
               if (file) {
-                for (let i = 0; i < req.files.length; i++) {
-                  let thumbnail = ffmpeg({ source: file.path })
-                    .on("filename", (filename) => {
-                      console.log("Created file names", filename);
-                    })
-                    .on("end", () => {
-                      console.log("Job done");
-                    })
-                    .on("error", (err) => {
-                      console.log("Error", err);
-                    })
-                    .takeScreenshots(
-                      {
-                        filename: `${v4()}.png`,
-                        timemarks: [2],
-                      },
-                      "public/"
-                    );
-                    console.log("thumbnail",thumbnail.options.source);
-                }
+                // for (let i = 0; i < req.files.length; i++) {
+                //   let thumbnail = ffmpeg({ source: file.path })
+                //     .on("filename", (filename) => {
+                //       console.log("Created file names", filename);
+                //     })
+                //     .on("end", () => {
+                //       console.log("Job done");
+                //     })
+                //     .on("error", (err) => {
+                //       console.log("Error", err);
+                //     })
+                //     .takeScreenshots(
+                //       {
+                //         filename: `${v4()}.png`,
+                //         timemarks: [2],
+                //       },
+                //       "public/"
+                //     );
+                //     console.log("thumbnail",thumbnail.options.source);
+                // }
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
