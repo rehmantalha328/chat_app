@@ -103,10 +103,10 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("This phone number is already verified"));
     }
-    const chkOtpExists = await chkExistingOtp(phone, otp);
-    if (!chkOtpExists) {
-      return res.status(404).send(getError("Invalid otp code"));
-    }
+    // const chkOtpExists = await chkExistingOtp(phone, otp);
+    // if (!chkOtpExists) {
+    //   return res.status(404).send(getError("Invalid otp code"));
+    // }
     await prisma.user.update({
       where: {
         user_id: PhoneExists?.user_id,

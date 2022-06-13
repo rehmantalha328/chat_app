@@ -42,10 +42,22 @@ function chkExistingUsername(username) {
   });
 }
 
+function updateFcmToken(fcm_token) {
+  return prisma.user.update({
+    where: {
+      user_id,
+    },
+    data: {
+      fcm_token,
+    },
+  });
+}
+
 module.exports = {
   getUserFromphone,
   getUserFromId,
   chkExistingUserName,
   chkExistingOtp,
   chkExistingUsername,
+  updateFcmToken,
 };

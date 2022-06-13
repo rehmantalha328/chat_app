@@ -12,6 +12,7 @@ function loginUser(data) {
   const loginSchema = Joi.object({
     phone: Joi.string().required(),
     password: Joi.string().required(),
+    fcm_token: Joi.string().required(),
   });
   return loginSchema.validate(data);
 }
@@ -59,6 +60,7 @@ function signUpValidation(data) {
     phone: Joi.string().required(),
     username: Joi.string().required(),
     password: Joi.string().min(6).required(),
+    fcm_token: Joi.string().required(),
   });
   return signupschema.validate(data);
 }

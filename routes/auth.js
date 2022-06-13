@@ -18,6 +18,7 @@ const {
 const {
   getUserFromphone,
   chkExistingUsername,
+  updateFcmToken,
 } = require("../database_queries/auth");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const imagemulter = require("../middleWares/imageMulter");
@@ -78,7 +79,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       deleteExistigImg(req);
       return res.status(404).send(getError("Please Select Your Profile."));
     }
-    const { username: _username, password } = value;
+    const { username: _username, password,fcm_token } = value;
     const phone = "+" + clean(value.phone);
     const username = _username.toLowerCase();
 
@@ -116,6 +117,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
         username,
         is_registered: true,
         profile_img: profile_picture,
+        fcm_token,
       },
     });
     if (!createUser) {
@@ -143,7 +145,7 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
-    const { password } = value;
+    const { password,fcm_token } = value;
     const phone = "+" + clean(value.phone);
     const getExistingUser = await getUserFromphone(phone);
     if (!getExistingUser) {
@@ -155,6 +157,7 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     if (getExistingUser?.password !== password) {
       return res.status(404).send(getError("Passwword is incorrect"));
     }
+    const updateFcm = await updateFcmToken(getExistingUser?.user_id, fcm_token);
     return res
       .status(200)
       .send(getSuccessData(await createToken(getExistingUser)));
