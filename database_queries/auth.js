@@ -42,7 +42,7 @@ function chkExistingUsername(username) {
   });
 }
 
-function updateFcmToken(fcm_token) {
+function updateFcmToken(user_id,fcm_token) {
   return prisma.user.update({
     where: {
       user_id,
