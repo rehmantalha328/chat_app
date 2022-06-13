@@ -28,9 +28,17 @@ function isGroupChatNotificationAllowed(user_id) {
   });
 }
 
+function isGroupMuteFalse(group_id) {
+  return prisma.groups.findFirst({
+    where: {
+      group_id,
+    },
+  });
+}
 
 module.exports = {
   isNotificationAllowed,
   isPrivateChatNotificationAllowed,
   isGroupChatNotificationAllowed,
+  isGroupMuteFalse,
 };
