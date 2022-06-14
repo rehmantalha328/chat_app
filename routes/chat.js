@@ -680,8 +680,10 @@ router.post(
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
+                      console.log("here");
                       file.thumbnailPath = filePath;
                       let { Location } = await uploadThumbnail(file);
+                      console.log("location",Location);
                       thumbnails.push({
                         Location,
                       });
