@@ -48,4 +48,4 @@ const deleteFile = (fileUrl) => {
   return {};
 };
 
-module.exports = { uploadFile, deleteFile };
+module.exports = { uploadFile, deleteFile};

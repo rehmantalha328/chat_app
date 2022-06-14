@@ -4,7 +4,6 @@ const prisma = Prisma_Client.prismaClient;
 const trimRequest = require("trim-request");
 const {
   signUpValidation,
-  getMyContacts,
 } = require("../joi_validations/validate");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 const {
@@ -82,7 +81,7 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
 //   }
 // });
 
-router.post("/getMyAllData", trimRequest.all, async (req, res) => {
+router.get("/getMyAllData", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
     let groups = [];

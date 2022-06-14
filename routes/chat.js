@@ -54,10 +54,10 @@ const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
 const { fs } = require("file-system");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
-const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
-const ffmpeg = require("fluent-ffmpeg");
-ffmpeg.setFfmpegPath(ffmpegPath);
-const { v4 } = require("uuid");
+// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+// const ffmpeg = require("fluent-ffmpeg");
+// ffmpeg.setFfmpegPath(ffmpegPath);
+// const { v4 } = require("uuid");
 
 // Create Group
 router.post(
@@ -913,29 +913,78 @@ router.post(
                 )
               );
           }
+          // if (MediaType.VIDEO) {
+          //   let thumbnails = [];
+          //   if (req.files) {
+          //     for (const file of req.files) {
+          //       if (file) {
+          //         for (let i = 0; i < req.files.length; i++) {
+          //           var filePath = "";
+          //           ffmpeg({ source: file.path })
+          //             .on("filenames", (filenames) => {
+          //               filePath = "public/" + filenames[0];
+          //               thumbnails.push({
+          //                 filePath,
+          //               });
+          //               console.log("Created file names", filenames);
+          //             })
+          //             .on("end", () => {
+          //               console.log("Job done");
+          //             })
+          //             .on("error", (err) => {
+          //               console.log("Error", err);
+          //             })
+          //             .takeScreenshots(
+          //               {
+          //                 filename: `${v4()}.png`,
+          //                 timemarks: [2],
+          //               },
+          //               "public/"
+          //             );
+          //         }
+          //       }
+          //       console.log(thumbnails);
+          //       // let { Location } = await uploadFile(file);
+          //       for (let i = 0; i < thumbnails.length; i++) {
+          //         media_data.push({
+          //           sender_id,
+          //           reciever_id,
+          //           group_id: chkChannel
+          //             ? chkChannel.group_id
+          //             : chkChannel.group_id,
+          //           media_caption: media_caption ? media_caption : null,
+          //           media_type,
+          //           message_type,
+          //           // attatchment: Location,
+          //           attatchment_name: file.filename,
+          //           thumbnail: thumbnails[i].filePath,
+          //         });
+          //       }
+          //       console.log("media", media_data);
+          //       return res.status(200).send(getSuccessData("ok"));
+          //       media.push({
+          //         sender_id,
+          //         reciever_id,
+          //         group_id: chkChannel
+          //           ? chkChannel.group_id
+          //           : chkChannel.group_id,
+          //         media_caption: media_caption ? media_caption : null,
+          //         media_type,
+          //         message_type,
+          //         // attatchment: Location,
+          //         attatchment_name: file.filename,
+          //         user_sender: user_sender_one_to_one,
+          //         message_time: new Date().toLocaleTimeString(),
+          //       });
+          //     }
+          //     if (fs.existsSync(file.path)) {
+          //       fs.unlinkSync(file.path);
+          //     }
+          //   }
+          // }
           if (req.files) {
             for (const file of req.files) {
               if (file) {
-                // for (let i = 0; i < req.files.length; i++) {
-                //   let thumbnail = ffmpeg({ source: file.path })
-                //     .on("filename", (filename) => {
-                //       console.log("Created file names", filename);
-                //     })
-                //     .on("end", () => {
-                //       console.log("Job done");
-                //     })
-                //     .on("error", (err) => {
-                //       console.log("Error", err);
-                //     })
-                //     .takeScreenshots(
-                //       {
-                //         filename: `${v4()}.png`,
-                //         timemarks: [2],
-                //       },
-                //       "public/"
-                //     );
-                //     console.log("thumbnail",thumbnail.options.source);
-                // }
                 let { Location } = await uploadFile(file);
                 media_data.push({
                   sender_id,
