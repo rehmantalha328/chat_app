@@ -63,6 +63,8 @@ const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath(ffmpegPath);
 const { v4 } = require("uuid");
 const { SendNotification } = require("../notifications/pushNotifications");
+
+
 // Create Group
 router.post(
   "/createGroup",
@@ -664,7 +666,7 @@ router.post(
               );
           }
           if (media_type === MediaType.VIDEO) {
-            let thumbnailsPath = [];
+            // let thumbnailsPath = [];
             let thumbnails = [];
             if (req.files) {
               for (const file of req.files) {
@@ -673,9 +675,9 @@ router.post(
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
                       filePath = "public\\" + filenames[0];
-                      thumbnailsPath.push({
-                        filePath,
-                      });
+                      // thumbnailsPath.push({
+                      //   filePath,
+                      // });
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
@@ -1014,7 +1016,7 @@ router.post(
               );
           }
           if (media_type === MediaType.VIDEO) {
-            let thumbnailsPath = [];
+            // let thumbnailsPath = [];
             let thumbnails = [];
             if (req.files) {
               for (const file of req.files) {
@@ -1023,9 +1025,9 @@ router.post(
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
                       filePath = "public\\" + filenames[0];
-                      thumbnailsPath.push({
-                        filePath,
-                      });
+                      // thumbnailsPath.push({
+                      //   filePath,
+                      // });
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
