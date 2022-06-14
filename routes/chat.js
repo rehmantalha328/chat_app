@@ -673,7 +673,7 @@ router.post(
                   var filePath = "";
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
-                      filePath = "public\\" + filenames[0];
+                      filePath = "public/" + filenames[0];
                       // thumbnailsPath.push({
                       //   filePath,
                       // });
