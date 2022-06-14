@@ -1170,15 +1170,17 @@ router.post(
                   var filePath = "";
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
-                      filePath = "public\\" + filenames[0];
+                      filePath = "public/" + filenames[0];
                       // thumbnailsPath.push({
                       //   filePath,
                       // });
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
+                      console.log("here");
                       file.thumbnailPath = filePath;
                       let { Location } = await uploadThumbnail(file);
+                      console.log("location",Location);
                       thumbnails.push({
                         Location,
                       });
