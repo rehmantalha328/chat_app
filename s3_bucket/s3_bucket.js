@@ -36,6 +36,24 @@ let uploadFile = function (file) {
   return {};
 };
 
+let uploadThumbnail = function (file) {
+  if (file) {
+    const fileContent = fs.createReadStream(file.thumbnailPath);
+    // Setting up S3 upload parameters
+    const params = {
+      Bucket: BUCKET_NAME,
+      Key: v4(), // File name you want to save as in S3
+      Body: fileContent,
+      ContentEncoding: "base64",
+      ContentType: "image/png",
+      ACL: "public-read",
+    };
+    // Uploading files to the bucket
+    return s3.upload(params).promise();
+  }
+  return {};
+};
+
 const deleteFile = (fileUrl) => {
   if (fileUrl) {
     const splitedFileUrl = fileUrl.split("/");
@@ -48,4 +66,4 @@ const deleteFile = (fileUrl) => {
   return {};
 };
 
-module.exports = { uploadFile, deleteFile};
+module.exports = { uploadFile, deleteFile, uploadThumbnail };

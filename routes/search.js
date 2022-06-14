@@ -52,34 +52,6 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
   }
 });
 
-// getMyContacts
-// router.get("/getMyRegisteredContacts", trimRequest.all, async (req, res) => {
-//   try {
-//     const { user_id } = req.user;
-//     const { error, value } = getMyContacts(req.body);
-//     if (error) {
-//       return res.status(404).send(getError(error.details[0].message));
-//     }
-//     let contact_list = [];
-//     const { contacts } = value;
-//     if (contacts.length <= 0) {
-//       return res.status(404).send(getError("Contacts not allowed to be empty"));
-//     }
-//     for(let i=0; i<contacts.length; i++){
-//       const chkMyContacts = await prisma.user.findFirst({
-//         where:{
-//           phone: contacts[i].contact_number,
-//         }
-//       });
-//     }
-//     return res.status(200).send(getSuccessData(getAllusers));
-//   } catch (catchError) {
-//     if (catchError && catchError.message) {
-//       return res.status(404).send(getError(catchError.message));
-//     }
-//     return res.status(404).send(getError(catchError));
-//   }
-// });
 
 router.get("/getMyAllData", trimRequest.all, async (req, res) => {
   try {
