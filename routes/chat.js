@@ -1207,7 +1207,7 @@ router.post(
                 if (getFcmToken) {
                   SendNotification(getFcmToken, {
                     // profile: profile_picture,
-                    title: fname + "" + lname,
+                    title: username,
                     body: `Sent you ${message_type}`,
                   })
                     .then((res) => {
