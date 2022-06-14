@@ -58,11 +58,11 @@ const {
   deleteFile,
   uploadThumbnail,
 } = require("../s3_bucket/s3_bucket");
-const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
-const ffmpeg = require("fluent-ffmpeg");
-ffmpeg.setFfmpegPath(ffmpegPath);
-const { v4 } = require("uuid");
-const { SendNotification } = require("../notifications/pushNotifications");
+// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+// const ffmpeg = require("fluent-ffmpeg");
+// ffmpeg.setFfmpegPath(ffmpegPath);
+// const { v4 } = require("uuid");
+// const { SendNotification } = require("../notifications/pushNotifications");
 
 // Create Group
 router.post(
@@ -664,130 +664,130 @@ router.post(
                 )
               );
           }
-          if (media_type === MediaType.VIDEO) {
-            // let thumbnailsPath = [];
-            let thumbnails = [];
-            if (req.files) {
-              for (const file of req.files) {
-                if (file) {
-                  var filePath = "";
-                  ffmpeg({ source: file.path })
-                    .on("filenames", (filenames) => {
-                      filePath = "public/" + filenames[0];
-                      // thumbnailsPath.push({
-                      //   filePath,
-                      // });
-                      console.log("Created file names", filenames);
-                    })
-                    .on("end", async () => {
-                      console.log("here");
-                      file.thumbnailPath = filePath;
-                      let { Location } = await uploadThumbnail(file);
-                      console.log("location",Location);
-                      thumbnails.push({
-                        Location,
-                      });
-                    })
-                    .on("error", (err) => {
-                      console.log("Error", err);
-                    })
-                    .takeScreenshots(
-                      {
-                        filename: `${v4()}`,
-                        timemarks: [3],
-                      },
-                      "public/"
-                    );
-                  let { Location } = await uploadFile(file);
-                  for (let i = 0; i < thumbnails.length; i++) {
-                    media_data.push({
-                      sender_id,
-                      group_id,
-                      media_caption: media_caption ? media_caption : null,
-                      media_type,
-                      message_type,
-                      attatchment: Location,
-                      attatchment_name: file.originalname,
-                      thumbnail: thumbnails[i].Location,
-                    });
-                    media.push({
-                      sender_id,
-                      group_id,
-                      media_caption: media_caption ? media_caption : null,
-                      media_type,
-                      message_type,
-                      attatchment: Location,
-                      attatchment_name: file.originalname,
-                      thumbnail: thumbnails[i].Location,
-                      user_sender: user_sender_group,
-                      message_time: new Date().toLocaleTimeString(),
-                    });
-                  }
-                }
-                if (fs.existsSync(file.path)) {
-                  fs.unlinkSync(file.path);
-                }
-              }
-            }
-            for (let i = 0; i < media_data?.length; i++) {
-              const addMedia = await prisma.group_messages.create({
-                data: {
-                  sender_id: media_data[i].sender_id,
-                  group_id: media_data[i].group_id,
-                  media_caption: media_data[i].media_caption,
-                  media_type: media_data[i].media_type,
-                  attatchment: media_data[i].attatchment,
-                  message_type: media_data[i].message_type,
-                  attatchment_name: media_data[i].attatchment_name,
-                  thumbnail: media_data[i].thumbnail,
-                  reciever: {
-                    createMany: {
-                      data: recieverData,
-                    },
-                  },
-                },
-              });
-            }
-            const updateLastMessageTime = await prisma.groups.update({
-              where: {
-                group_id,
-              },
-              data: {
-                last_message_time: new Date(),
-              },
-            });
-            sendMediaMessageToGroup(sender_id, reciever, media);
-            // Notifications
-            // for (let i = 0; i < reciever.length; i++) {
-            //   const isNotificationsMute = await isGroupMuteFalse(
-            //     reciever[i].member.user_id,
-            //     group_id
-            //   );
-            //   const isAllowed = await isNotificationAllowed(
-            //     reciever[i].member.user_id
-            //   );
-            //   if (!isNotificationsMute) {
-            //     if (isAllowed) {
-            //       if (isAllowed?.is_private_chat_notifications === true) {
-            //         const getFcmToken = isAllowed?.fcm_token;
-            //         if (getFcmToken) {
-            //           SendNotification(getFcmToken, {
-            //             title: username,
-            //             body: `Sent you ${media_type}`,
-            //           })
-            //             .then((res) => {
-            //               console.log(res, "done");
-            //             })
-            //             .catch((error) => {
-            //               console.log(error, "Error sending notification");
-            //             });
-            //         }
-            //       }
-            //     }
-            //   }
-            // }
-            return res.status(200).send(getSuccessData("Sent successful"));
-          }
+          // if (media_type === MediaType.VIDEO) {
+          //   // let thumbnailsPath = [];
+          //   let thumbnails = [];
+          //   if (req.files) {
+          //     for (const file of req.files) {
+          //       if (file) {
+          //         var filePath = "";
+          //         ffmpeg({ source: file.path })
+          //           .on("filenames", (filenames) => {
+          //             filePath = "public/" + filenames[0];
+          //             // thumbnailsPath.push({
+          //             //   filePath,
+          //             // });
+          //             console.log("Created file names", filenames);
+          //           })
+          //           .on("end", async () => {
+          //             console.log("here");
+          //             file.thumbnailPath = filePath;
+          //             let { Location } = await uploadThumbnail(file);
+          //             console.log("location",Location);
+          //             thumbnails.push({
+          //               Location,
+          //             });
+          //           })
+          //           .on("error", (err) => {
+          //             console.log("Error", err);
+          //           })
+          //           .takeScreenshots(
+          //             {
+          //               filename: `${v4()}`,
+          //               timemarks: [3],
+          //             },
+          //             "public/"
+          //           );
+          //         let { Location } = await uploadFile(file);
+          //         for (let i = 0; i < thumbnails.length; i++) {
+          //           media_data.push({
+          //             sender_id,
+          //             group_id,
+          //             media_caption: media_caption ? media_caption : null,
+          //             media_type,
+          //             message_type,
+          //             attatchment: Location,
+          //             attatchment_name: file.originalname,
+          //             thumbnail: thumbnails[i].Location,
+          //           });
+          //           media.push({
+          //             sender_id,
+          //             group_id,
+          //             media_caption: media_caption ? media_caption : null,
+          //             media_type,
+          //             message_type,
+          //             attatchment: Location,
+          //             attatchment_name: file.originalname,
+          //             thumbnail: thumbnails[i].Location,
+          //             user_sender: user_sender_group,
+          //             message_time: new Date().toLocaleTimeString(),
+          //           });
+          //         }
+          //       }
+          //       if (fs.existsSync(file.path)) {
+          //         fs.unlinkSync(file.path);
+          //       }
+          //     }
+          //   }
+          //   for (let i = 0; i < media_data?.length; i++) {
+          //     const addMedia = await prisma.group_messages.create({
+          //       data: {
+          //         sender_id: media_data[i].sender_id,
+          //         group_id: media_data[i].group_id,
+          //         media_caption: media_data[i].media_caption,
+          //         media_type: media_data[i].media_type,
+          //         attatchment: media_data[i].attatchment,
+          //         message_type: media_data[i].message_type,
+          //         attatchment_name: media_data[i].attatchment_name,
+          //         thumbnail: media_data[i].thumbnail,
+          //         reciever: {
+          //           createMany: {
+          //             data: recieverData,
+          //           },
+          //         },
+          //       },
+          //     });
+          //   }
+          //   const updateLastMessageTime = await prisma.groups.update({
+          //     where: {
+          //       group_id,
+          //     },
+          //     data: {
+          //       last_message_time: new Date(),
+          //     },
+          //   });
+          //   sendMediaMessageToGroup(sender_id, reciever, media);
+          //   // Notifications
+          //   // for (let i = 0; i < reciever.length; i++) {
+          //   //   const isNotificationsMute = await isGroupMuteFalse(
+          //   //     reciever[i].member.user_id,
+          //   //     group_id
+          //   //   );
+          //   //   const isAllowed = await isNotificationAllowed(
+          //   //     reciever[i].member.user_id
+          //   //   );
+          //   //   if (!isNotificationsMute) {
+          //   //     if (isAllowed) {
+          //   //       if (isAllowed?.is_private_chat_notifications === true) {
+          //   //         const getFcmToken = isAllowed?.fcm_token;
+          //   //         if (getFcmToken) {
+          //   //           SendNotification(getFcmToken, {
+          //   //             title: username,
+          //   //             body: `Sent you ${media_type}`,
+          //   //           })
+          //   //             .then((res) => {
+          //   //               console.log(res, "done");
+          //   //             })
+          //   //             .catch((error) => {
+          //   //               console.log(error, "Error sending notification");
+          //   //             });
+          //   //         }
+          //   //       }
+          //   //     }
+          //   //   }
+          //   // }
+          //   return res.status(200).send(getSuccessData("Sent successful"));
+          // }
           if (req.files) {
             for (const file of req.files) {
               if (file) {
@@ -910,34 +910,34 @@ router.post(
             group_id
           );
           // Notifications
-          for (let i = 0; i < reciever.length; i++) {
-            const isNotificationsMute = await isGroupMuteFalse(
-              reciever[i].member.user_id,
-              group_id
-            );
-            const isAllowed = await isNotificationAllowed(
-              reciever[i].member.user_id
-            );
-            if (!isNotificationsMute) {
-              if (isAllowed) {
-                if (isAllowed?.is_private_chat_notifications === true) {
-                  const getFcmToken = isAllowed?.fcm_token;
-                  if (getFcmToken) {
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${message_type}`,
-                    })
-                      .then((res) => {
-                        console.log(res, "done");
-                      })
-                      .catch((error) => {
-                        console.log(error, "Error sending notification");
-                      });
-                  }
-                }
-              }
-            }
-          }
+          // for (let i = 0; i < reciever.length; i++) {
+          //   const isNotificationsMute = await isGroupMuteFalse(
+          //     reciever[i].member.user_id,
+          //     group_id
+          //   );
+          //   const isAllowed = await isNotificationAllowed(
+          //     reciever[i].member.user_id
+          //   );
+          //   if (!isNotificationsMute) {
+          //     if (isAllowed) {
+          //       if (isAllowed?.is_private_chat_notifications === true) {
+          //         const getFcmToken = isAllowed?.fcm_token;
+          //         if (getFcmToken) {
+          //           SendNotification(getFcmToken, {
+          //             title: username,
+          //             body: `Sent you ${message_type}`,
+          //           })
+          //             .then((res) => {
+          //               console.log(res, "done");
+          //             })
+          //             .catch((error) => {
+          //               console.log(error, "Error sending notification");
+          //             });
+          //         }
+          //       }
+          //     }
+          //   }
+          // }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.LINK) {
@@ -1161,124 +1161,117 @@ router.post(
                 )
               );
           }
-          if (media_type === MediaType.VIDEO) {
-            // let thumbnailsPath = [];
-            let thumbnails = [];
-            if (req.files) {
-              for (const file of req.files) {
-                if (file) {
-                  var filePath = "";
-                  ffmpeg({ source: file.path })
-                    .on("filenames", (filenames) => {
-                      filePath = "public/" + filenames[0];
-                      // thumbnailsPath.push({
-                      //   filePath,
-                      // });
-                      console.log("Created file names", filenames);
-                    })
-                    .on("end", async () => {
-                      try{
-                      console.log("here");
-                      file.thumbnailPath = filePath;
-                      console.log("iam file in chat screen",file);
-                      let { Location } = await uploadThumbnail(file);
-                      console.log("location",Location);
-                      thumbnails.push({
-                        Location,
-                      });
-                    }catch(err){
-                      if (err&&err.message) {
-                        return res.status(404).send(getError(err.message))
-                      }
-                      return res.status(404).send(getError(err))
-                    }
-                    })
-                    .on("error", (err) => {
-                      console.log("error", err);
-                    })
-                    .takeScreenshots(
-                      {
-                        filename: `${v4()}`,
-                        timemarks: [3],
-                      },
-                      "public/"
-                    );
-                  let { Location } = await uploadFile(file);
-                  for (let i = 0; i < thumbnails.length; i++) {
-                    media_data.push({
-                      sender_id,
-                      reciever_id,
-                      group_id: chkChannel
-                        ? chkChannel.group_id
-                        : chkChannel.group_id,
-                      media_caption: media_caption ? media_caption : null,
-                      media_type,
-                      message_type,
-                      attatchment: Location,
-                      attatchment_name: file.originalname,
-                      thumbnail: thumbnails[i].Location,
-                    });
-                    media.push({
-                      sender_id,
-                      reciever_id,
-                      group_id: chkChannel
-                        ? chkChannel.group_id
-                        : chkChannel.group_id,
-                      media_caption: media_caption ? media_caption : null,
-                      media_type,
-                      message_type,
-                      attatchment: Location,
-                      attatchment_name: file.originalname,
-                      thumbnail: thumbnails[i].Location,
-                      user_sender: user_sender_one_to_one,
-                      message_time: new Date().toLocaleTimeString(),
-                    });
-                  }
-                }
-                if (fs.existsSync(file.path)) {
-                  fs.unlinkSync(file.path);
-                }
-              }
-            }
-            const createMessage = await prisma.group_messages.createMany({
-              data: media_data,
-            });
-            sendMediaMessage(
-              sender_id,
-              // user_sender_one_to_one,
-              reciever_id,
-              // media,
-              // message_type,
-              // chkChannel?.group_id
-              media
-            );
-            // Notifications
-            // const isNotificationsMute = await isGroupMuteFalse(
-            //   reciever_id,
-            //   group_id
-            // );
-            // const isAllowed = await isNotificationAllowed(reciever_id);
-            // if (!isNotificationsMute) {
-            //   if (isAllowed) {
-            //     if (isAllowed?.is_private_chat_notifications === true) {
-            //       const getFcmToken = isAllowed?.fcm_token;
-            //       if (getFcmToken) {
-            //         SendNotification(getFcmToken, {
-            //           title: username,
-            //           body: `Sent you ${media_type}`,
-            //         })
-            //           .then((res) => {
-            //             console.log(res, "done");
-            //           })
-            //           .catch((error) => {
-            //             console.log(error, "Error sending notification");
-            //           });
-            //       }
-            //     }
-            //   }
-            // }
-            return res.status(200).send(getSuccessData("Sent successful"));
-          }
+          // if (media_type === MediaType.VIDEO) {
+          //   // let thumbnailsPath = [];
+          //   let thumbnails = [];
+          //   if (req.files) {
+          //     for (const file of req.files) {
+          //       if (file) {
+          //         var filePath = "";
+          //         ffmpeg({ source: file.path })
+          //           .on("filenames", (filenames) => {
+          //             filePath = "public/" + filenames[0];
+          //             // thumbnailsPath.push({
+          //             //   filePath,
+          //             // });
+          //             console.log("Created file names", filenames);
+          //           })
+          //           .on("end", async () => {
+          //             console.log("here");
+          //             file.thumbnailPath = filePath;
+          //             console.log("iam file in chat screen",file);
+          //             let { Location } = await uploadThumbnail(file);
+          //             console.log("location",Location);
+          //             thumbnails.push({
+          //               Location,
+          //             });
+          //           })
+          //           .on("error", (err) => {
+          //             console.log("error", err);
+          //           })
+          //           .takeScreenshots(
+          //             {
+          //               filename: `${v4()}`,
+          //               timemarks: [3],
+          //             },
+          //             "public/"
+          //           );
+          //         let { Location } = await uploadFile(file);
+          //         for (let i = 0; i < thumbnails.length; i++) {
+          //           media_data.push({
+          //             sender_id,
+          //             reciever_id,
+          //             group_id: chkChannel
+          //               ? chkChannel.group_id
+          //               : chkChannel.group_id,
+          //             media_caption: media_caption ? media_caption : null,
+          //             media_type,
+          //             message_type,
+          //             attatchment: Location,
+          //             attatchment_name: file.originalname,
+          //             thumbnail: thumbnails[i].Location,
+          //           });
+          //           media.push({
+          //             sender_id,
+          //             reciever_id,
+          //             group_id: chkChannel
+          //               ? chkChannel.group_id
+          //               : chkChannel.group_id,
+          //             media_caption: media_caption ? media_caption : null,
+          //             media_type,
+          //             message_type,
+          //             attatchment: Location,
+          //             attatchment_name: file.originalname,
+          //             thumbnail: thumbnails[i].Location,
+          //             user_sender: user_sender_one_to_one,
+          //             message_time: new Date().toLocaleTimeString(),
+          //           });
+          //         }
+          //       }
+          //       if (fs.existsSync(file.path)) {
+          //         fs.unlinkSync(file.path);
+          //       }
+          //     }
+          //   }
+          //   const createMessage = await prisma.group_messages.createMany({
+          //     data: media_data,
+          //   });
+          //   sendMediaMessage(
+          //     sender_id,
+          //     // user_sender_one_to_one,
+          //     reciever_id,
+          //     // media,
+          //     // message_type,
+          //     // chkChannel?.group_id
+          //     media
+          //   );
+          //   // Notifications
+          //   // const isNotificationsMute = await isGroupMuteFalse(
+          //   //   reciever_id,
+          //   //   group_id
+          //   // );
+          //   // const isAllowed = await isNotificationAllowed(reciever_id);
+          //   // if (!isNotificationsMute) {
+          //   //   if (isAllowed) {
+          //   //     if (isAllowed?.is_private_chat_notifications === true) {
+          //   //       const getFcmToken = isAllowed?.fcm_token;
+          //   //       if (getFcmToken) {
+          //   //         SendNotification(getFcmToken, {
+          //   //           title: username,
+          //   //           body: `Sent you ${media_type}`,
+          //   //         })
+          //   //           .then((res) => {
+          //   //             console.log(res, "done");
+          //   //           })
+          //   //           .catch((error) => {
+          //   //             console.log(error, "Error sending notification");
+          //   //           });
+          //   //       }
+          //   //     }
+          //   //   }
+          //   // }
+          //   return res.status(200).send(getSuccessData("Sent successful"));
+          // }
           if (req.files) {
             for (const file of req.files) {
               if (file) {
