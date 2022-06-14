@@ -166,7 +166,7 @@ router.get("/getMyAllData", trimRequest.all, async (req, res) => {
     });
     const myJoinedGroups = getAllRecord.groups_i_joined;
     myJoinedGroups.forEach((data) => {
-      groups.push({ groups: data });
+      groups.push({ groups: data.group });
     });
     const reciever = getAllRecord.primary_user_channel;
     const getReciever = reciever?.map((data) => {

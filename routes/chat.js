@@ -62,7 +62,7 @@ const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath(ffmpegPath);
 const { v4 } = require("uuid");
-const {SendNotification} = require("../notifications/pushNotifications");
+const { SendNotification } = require("../notifications/pushNotifications");
 // Create Group
 router.post(
   "/createGroup",
@@ -84,7 +84,8 @@ router.post(
         deleteExistigImg(req);
         return res.status(404).send(getError("Please Select group image"));
       }
-      const { groupDescription, groupName } = value;
+      const { groupDescription, groupName: group_name } = value;
+      const groupName = group_name.toLowerCase();
       let is_group_chat = true;
       let groupMembers = [];
 
