@@ -1180,6 +1180,7 @@ router.post(
                       try{
                       console.log("here");
                       file.thumbnailPath = filePath;
+                      console.log("iam file in chat screen",file);
                       let { Location } = await uploadThumbnail(file);
                       console.log("location",Location);
                       thumbnails.push({
