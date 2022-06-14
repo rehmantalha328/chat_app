@@ -1201,28 +1201,28 @@ router.post(
             chkChannel?.group_id
           );
           // Notifications
-          const isNotificationsMute = await isGroupMuteFalse(group_id);
-          const isAllowed = await isNotificationAllowed(reciever_id);
-          if (isNotificationsMute?.is_group_notification_mute == false) {
-            if (isAllowed) {
-              if (isAllowed?.is_private_chat_notifications === true) {
-                const getFcmToken = isAllowed?.fcm_token;
-                if (getFcmToken) {
-                  SendNotification(getFcmToken, {
-                    // profile: profile_picture,
-                    title: username,
-                    body: `Sent you ${message_body}`,
-                  })
-                    .then((res) => {
-                      console.log(res, "done");
-                    })
-                    .catch((error) => {
-                      console.log(error, "Error sending notification");
-                    });
-                }
-              }
-            }
-          }
+          // const isNotificationsMute = await isGroupMuteFalse(group_id);
+          // const isAllowed = await isNotificationAllowed(reciever_id);
+          // if (isNotificationsMute?.is_group_notification_mute == false) {
+          //   if (isAllowed) {
+          //     if (isAllowed?.is_private_chat_notifications === true) {
+          //       const getFcmToken = isAllowed?.fcm_token;
+          //       if (getFcmToken) {
+          //         SendNotification(getFcmToken, {
+          //           // profile: profile_picture,
+          //           title: username,
+          //           body: `Sent you ${message_body}`,
+          //         })
+          //           .then((res) => {
+          //             console.log(res, "done");
+          //           })
+          //           .catch((error) => {
+          //             console.log(error, "Error sending notification");
+          //           });
+          //       }
+          //     }
+          //   }
+          // }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.LINK) {
