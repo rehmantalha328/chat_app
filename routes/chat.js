@@ -1177,6 +1177,7 @@ router.post(
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
+                      try{
                       console.log("here");
                       file.thumbnailPath = filePath;
                       let { Location } = await uploadThumbnail(file);
@@ -1184,9 +1185,15 @@ router.post(
                       thumbnails.push({
                         Location,
                       });
+                    }catch(err){
+                      if (err&&err.message) {
+                        return res.status(404).send(getError(err.message))
+                      }
+                      return res.status(404).send(getError(err))
+                    }
                     })
                     .on("error", (err) => {
-                      console.log("Error", err);
+                      console.log("error", err);
                     })
                     .takeScreenshots(
                       {
