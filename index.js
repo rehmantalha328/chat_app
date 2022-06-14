@@ -37,7 +37,7 @@ Prisma_Client.setupPrisma();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "public/"));
 
 // Simple Routes without Authentication..
 app.use("/api", [otpVerification, signUpUser]);
