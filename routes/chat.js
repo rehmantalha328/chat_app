@@ -1317,102 +1317,6 @@ router.post(
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
                       console.log("Thumbnaillocation", Location);
-                      let fileLocation = await uploadFile(file);
-
-                      console.log("file Location", Location);
-                      media_data.push({
-                        sender_id,
-                        reciever_id,
-                        group_id: chkChannel
-                          ? chkChannel.group_id
-                          : chkChannel.group_id,
-                        media_caption: media_caption ? media_caption : null,
-                        media_type,
-                        message_type,
-                        attatchment: fileLocation.Location,
-                        attatchment_name: file.originalname,
-                        thumbnail: file.thumbnailLocation,
-                      });
-                      console.log(
-                        "iam media_data in pushing state",
-                        media_data
-                      );
-                      media.push({
-                        sender_id,
-                        reciever_id,
-                        group_id: chkChannel
-                          ? chkChannel.group_id
-                          : chkChannel.group_id,
-                        media_caption: media_caption ? media_caption : null,
-                        media_type,
-                        message_type,
-                        attatchment: fileLocation.Location,
-                        attatchment_name: file.originalname,
-                        thumbnail: file.thumbnailLocation,
-                        user_sender: user_sender_one_to_one,
-                        message_time: new Date().toLocaleTimeString(),
-                      });
-                      console.log("media_data after all pushes", media_data);
-                      const createMessage = await prisma.group_messages.create({
-                        data: {
-                          sender_id,
-                          reciever_id,
-                          group_id: chkChannel
-                            ? chkChannel.group_id
-                            : chkChannel.group_id,
-                          media_caption: media_caption ? media_caption : null,
-                          media_type,
-                          message_type,
-                          attatchment: fileLocation.Location,
-                          attatchment_name: file.originalname,
-                          thumbnail: file.thumbnailLocation,
-                        },
-                      });
-                      console.log("createMessage", createMessage);
-                      sendMediaMessage(
-                        sender_id,
-                        // user_sender_one_to_one,
-                        reciever_id,
-                        // media,
-                        // message_type,
-                        // chkChannel?.group_id
-                        media
-                      );
-                      // Notifications
-                      const isNotificationsMute = await isGroupMuteFalse(
-                        reciever_id,
-                        group_id
-                      );
-                      const isAllowed = await isNotificationAllowed(
-                        reciever_id
-                      );
-                      if (!isNotificationsMute) {
-                        if (isAllowed) {
-                          if (
-                            isAllowed?.is_private_chat_notifications === true
-                          ) {
-                            const getFcmToken = isAllowed?.fcm_token;
-                            if (getFcmToken) {
-                              SendNotification(getFcmToken, {
-                                title: username,
-                                body: `Sent you ${media_type}`,
-                              })
-                                .then((res) => {
-                                  console.log(res, "done");
-                                })
-                                .catch((error) => {
-                                  console.log(
-                                    error,
-                                    "Error sending notification"
-                                  );
-                                });
-                            }
-                          }
-                        }
-                      }
-                      return res
-                        .status(200)
-                        .send(getSuccessData("Sent successful"));
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1424,12 +1328,83 @@ router.post(
                       },
                       "media/"
                     );
+                  let { Location } = await uploadFile(file);
+                  console.log("file Location", Location);
+                  media_data.push({
+                    sender_id,
+                    reciever_id,
+                    group_id: chkChannel
+                      ? chkChannel.group_id
+                      : chkChannel.group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    thumbnail: file.thumbnailLocation,
+                  });
+                  console.log("iam media_data in pushing state", media_data);
+                  media.push({
+                    sender_id,
+                    reciever_id,
+                    group_id: chkChannel
+                      ? chkChannel.group_id
+                      : chkChannel.group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    thumbnail: file.thumbnailLocation,
+                    user_sender: user_sender_one_to_one,
+                    message_time: new Date().toLocaleTimeString(),
+                  });
                 }
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
                 }
               }
             }
+            console.log("media_data after all pushes", media_data);
+            const createMessage = await prisma.group_messages.createMany({
+              data: media_data,
+            });
+            console.log("createMessage", createMessage);
+            sendMediaMessage(
+              sender_id,
+              // user_sender_one_to_one,
+              reciever_id,
+              // media,
+              // message_type,
+              // chkChannel?.group_id
+              media
+            );
+            // Notifications
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `Sent you ${media_type}`,
+                    })
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+            return res.status(200).send(getSuccessData("Sent successful"));
           }
           if (req.files) {
             for (const file of req.files) {
