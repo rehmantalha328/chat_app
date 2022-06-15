@@ -1172,20 +1172,14 @@ router.post(
                   await ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
                       filePath = "media/" + filenames[0];
-                      console.log("Created file names", filenames);
+                      file.thumbnailPath = filePath;
+                      let { Location } = await uploadThumbnail(file);
+                      console.log("location of thumbnail", Location);
+                      file.thumbnailLocation = Location;
+                      console.log("thumbnail embedded",file.thumbnailLocation);
                     })
                     .on("end", async () => {
-                      console.log("here");
-                      file.thumbnailPath = filePath;
-                      console.log("iam file in chat screen", file);
-                      let { Location } = await uploadThumbnail(file);
-                      console.log("location", Location);
-                    //  await thumbnails.push({
-                    //     Location,
-                    //   });
-                    file.thumbnailLocation = Location;
-                    console.log("thumbnail embedded",file.thumbnailLocation);
-                      // console.log("thumbnails", thumbnails);
+                      console.log("end state");
                     })
                     .on("error", (err) => {
                       console.log("error", err);
