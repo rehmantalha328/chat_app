@@ -1173,7 +1173,7 @@ router.post(
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
-                    .on("end", async () => {
+                    .on("progress", async () => {
                       console.log("end state");
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
