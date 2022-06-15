@@ -1382,6 +1382,7 @@ router.post(
           //   group_id
           // );
           const isAllowed = await isNotificationAllowed(reciever_id);
+          console.log("isAllowed",isAllowed);
           // if (!isNotificationsMute) {
             if (isAllowed) {
               console.log("allowed");
