@@ -1161,99 +1161,99 @@ router.post(
                 )
               );
           }
-          if (media_type === MediaType.VIDEO) {
-            // let thumbnailsPath = [];
-            let thumbnails = [];
-            if (req.files) {
-              for (const file of req.files) {
-                if (file) {
-                  var filePath = "";
-                  ffmpeg({ source: file.path })
-                    .on("filenames", (filenames) => {
-                      filePath = "public/" + filenames[0];
-                      // thumbnailsPath.push({
-                      //   filePath,
-                      // });
-                      console.log("Created file names", filenames);
-                    })
-                    .on("end", async () => {
-                      console.log("here");
-                      file.thumbnailPath = filePath;
-                      console.log("iam file in chat screen", file);
-                      let { Location } = await uploadThumbnail(file);
-                      console.log("location", Location);
-                      thumbnails.push({
-                        Location,
-                      });
-                      console.log("thumbnails", thumbnails);
-                    })
-                    .on("error", (err) => {
-                      console.log("iam in error section");
-                      console.log("error", err);
-                    })
-                    .takeScreenshots(
-                      {
-                        filename: `${v4()}`,
-                        timemarks: [3],
-                      },
-                      "public/"
-                    );
-                  let { Location } = await uploadFile(file);
-                  var fileLocation = Location;
-                  console.log("file Location", Location);
-                }
-                if (fs.existsSync(file.path)) {
-                  fs.unlinkSync(file.path);
-                }
-              }
-              for (let i = 0; i < thumbnails.length; i++) {
-                console.log("iam in pushing loop");
-                media_data.push({
-                  sender_id,
-                  reciever_id,
-                  group_id: chkChannel
-                    ? chkChannel.group_id
-                    : chkChannel.group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: fileLocation,
-                  // attatchment_name: file.originalname,
-                  thumbnail: thumbnails[i].Location,
-                });
-                console.log("iam media_data in pushing state",media_data);
-                media.push({
-                  sender_id,
-                  reciever_id,
-                  group_id: chkChannel
-                    ? chkChannel.group_id
-                    : chkChannel.group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: fileLocation,
-                  // attatchment_name: file.originalname,
-                  thumbnail: thumbnails[i].Location,
-                  user_sender: user_sender_one_to_one,
-                  message_time: new Date().toLocaleTimeString(),
-                });
-              }
-            }
-            console.log("media_data after all pushes", media_data);
-            const createMessage = await prisma.group_messages.createMany({
-              data: media_data,
-            });
-            console.log("createMessage", createMessage);
-            sendMediaMessage(
-              sender_id,
-              // user_sender_one_to_one,
-              reciever_id,
-              // media,
-              // message_type,
-              // chkChannel?.group_id
-              media
-            );
-            // Notifications
+          // if (media_type === MediaType.VIDEO) {
+          //   // let thumbnailsPath = [];
+          //   let thumbnails = [];
+          //   if (req.files) {
+          //     for (const file of req.files) {
+          //       if (file) {
+          //         var filePath = "";
+          //         ffmpeg({ source: file.path })
+          //           .on("filenames", (filenames) => {
+          //             filePath = "public/" + filenames[0];
+          //             // thumbnailsPath.push({
+          //             //   filePath,
+          //             // });
+          //             console.log("Created file names", filenames);
+          //           })
+          //           .on("end", async () => {
+          //             console.log("here");
+          //             file.thumbnailPath = filePath;
+          //             console.log("iam file in chat screen", file);
+          //             let { Location } = await uploadThumbnail(file);
+          //             console.log("location", Location);
+          //             thumbnails.push({
+          //               Location,
+          //             });
+          //             console.log("thumbnails", thumbnails);
+          //           })
+          //           .on("error", (err) => {
+          //             console.log("iam in error section");
+          //             console.log("error", err);
+          //           })
+          //           .takeScreenshots(
+          //             {
+          //               filename: `${v4()}`,
+          //               timemarks: [3],
+          //             },
+          //             "public/"
+          //           );
+          //         let { Location } = await uploadFile(file);
+          //         var fileLocation = Location;
+          //         console.log("file Location", Location);
+          //       }
+          //       if (fs.existsSync(file.path)) {
+          //         fs.unlinkSync(file.path);
+          //       }
+          //     }
+          //     for (let i = 0; i < thumbnails.length; i++) {
+          //       console.log("iam in pushing loop");
+          //       media_data.push({
+          //         sender_id,
+          //         reciever_id,
+          //         group_id: chkChannel
+          //           ? chkChannel.group_id
+          //           : chkChannel.group_id,
+          //         media_caption: media_caption ? media_caption : null,
+          //         media_type,
+          //         message_type,
+          //         attatchment: fileLocation,
+          //         // attatchment_name: file.originalname,
+          //         thumbnail: thumbnails[i].Location,
+          //       });
+          //       console.log("iam media_data in pushing state",media_data);
+          //       media.push({
+          //         sender_id,
+          //         reciever_id,
+          //         group_id: chkChannel
+          //           ? chkChannel.group_id
+          //           : chkChannel.group_id,
+          //         media_caption: media_caption ? media_caption : null,
+          //         media_type,
+          //         message_type,
+          //         attatchment: fileLocation,
+          //         // attatchment_name: file.originalname,
+          //         thumbnail: thumbnails[i].Location,
+          //         user_sender: user_sender_one_to_one,
+          //         message_time: new Date().toLocaleTimeString(),
+          //       });
+          //     }
+          //   }
+          //   console.log("media_data after all pushes", media_data);
+          //   const createMessage = await prisma.group_messages.createMany({
+          //     data: media_data,
+          //   });
+          //   console.log("createMessage", createMessage);
+          //   sendMediaMessage(
+          //     sender_id,
+          //     // user_sender_one_to_one,
+          //     reciever_id,
+          //     // media,
+          //     // message_type,
+          //     // chkChannel?.group_id
+          //     media
+          //   );
+          //   // Notifications
             //   // const isNotificationsMute = await isGroupMuteFalse(
             //   //   reciever_id,
             //   //   group_id
@@ -1278,8 +1278,8 @@ router.post(
             //   //     }
             //   //   }
             //   // }
-            return res.status(200).send(getSuccessData("Sent successful"));
-          }
+          //   return res.status(200).send(getSuccessData("Sent successful"));
+          // }
           if (req.files) {
             for (const file of req.files) {
               if (file) {
