@@ -1377,12 +1377,12 @@ router.post(
             chkChannel?.group_id
           );
           // Notifications
-          const isNotificationsMute = await isGroupMuteFalse(
-            reciever_id,
-            group_id
-          );
+          // const isNotificationsMute = await isGroupMuteFalse(
+          //   reciever_id,
+          //   group_id
+          // );
           const isAllowed = await isNotificationAllowed(reciever_id);
-          if (!isNotificationsMute) {
+          // if (!isNotificationsMute) {
             if (isAllowed) {
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
@@ -1398,7 +1398,7 @@ router.post(
                       console.log(error, "Error sending notification");
                     });
                 }
-              }
+              // }
             }
           }
           return res.status(200).send(getSuccessData(createMessage));
