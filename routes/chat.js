@@ -1162,7 +1162,6 @@ router.post(
               );
           }
           if (media_type === MediaType.VIDEO) {
-            // let thumbnailsPath = [];
             let thumbnails = [];
             if (req.files) {
               for (let i = 0; i < req.files.length; i++) {
@@ -1173,9 +1172,6 @@ router.post(
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
                       filePath = "media/" + filenames[0];
-                      // thumbnailsPath.push({
-                      //   filePath,
-                      // });
                       console.log("Created file names", filenames);
                     })
                     .on("end", async () => {
@@ -1184,7 +1180,7 @@ router.post(
                       console.log("iam file in chat screen", file);
                       let { Location } = await uploadThumbnail(file);
                       console.log("location", Location);
-                      thumbnails.push({
+                     await thumbnails.push({
                         Location,
                       });
                       console.log("thumbnails", thumbnails);
@@ -1212,7 +1208,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    // thumbnail: thumbnails[i].Location,
+                    thumbnail: thumbnails[i].Location,
                   });
                   console.log("iam media_data in pushing state", media_data);
                   media.push({
@@ -1226,7 +1222,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    // thumbnail: thumbnails[i].Location,
+                    thumbnail: thumbnails[i].Location,
                     user_sender: user_sender_one_to_one,
                     message_time: new Date().toLocaleTimeString(),
                   });
