@@ -1169,15 +1169,15 @@ router.post(
                 if (file) {
                   var filePath = "";
                   await ffmpeg({ source: file.path })
-                    .on("filenames", async(filenames) => {
+                    .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
                     .on("end", async () => {
                       console.log("end state");
-                      // let{Location} = await uploadThumbnail(file);
-                      // file.thumbnailLocation = Location;
-                      console.log("location",Location);
+                      let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
+                      console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1202,7 +1202,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    // thumbnail: file.thumbnailLocation,
+                    thumbnail: file.thumbnailLocation,
                   });
                   console.log("iam media_data in pushing state", media_data);
                   media.push({
@@ -1216,7 +1216,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    // thumbnail: file.thumbnailLocation,
+                    thumbnail: file.thumbnailLocation,
                     user_sender: user_sender_one_to_one,
                     message_time: new Date().toLocaleTimeString(),
                   });
