@@ -3,12 +3,12 @@ var fs = require("fs");
 const { v4 } = require("uuid");
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        let path = "public/";
+        let path = "media/";
         if (!fs.existsSync(path)) {
           fs.mkdirSync(path);
-          cb(null, "public/");
+          cb(null, "media/");
         }
-        cb(null, "public/");
+        cb(null, "media/");
     },
     filename: (req, file, cb) => {
         const ext = file.mimetype.split("/")[1];

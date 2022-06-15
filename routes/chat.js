@@ -1172,7 +1172,7 @@ router.post(
                   var filePath = "";
                   ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
-                      filePath = "public/" + filenames[0];
+                      filePath = "media/" + filenames[0];
                       // thumbnailsPath.push({
                       //   filePath,
                       // });
@@ -1198,7 +1198,7 @@ router.post(
                         filename: `${v4()}`,
                         timemarks: [3],
                       },
-                      "public/"
+                      "media/"
                     );
                   let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
