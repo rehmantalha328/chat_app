@@ -1170,15 +1170,15 @@ router.post(
                 if (file) {
                   var filePath = "";
                   await ffmpeg({ source: file.path })
-                    .on("filenames", async(filenames) => {
+                    .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
+                    })
+                    .on("end", async () => {
                       file.thumbnailPath = filePath;
                       let { Location } = await uploadThumbnail(file);
                       console.log("location of thumbnail", Location);
                       file.thumbnailLocation = Location;
-                      console.log("thumbnail embedded",file.thumbnailLocation);
-                    })
-                    .on("end", async () => {
+                      console.log("thumbnail embedded", file.thumbnailLocation);
                       console.log("end state");
                     })
                     .on("error", (err) => {
@@ -1193,35 +1193,37 @@ router.post(
                     );
                   let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
-                  media_data.push({
-                    sender_id,
-                    reciever_id,
-                    group_id: chkChannel
-                      ? chkChannel.group_id
-                      : chkChannel.group_id,
-                    media_caption: media_caption ? media_caption : null,
-                    media_type,
-                    message_type,
-                    attatchment: Location,
-                    attatchment_name: file.originalname,
-                    thumbnail: file.thumbnailLocation,
-                  });
-                  console.log("iam media_data in pushing state", media_data);
-                  media.push({
-                    sender_id,
-                    reciever_id,
-                    group_id: chkChannel
-                      ? chkChannel.group_id
-                      : chkChannel.group_id,
-                    media_caption: media_caption ? media_caption : null,
-                    media_type,
-                    message_type,
-                    attatchment: Location,
-                    attatchment_name: file.originalname,
-                    thumbnail: thumbnails[i].Location,
-                    user_sender: user_sender_one_to_one,
-                    message_time: new Date().toLocaleTimeString(),
-                  });
+                  if (file.thumbnailLocation) {
+                    media_data.push({
+                      sender_id,
+                      reciever_id,
+                      group_id: chkChannel
+                        ? chkChannel.group_id
+                        : chkChannel.group_id,
+                      media_caption: media_caption ? media_caption : null,
+                      media_type,
+                      message_type,
+                      attatchment: Location,
+                      attatchment_name: file.originalname,
+                      thumbnail: file.thumbnailLocation,
+                    });
+                    console.log("iam media_data in pushing state", media_data);
+                    media.push({
+                      sender_id,
+                      reciever_id,
+                      group_id: chkChannel
+                        ? chkChannel.group_id
+                        : chkChannel.group_id,
+                      media_caption: media_caption ? media_caption : null,
+                      media_type,
+                      message_type,
+                      attatchment: Location,
+                      attatchment_name: file.originalname,
+                      thumbnail: file.thumbnailLocation,
+                      user_sender: user_sender_one_to_one,
+                      message_time: new Date().toLocaleTimeString(),
+                    });
+                  }
                 }
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
