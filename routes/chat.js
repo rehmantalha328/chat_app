@@ -1190,7 +1190,6 @@ router.post(
                       console.log("thumbnails", thumbnails);
                     })
                     .on("error", (err) => {
-                      console.log("iam in error section");
                       console.log("error", err);
                     })
                     .takeScreenshots(
@@ -1213,7 +1212,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    thumbnail: thumbnails[i].Location,
+                    // thumbnail: thumbnails[i].Location,
                   });
                   console.log("iam media_data in pushing state", media_data);
                   media.push({
@@ -1227,7 +1226,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    thumbnail: thumbnails[i].Location,
+                    // thumbnail: thumbnails[i].Location,
                     user_sender: user_sender_one_to_one,
                     message_time: new Date().toLocaleTimeString(),
                   });
