@@ -16,6 +16,7 @@ const {
   chkWhoSeenInGroup,
   leaveGroupValidation,
   updateGroupInfoValidate,
+  groupMuteValidation,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,
@@ -429,6 +430,145 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(error));
   }
 });
+
+router.post("/MuteNotifications", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = groupMuteValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const isGroupExists = await chkExistingGroup(group_id);
+    if (!isGroupExists) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
+    const chkExistingMuteRecord = await prisma.group_mute.findFirst({
+      where: {
+        user_id,
+        group_id,
+      },
+    });
+    if (chkExistingMuteRecord) {
+      const delMutedChatRecord = await prisma.group_mute.delete({
+        where: {
+          id: chkExistingMuteRecord?.id,
+        },
+      });
+      return res
+        .status(200)
+        .send(getSuccessData("You have successfully unmuted this chat"));
+    }
+    const muteNotifications = await prisma.group_mute.create({
+      data: {
+        user_id,
+        group_id,
+      },
+    });
+    return res
+      .status(200)
+      .send(getSuccessData("You have successfully muted this chat"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
+router.post(
+  "/mutePrivateChatNotifications",
+  trimRequest.all,
+  async (req, res) => {
+    try {
+      const { user_id, is_private_chat_notifications } = req.user;
+      if (is_private_chat_notifications === true) {
+        const mutePrivateChatNotifications = await prisma.user.update({
+          where: {
+            user_id,
+          },
+          data: {
+            is_private_chat_notifications: false,
+          },
+        });
+        return res
+          .status(200)
+          .send(
+            getSuccessData(
+              "You have successfully mute notifications for private chats"
+            )
+          );
+      }
+      const muteNotifications = await prisma.user.update({
+        where: {
+          user_id,
+        },
+        data: {
+          is_private_chat_notifications: true,
+        },
+      });
+      return res
+        .status(200)
+        .send(
+          getSuccessData(
+            "You have successfully unmute notifications for private chats"
+          )
+        );
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
+    }
+  }
+);
+
+router.post(
+  "/muteGroupChatNotifications",
+  trimRequest.all,
+  async (req, res) => {
+    try {
+      const { user_id, is_group_chat_notifications } = req.user;
+      if (is_group_chat_notifications === true) {
+        const mutePrivateChatNotifications = await prisma.user.update({
+          where: {
+            user_id,
+          },
+          data: {
+            is_group_chat_notifications: false,
+          },
+        });
+        return res
+          .status(200)
+          .send(
+            getSuccessData(
+              "You have successfully mute notifications for group chats"
+            )
+          );
+      }
+      const muteNotifications = await prisma.user.update({
+        where: {
+          user_id,
+        },
+        data: {
+          is_group_chat_notifications: true,
+        },
+      });
+      return res
+        .status(200)
+        .send(
+          getSuccessData(
+            "You have successfully unmute notifications for group chats"
+          )
+        );
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
+    }
+  }
+);
 
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
@@ -1168,31 +1308,31 @@ router.post(
               for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 if (file) {
-                  const test = async()=>{
-                  var filePath = "";
-                  await ffmpeg({ source: file.path })
-                    .on("filenames", async (filenames) => {
-                      filePath = "media/" + filenames[0];
-                      file.thumbnailPath = filePath;
-                    })
-                    .on("end", async () => {
-                      console.log("end state");
-                      let { Location } = await uploadThumbnail(file);
-                      file.thumbnailLocation = Location;
-                      console.log("Thumbnaillocation", Location);
-                      state = true;
-                    })
-                    .on("error", (err) => {
-                      console.log("error", err);
-                    })
-                    .takeScreenshots(
-                      {
-                        filename: `${v4()}`,
-                        timemarks: [3],
-                      },
-                      "media/"
-                    );
-                  }
+                  const test = async () => {
+                    var filePath = "";
+                    await ffmpeg({ source: file.path })
+                      .on("filenames", async (filenames) => {
+                        filePath = "media/" + filenames[0];
+                        file.thumbnailPath = filePath;
+                      })
+                      .on("end", async () => {
+                        console.log("end state");
+                        let { Location } = await uploadThumbnail(file);
+                        file.thumbnailLocation = Location;
+                        console.log("Thumbnaillocation", Location);
+                        state = true;
+                      })
+                      .on("error", (err) => {
+                        console.log("error", err);
+                      })
+                      .takeScreenshots(
+                        {
+                          filename: `${v4()}`,
+                          timemarks: [3],
+                        },
+                        "media/"
+                      );
+                  };
                   await test();
                   let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
@@ -1246,30 +1386,30 @@ router.post(
               media
             );
             // Notifications
-              const isNotificationsMute = await isGroupMuteFalse(
-                reciever_id,
-                group_id
-              );
-              const isAllowed = await isNotificationAllowed(reciever_id);
-              if (!isNotificationsMute) {
-                if (isAllowed) {
-                  if (isAllowed?.is_private_chat_notifications === true) {
-                    const getFcmToken = isAllowed?.fcm_token;
-                    if (getFcmToken) {
-                      SendNotification(getFcmToken, {
-                        title: username,
-                        body: `Sent you ${media_type}`,
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `Sent you ${media_type}`,
+                    })
+                      .then((res) => {
+                        console.log(res, "done");
                       })
-                        .then((res) => {
-                          console.log(res, "done");
-                        })
-                        .catch((error) => {
-                          console.log(error, "Error sending notification");
-                        });
-                    }
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
                   }
                 }
               }
+            }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           if (req.files) {

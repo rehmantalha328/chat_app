@@ -145,6 +145,13 @@ function leaveGroupValidation(data) {
   return leaveGroupSchema.validate(data);
 }
 
+function groupMuteValidation(data){
+  const groupMuteSchema = Joi.object({
+    group_id: Joi.string().required(),
+  });
+  return leaveGroupSchema.validate(data);
+}
+
 function getAllMembers(data) {
   const membersSchema = Joi.object({
     group_id: Joi.string().required(),
@@ -307,4 +314,5 @@ module.exports = {
   updateGroupInfoValidate,
   reportGroupValidation,
   reportuserValidation,
+  groupMuteValidation,
 };
