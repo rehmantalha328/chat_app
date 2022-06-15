@@ -1169,7 +1169,7 @@ router.post(
                 console.log("file", file);
                 if (file) {
                   var filePath = "";
-                  ffmpeg({ source: file.path })
+                  await ffmpeg({ source: file.path })
                     .on("filenames", (filenames) => {
                       filePath = "media/" + filenames[0];
                       console.log("Created file names", filenames);
