@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 const { v4 } = require("uuid");
 const { getEnv } = require("../config");
-
 const ID = getEnv("S3_ID");
 const SECRET = getEnv("S3_SECRET");
 const BUCKET_NAME = getEnv("S3_BUCKET_NAME");
@@ -45,7 +44,7 @@ let uploadThumbnail = function (file) {
       Key: v4(), // File name you want to save as in S3
       Body: fileContent,
       ContentEncoding: "base64",
-      ContentType: "image/jpg",
+      ContentType: "image/png",
       ACL: "public-read",
     };
     // Uploading files to the bucket

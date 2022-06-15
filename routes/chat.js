@@ -1302,38 +1302,32 @@ router.post(
               );
           }
           if (media_type === MediaType.VIDEO) {
-            var state;
-            let thumbnails = [];
             if (req.files) {
               for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 if (file) {
-                  const test = async () => {
-                    var filePath = "";
-                    await ffmpeg({ source: file.path })
-                      .on("filenames", async (filenames) => {
-                        filePath = "media/" + filenames[0];
-                        file.thumbnailPath = filePath;
-                      })
-                      .on("end", async () => {
-                        console.log("end state");
-                        let { Location } = await uploadThumbnail(file);
-                        file.thumbnailLocation = Location;
-                        console.log("Thumbnaillocation", Location);
-                        state = true;
-                      })
-                      .on("error", (err) => {
-                        console.log("error", err);
-                      })
-                      .takeScreenshots(
-                        {
-                          filename: `${v4()}`,
-                          timemarks: [3],
-                        },
-                        "media/"
-                      );
-                  };
-                  await test();
+                  var filePath = "";
+                  await ffmpeg({ source: file.path })
+                    .on("filenames", async (filenames) => {
+                      filePath = "media/" + filenames[0];
+                      file.thumbnailPath = filePath;
+                    })
+                    .on("end", async () => {
+                      console.log("end state");
+                      let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
+                      console.log("Thumbnaillocation", Location);
+                    })
+                    .on("error", (err) => {
+                      console.log("error", err);
+                    })
+                    .takeScreenshots(
+                      {
+                        filename: `${v4()}`,
+                        timemarks: [3],
+                      },
+                      "media/"
+                    );
                   let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
                   media_data.push({

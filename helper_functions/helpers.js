@@ -3,6 +3,16 @@ const fs = require("fs");
 const { now } = require("mongoose");
 const timediff = require("timediff");
 const { getEnv } = require("../config");
+// const { fs } = require("file-system");
+// const {
+//   uploadFile,
+//   deleteFile,
+//   uploadThumbnail,
+// } = require("../s3_bucket/s3_bucket");
+// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+// const ffmpeg = require("fluent-ffmpeg");
+// ffmpeg.setFfmpegPath(ffmpegPath);
+// const { v4 } = require("uuid");
 
 const getError = (error) => {
   return {
@@ -97,7 +107,7 @@ const deleteUploadedImage = (req) => {
     if (req.files) {
       req?.files?.forEach((file) => {
         fs.unlinkSync(file.path);
-      })
+      });
     }
   } catch (error) {
     console.log(error);
@@ -135,11 +145,39 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c; // Distance in km
   return d;
-};
+}
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
-};
+}
+
+// const createThumbnail = async (file) => {
+//   var filePath = "";
+//   var file = file;
+//   ffmpeg({ source: file.path })
+//   .on("filenames", async (filenames) => {
+//     console.log("filename",filenames);
+//     filePath = "media/" + filenames[0];
+//     file.thumbnailPath = filePath;
+//     let { Location } = await uploadThumbnail(file);
+//     file.thumbnailLocation = Location;
+//     console.log("Thumbnaillocation", Location);
+      
+//     })
+//     .on("end", async () => {
+//       console.log("end state");
+//     })
+//     .on("error", (err) => {
+//       console.log("error", err);
+//     })
+//     .takeScreenshots(
+//       {
+//         filename: `${v4()}`,
+//         timemarks: [3],
+//       },
+//       "media/"
+//     );
+// };
 
 module.exports = {
   getError,
