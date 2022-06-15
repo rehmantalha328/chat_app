@@ -1180,10 +1180,12 @@ router.post(
                       console.log("iam file in chat screen", file);
                       let { Location } = await uploadThumbnail(file);
                       console.log("location", Location);
-                     await thumbnails.push({
-                        Location,
-                      });
-                      console.log("thumbnails", thumbnails);
+                    //  await thumbnails.push({
+                    //     Location,
+                    //   });
+                    file.thumbnailLocation = Location;
+                    console.log("thumbnail embedded",file.thumbnailLocation);
+                      // console.log("thumbnails", thumbnails);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1208,7 +1210,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    thumbnail: thumbnails[i].Location,
+                    thumbnail: file.thumbnailLocation,
                   });
                   console.log("iam media_data in pushing state", media_data);
                   media.push({
