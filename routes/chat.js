@@ -1384,9 +1384,13 @@ router.post(
           const isAllowed = await isNotificationAllowed(reciever_id);
           // if (!isNotificationsMute) {
             if (isAllowed) {
+              console.log("allowed");
               if (isAllowed?.is_private_chat_notifications === true) {
+                console.log("private_chat_allowed");
                 const getFcmToken = isAllowed?.fcm_token;
+                console.log("fcm_token",getFcmToken);
                 if (getFcmToken) {
+                  console.log("here in sending notifications");
                   SendNotification(getFcmToken, {
                     title: username,
                     body: `Sent you ${message_type}`,
