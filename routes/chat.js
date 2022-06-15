@@ -1170,7 +1170,7 @@ router.post(
                 if (file) {
                   var filePath = "";
                   await ffmpeg({ source: file.path })
-                    .on("filenames", (filenames) => {
+                    .on("filenames", async(filenames) => {
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                       let { Location } = await uploadThumbnail(file);
