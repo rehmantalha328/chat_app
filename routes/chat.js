@@ -2006,7 +2006,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
-          delete data.group_messages;
+        delete data.group_messages;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
@@ -2063,7 +2063,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
-          delete data.group_messages;
+        delete data.group_messages;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,

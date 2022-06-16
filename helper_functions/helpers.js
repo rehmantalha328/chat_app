@@ -3,16 +3,7 @@ const fs = require("fs");
 const { now } = require("mongoose");
 const timediff = require("timediff");
 const { getEnv } = require("../config");
-// const { fs } = require("file-system");
-// const {
-//   uploadFile,
-//   deleteFile,
-//   uploadThumbnail,
-// } = require("../s3_bucket/s3_bucket");
-// const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
-// const ffmpeg = require("fluent-ffmpeg");
-// ffmpeg.setFfmpegPath(ffmpegPath);
-// const { v4 } = require("uuid");
+
 
 const getError = (error) => {
   return {
@@ -151,42 +142,8 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-// function createThumbnailForVideo(file) {
-//   return new Promise((resolve, reject) => {
-//     const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
-//     const ffmpeg = require("fluent-ffmpeg");
-//     ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-//     var path = require("path"), // Default node module
-//       pathToFile = path.join(__dirname, "media", file.filename),
-//       pathToSnapshot = path.join(__dirname, "media");
-//     var proc = ffmpeg(pathToFile)
-//       .on("filenames", (filenames) => {})
-//       .on("end", (data) => {
-//         console.log("screenshots were saved");
-//       })
-//       .on("error", (err) => {
-//         console.log("an error happened: " + err.message);
-//         return reject(new Error(err));
-//       })
-//       .takeScreenshots(
-//         {
-//           count: 1,
-//           filename: v4(),
-//           timemarks: ["4"],
-//           // size: "250x?",
-//         },
-//         pathToSnapshot
-//       )
-//       .on("end", () => {
-//         console.log("FFmpeg done!");
-//         resolve();
-//       })
-//       .on("error", (err) => {
-//         console.log("an error happened: " + err.message);
-//         return reject(new Error(err));
-//       });
-//   });
-// }
+
+
 module.exports = {
   getError,
   getSuccessData,
@@ -198,5 +155,4 @@ module.exports = {
   timeExpired,
   getDistanceFromLatLonInKm,
   createAdminToken,
-  // createThumbnailForVideo,
 };
