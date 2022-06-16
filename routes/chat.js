@@ -1320,11 +1320,9 @@ router.post(
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
-                    .on("end", async () => {
+                    .on("media", async () => {
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
-                      console.log("end state");
-                      console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1337,19 +1335,15 @@ router.post(
                       "media/"
                     );
                   if (file.thumbnailLocation === undefined) {
-                    ffmpeg({ source: file.path })
-                      .on("filenames", async (filenames) => {
-                        filePath = "media/" + filenames[0];
-                        file.thumbnailPath = filePath;
-                      })
-                      .on("end", async () => {
-                        let { Location } = await uploadThumbnail(file);
-                        file.thumbnailLocation = Location;
-                        console.log("end state");
-                        console.log("Thumbnaillocation", Location);
-                      });
+                    console.log("here");
+                    let { Location } = await uploadFile(file);
+                    file.fileLocation = Location;
+                    console.log("uploaded file", Location);
+                    let uploadthumbnail = await uploadThumbnail(file);
+                    file.thumbnailLocation = uploadthumbnail.Location;
+                    console.log("file", file);
                   }
-                  let { Location } = await uploadFile(file);
+                  // let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
                   media_data.push({
                     sender_id,
@@ -1360,7 +1354,7 @@ router.post(
                     media_caption: media_caption ? media_caption : null,
                     media_type,
                     message_type,
-                    attatchment: Location,
+                    attatchment: file.fileLocation,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                   });
@@ -1374,7 +1368,7 @@ router.post(
                     media_caption: media_caption ? media_caption : null,
                     media_type,
                     message_type,
-                    attatchment: Location,
+                    attatchment: file.fileLocation,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                     user_sender: user_sender_one_to_one,
@@ -1901,7 +1895,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
     });
 
-    const first = contacts.primary_user_channel;
+    const first = contacts?.primary_user_channel;
     const send = first?.map((arr) => {
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
@@ -1917,8 +1911,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete arr.reciever.user_blocked_me;
 
       if (
-        arr.reciever.i_send_messages.length > 0 &&
-        arr.reciever.i_recieve_messages.length > 0
+        arr.reciever?.i_send_messages?.length > 0 &&
+        arr.reciever?.i_recieve_messages?.length > 0
       ) {
         arr.reciever.is_chat_start = true;
       } else {
@@ -1954,7 +1948,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return obj;
     });
 
-    const second = contacts.secondary_user_channel;
+    const second = contacts?.secondary_user_channel;
     const recieve = second?.map((ary) => {
       // if (ary.sender.user_i_block.length > 0) {
       //   ary.sender.is_user_i_block = true;
@@ -1970,7 +1964,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete ary.sender.user_i_block;
 
       const obj = ary.sender;
-      if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
+      if (obj.i_send_messages?.length > 0 && obj.i_recieve_messages?.length > 0) {
         obj.is_chat_start = true;
       } else {
         obj.is_chat_start = false;
