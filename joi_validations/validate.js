@@ -149,7 +149,7 @@ function groupMuteValidation(data){
   const groupMuteSchema = Joi.object({
     group_id: Joi.string().required(),
   });
-  return leaveGroupSchema.validate(data);
+  return groupMuteSchema.validate(data);
 }
 
 function getAllMembers(data) {
@@ -278,14 +278,6 @@ function reportGroupValidation(data){
   return reportGroupSchema.validate(data);
 }
 
-// function getMyContacts(data) {
-//   const contactsSchema = Joi.object({
-//     contacts: Joi.array().required().items({
-//       contact_number: Joi.string().required(),
-//     }),
-//   });
-//   return contactsSchema.validate(data);
-// }
 
 
 module.exports = {
