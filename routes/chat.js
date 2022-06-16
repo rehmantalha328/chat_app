@@ -1315,31 +1315,28 @@ router.post(
                 const file = req.files[i];
                 if (file) {
                   var filePath = "";
-                  ffmpeg({ source: file.path })
+                  await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
+                      file.thumbnailPath = filePath;
                     })
-                    .on("end", () => {
-                      const test = async () => {
-                        console.log("end state");
-                      };
-                      test();
+                    .on("end", async() => {
+                      let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
+                      console.log("end state");
+                      console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
                     })
                     .takeScreenshots(
                       {
-                        filename: v4(),
+                        filename: `${v4()}`,
                         timemarks: [3],
                       },
                       "media/"
                     );
                   let { Location } = await uploadFile(file);
-                  if (Location) {
-                    let chk = await uploadThumbnail(filePath);
-                    var fin = chk.Location;
-                  }
                   console.log("file Location", Location);
                   media_data.push({
                     sender_id,
@@ -1352,7 +1349,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    thumbnail: fin,
+                    thumbnail: file.thumbnailLocation,
                   });
                   console.log("iam media_data in pushing state", media_data);
                   media.push({
@@ -1366,7 +1363,7 @@ router.post(
                     message_type,
                     attatchment: Location,
                     attatchment_name: file.originalname,
-                    thumbnail: fin,
+                    thumbnail: file.thumbnailLocation,
                     user_sender: user_sender_one_to_one,
                     message_time: new Date().toLocaleTimeString(),
                   });
