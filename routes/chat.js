@@ -431,50 +431,54 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/mute_specific_group_and_private_chat", trimRequest.all, async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { error, value } = groupMuteValidation(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const { group_id } = value;
-    const isGroupExists = await chkExistingGroup(group_id);
-    if (!isGroupExists) {
-      return res.status(404).send(getError("Group doesn't exists"));
-    }
-    const chkExistingMuteRecord = await prisma.group_mute.findFirst({
-      where: {
-        user_id,
-        group_id,
-      },
-    });
-    if (chkExistingMuteRecord) {
-      const delMutedChatRecord = await prisma.group_mute.delete({
+router.post(
+  "/mute_specific_group_and_private_chat",
+  trimRequest.all,
+  async (req, res) => {
+    try {
+      const { user_id } = req.user;
+      const { error, value } = groupMuteValidation(req.body);
+      if (error) {
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      const { group_id } = value;
+      const isGroupExists = await chkExistingGroup(group_id);
+      if (!isGroupExists) {
+        return res.status(404).send(getError("Group doesn't exists"));
+      }
+      const chkExistingMuteRecord = await prisma.group_mute.findFirst({
         where: {
-          id: chkExistingMuteRecord?.id,
+          user_id,
+          group_id,
+        },
+      });
+      if (chkExistingMuteRecord) {
+        const delMutedChatRecord = await prisma.group_mute.delete({
+          where: {
+            id: chkExistingMuteRecord?.id,
+          },
+        });
+        return res
+          .status(200)
+          .send(getSuccessData("You have successfully unmuted this chat"));
+      }
+      const muteNotifications = await prisma.group_mute.create({
+        data: {
+          user_id,
+          group_id,
         },
       });
       return res
         .status(200)
-        .send(getSuccessData("You have successfully unmuted this chat"));
+        .send(getSuccessData("You have successfully muted this chat"));
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
     }
-    const muteNotifications = await prisma.group_mute.create({
-      data: {
-        user_id,
-        group_id,
-      },
-    });
-    return res
-      .status(200)
-      .send(getSuccessData("You have successfully muted this chat"));
-  } catch (error) {
-    if (error && error.message) {
-      return res.status(404).send(getError(error.message));
-    }
-    return res.status(404).send(getError(error));
   }
-});
+);
 
 router.post(
   "/mute_notifications_for_all_private_chats",
@@ -654,8 +658,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               sender_id: true,
               reciever_id: true,
               seen: true,
-              contact_name:true,
-              contact_number:true,
+              contact_name: true,
+              contact_number: true,
               created_at: true,
               updated_at: true,
               group_id: true,
@@ -728,7 +732,6 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
-
 
 router.post(
   "/sendMessages",
@@ -1917,6 +1920,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           ? arr.group_messages[0].message_body
             ? arr.group_messages[0].message_body
             : arr.group_messages[0].attatchment
+            ? arr.group_messages[0].attatchment
+            : arr.group_messages[0].contact_name
+            ? arr.group_messages[0].contact_name
+            : arr.group_messages[0].contact_number
           : null;
       obj.seen =
         arr.group_messages.length > 0 ? arr.group_messages[0].seen : null;
@@ -1963,6 +1970,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           ? ary.group_messages[0].message_body
             ? ary.group_messages[0].message_body
             : ary.group_messages[0].attatchment
+            ? ary.group_messages[0].attatchment
+            : ary.group_messages[0].contact_name
+            ? ary.group_messages[0].contact_name
+            : ary.group_messages[0].contact_number
           : null;
       obj.seen =
         ary.group_messages.length > 0 ? ary.group_messages[0].seen : null;
@@ -1988,9 +1999,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
+              ? data.group_messages[0].attatchment
+              : data.group_messages[0].contact_name
+              ? data.group_messages[0].contact_name
+              : data.group_messages[0].contact_number
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
+          delete data.group_messages;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
@@ -2040,9 +2056,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
+              ? data.group_messages[0].attatchment
+              : data.group_messages[0].contact_name
+              ? data.group_messages[0].contact_name
+              : data.group_messages[0].contact_number
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
+          delete data.group_messages;
         const getUnseenCounter = await prisma.message_reciever.findMany({
           where: {
             reciever_id: user_id,
