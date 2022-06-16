@@ -431,54 +431,50 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post(
-  "/mute_specific_group_and_private_chat",
-  trimRequest.all,
-  async (req, res) => {
-    try {
-      const { user_id } = req.user;
-      const { error, value } = groupMuteValidation(req.body);
-      if (error) {
-        return res.status(404).send(getError(error.details[0].message));
-      }
-      const { group_id } = value;
-      const isGroupExists = await chkExistingGroup(group_id);
-      if (!isGroupExists) {
-        return res.status(404).send(getError("Group doesn't exists"));
-      }
-      const chkExistingMuteRecord = await prisma.group_mute.findFirst({
+router.post("/mute_specific_group_and_private_chat", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = groupMuteValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const isGroupExists = await chkExistingGroup(group_id);
+    if (!isGroupExists) {
+      return res.status(404).send(getError("Group doesn't exists"));
+    }
+    const chkExistingMuteRecord = await prisma.group_mute.findFirst({
+      where: {
+        user_id,
+        group_id,
+      },
+    });
+    if (chkExistingMuteRecord) {
+      const delMutedChatRecord = await prisma.group_mute.delete({
         where: {
-          user_id,
-          group_id,
-        },
-      });
-      if (chkExistingMuteRecord) {
-        const delMutedChatRecord = await prisma.group_mute.delete({
-          where: {
-            id: chkExistingMuteRecord?.id,
-          },
-        });
-        return res
-          .status(200)
-          .send(getSuccessData("You have successfully unmuted this chat"));
-      }
-      const muteNotifications = await prisma.group_mute.create({
-        data: {
-          user_id,
-          group_id,
+          id: chkExistingMuteRecord?.id,
         },
       });
       return res
         .status(200)
-        .send(getSuccessData("You have successfully muted this chat"));
-    } catch (error) {
-      if (error && error.message) {
-        return res.status(404).send(getError(error.message));
-      }
-      return res.status(404).send(getError(error));
+        .send(getSuccessData("You have successfully unmuted this chat"));
     }
+    const muteNotifications = await prisma.group_mute.create({
+      data: {
+        user_id,
+        group_id,
+      },
+    });
+    return res
+      .status(200)
+      .send(getSuccessData("You have successfully muted this chat"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
   }
-);
+});
 
 router.post(
   "/mute_notifications_for_all_private_chats",
@@ -658,8 +654,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               sender_id: true,
               reciever_id: true,
               seen: true,
-              contact_name: true,
-              contact_number: true,
+              contact_name:true,
+              contact_number:true,
               created_at: true,
               updated_at: true,
               group_id: true,
@@ -732,6 +728,7 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
+
 
 router.post(
   "/sendMessages",
@@ -1320,9 +1317,11 @@ router.post(
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
-                    .on("media", async () => {
+                    .on("end", async () => {
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
+                      console.log("end state");
+                      console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1334,16 +1333,7 @@ router.post(
                       },
                       "media/"
                     );
-                  if (file.thumbnailLocation === undefined) {
-                    console.log("here");
-                    let { Location } = await uploadFile(file);
-                    file.fileLocation = Location;
-                    console.log("uploaded file", Location);
-                    let uploadthumbnail = await uploadThumbnail(file);
-                    file.thumbnailLocation = uploadthumbnail.Location;
-                    console.log("file", file);
-                  }
-                  // let { Location } = await uploadFile(file);
+                  let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
                   media_data.push({
                     sender_id,
@@ -1354,7 +1344,7 @@ router.post(
                     media_caption: media_caption ? media_caption : null,
                     media_type,
                     message_type,
-                    attatchment: file.fileLocation,
+                    attatchment: Location,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                   });
@@ -1368,7 +1358,7 @@ router.post(
                     media_caption: media_caption ? media_caption : null,
                     media_type,
                     message_type,
-                    attatchment: file.fileLocation,
+                    attatchment: Location,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                     user_sender: user_sender_one_to_one,
@@ -1895,7 +1885,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
     });
 
-    const first = contacts?.primary_user_channel;
+    const first = contacts.primary_user_channel;
     const send = first?.map((arr) => {
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
@@ -1911,8 +1901,8 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete arr.reciever.user_blocked_me;
 
       if (
-        arr.reciever?.i_send_messages?.length > 0 &&
-        arr.reciever?.i_recieve_messages?.length > 0
+        arr.reciever.i_send_messages.length > 0 &&
+        arr.reciever.i_recieve_messages.length > 0
       ) {
         arr.reciever.is_chat_start = true;
       } else {
@@ -1927,10 +1917,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           ? arr.group_messages[0].message_body
             ? arr.group_messages[0].message_body
             : arr.group_messages[0].attatchment
-            ? arr.group_messages[0].attatchment
-            : arr.group_messages[0].contact_name
-            ? arr.group_messages[0].contact_name
-            : arr.group_messages[0].contact_number
           : null;
       obj.seen =
         arr.group_messages.length > 0 ? arr.group_messages[0].seen : null;
@@ -1948,7 +1934,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return obj;
     });
 
-    const second = contacts?.secondary_user_channel;
+    const second = contacts.secondary_user_channel;
     const recieve = second?.map((ary) => {
       // if (ary.sender.user_i_block.length > 0) {
       //   ary.sender.is_user_i_block = true;
@@ -1964,7 +1950,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete ary.sender.user_i_block;
 
       const obj = ary.sender;
-      if (obj.i_send_messages?.length > 0 && obj.i_recieve_messages?.length > 0) {
+      if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
         obj.is_chat_start = true;
       } else {
         obj.is_chat_start = false;
@@ -1977,10 +1963,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           ? ary.group_messages[0].message_body
             ? ary.group_messages[0].message_body
             : ary.group_messages[0].attatchment
-            ? ary.group_messages[0].attatchment
-            : ary.group_messages[0].contact_name
-            ? ary.group_messages[0].contact_name
-            : ary.group_messages[0].contact_number
           : null;
       obj.seen =
         ary.group_messages.length > 0 ? ary.group_messages[0].seen : null;
@@ -2006,10 +1988,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
-              ? data.group_messages[0].attatchment
-              : data.group_messages[0].contact_name
-              ? data.group_messages[0].contact_name
-              : data.group_messages[0].contact_number
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
@@ -2062,10 +2040,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             ? data.group_messages[0].message_body
               ? data.group_messages[0].message_body
               : data.group_messages[0].attatchment
-              ? data.group_messages[0].attatchment
-              : data.group_messages[0].contact_name
-              ? data.group_messages[0].contact_name
-              : data.group_messages[0].contact_number
             : null;
         data.seen =
           data.group_messages.length > 0 ? data.group_messages[0].seen : null;
