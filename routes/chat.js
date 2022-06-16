@@ -1314,9 +1314,30 @@ router.post(
               for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 if (file) {
-                  const test = async () => {
-                    var filePath = "";
-                    await ffmpeg({ source: file.path })
+                  var filePath = "";
+                  await ffmpeg({ source: file.path })
+                    .on("filenames", async (filenames) => {
+                      filePath = "media/" + filenames[0];
+                      file.thumbnailPath = filePath;
+                    })
+                    .on("end", async () => {
+                      let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
+                      console.log("end state");
+                      console.log("Thumbnaillocation", Location);
+                    })
+                    .on("error", (err) => {
+                      console.log("error", err);
+                    })
+                    .takeScreenshots(
+                      {
+                        filename: `${v4()}`,
+                        timemarks: [3],
+                      },
+                      "media/"
+                    );
+                  if (file.thumbnailLocation === undefined) {
+                    ffmpeg({ source: file.path })
                       .on("filenames", async (filenames) => {
                         filePath = "media/" + filenames[0];
                         file.thumbnailPath = filePath;
@@ -1326,19 +1347,8 @@ router.post(
                         file.thumbnailLocation = Location;
                         console.log("end state");
                         console.log("Thumbnaillocation", Location);
-                      })
-                      .on("error", (err) => {
-                        console.log("error", err);
-                      })
-                      .takeScreenshots(
-                        {
-                          filename: `${v4()}`,
-                          timemarks: [3],
-                        },
-                        "media/"
-                      );
-                  };
-                  let chk = await test();
+                      });
+                  }
                   let { Location } = await uploadFile(file);
                   console.log("file Location", Location);
                   media_data.push({
