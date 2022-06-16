@@ -729,6 +729,7 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
   }
 });
 
+
 router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
@@ -1069,7 +1070,7 @@ router.post(
                   if (getFcmToken) {
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_type}`,
+                      body: `Sent you ${message_body}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1133,7 +1134,7 @@ router.post(
                   if (getFcmToken) {
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_type}`,
+                      body: `Sent you ${message_body}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1527,7 +1528,7 @@ router.post(
                 if (getFcmToken) {
                   SendNotification(getFcmToken, {
                     title: username,
-                    body: `Sent you ${message_type}`,
+                    body: `Sent you ${message_body}`,
                   })
                     .then((res) => {
                       console.log(res, "done");
@@ -1575,7 +1576,7 @@ router.post(
                 if (getFcmToken) {
                   SendNotification(getFcmToken, {
                     title: username,
-                    body: `Sent you ${message_type}`,
+                    body: `Sent you ${message_body}`,
                   })
                     .then((res) => {
                       console.log(res, "done");
