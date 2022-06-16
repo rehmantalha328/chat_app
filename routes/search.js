@@ -2,9 +2,7 @@ const router = require("express").Router();
 const Prisma_Client = require("../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 const trimRequest = require("trim-request");
-const {
-  signUpValidation,
-} = require("../joi_validations/validate");
+const { signUpValidation } = require("../joi_validations/validate");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 const {
   getUserFromphone,
@@ -51,7 +49,6 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
     return res.status(404).send(getError(catchError));
   }
 });
-
 
 router.get("/getMyAllData", trimRequest.all, async (req, res) => {
   try {
@@ -146,6 +143,11 @@ router.get("/getMyAllData", trimRequest.all, async (req, res) => {
     });
     let fetchAllRegisteredUsers = await prisma.user.findMany({
       where: {
+        NOT: [
+          {
+            user_id,
+          },
+        ],
         is_registered: true,
       },
       select: {

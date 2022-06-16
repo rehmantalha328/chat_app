@@ -151,34 +151,42 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-// const createThumbnail = async (file) => {
-//   var filePath = "";
-//   var file = file;
-//   ffmpeg({ source: file.path })
-//   .on("filenames", async (filenames) => {
-//     console.log("filename",filenames);
-//     filePath = "media/" + filenames[0];
-//     file.thumbnailPath = filePath;
-//     let { Location } = await uploadThumbnail(file);
-//     file.thumbnailLocation = Location;
-//     console.log("Thumbnaillocation", Location);
-      
-//     })
-//     .on("end", async () => {
-//       console.log("end state");
-//     })
-//     .on("error", (err) => {
-//       console.log("error", err);
-//     })
-//     .takeScreenshots(
-//       {
-//         filename: `${v4()}`,
-//         timemarks: [3],
-//       },
-//       "media/"
-//     );
-// };
-
+// function createThumbnailForVideo(file) {
+//   return new Promise((resolve, reject) => {
+//     const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
+//     const ffmpeg = require("fluent-ffmpeg");
+//     ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+//     var path = require("path"), // Default node module
+//       pathToFile = path.join(__dirname, "media", file.filename),
+//       pathToSnapshot = path.join(__dirname, "media");
+//     var proc = ffmpeg(pathToFile)
+//       .on("filenames", (filenames) => {})
+//       .on("end", (data) => {
+//         console.log("screenshots were saved");
+//       })
+//       .on("error", (err) => {
+//         console.log("an error happened: " + err.message);
+//         return reject(new Error(err));
+//       })
+//       .takeScreenshots(
+//         {
+//           count: 1,
+//           filename: v4(),
+//           timemarks: ["4"],
+//           // size: "250x?",
+//         },
+//         pathToSnapshot
+//       )
+//       .on("end", () => {
+//         console.log("FFmpeg done!");
+//         resolve();
+//       })
+//       .on("error", (err) => {
+//         console.log("an error happened: " + err.message);
+//         return reject(new Error(err));
+//       });
+//   });
+// }
 module.exports = {
   getError,
   getSuccessData,
@@ -190,4 +198,5 @@ module.exports = {
   timeExpired,
   getDistanceFromLatLonInKm,
   createAdminToken,
+  // createThumbnailForVideo,
 };
