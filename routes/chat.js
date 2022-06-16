@@ -431,7 +431,7 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/MuteNotifications", trimRequest.all, async (req, res) => {
+router.post("/mute_specific_group_and_private_chat", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
     const { error, value } = groupMuteValidation(req.body);
@@ -477,7 +477,7 @@ router.post("/MuteNotifications", trimRequest.all, async (req, res) => {
 });
 
 router.post(
-  "/mutePrivateChatNotifications",
+  "/mute_notifications_for_all_private_chats",
   trimRequest.all,
   async (req, res) => {
     try {
@@ -524,7 +524,7 @@ router.post(
 );
 
 router.post(
-  "/muteGroupChatNotifications",
+  "/mute_notifications_for_all_group_chats",
   trimRequest.all,
   async (req, res) => {
     try {
@@ -1313,9 +1313,9 @@ router.post(
                       file.thumbnailPath = filePath;
                     })
                     .on("end", async () => {
-                      console.log("end state");
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
+                      console.log("end state");
                       console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
