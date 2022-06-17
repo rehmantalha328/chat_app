@@ -1314,8 +1314,6 @@ router.post(
           if (media_type === MediaType.VIDEO) {
             if (req.files) {
               for (let i = 0; i < req.files.length; i++) {
-                console.log("thumbnails",req.body.thumbnails);
-                return res.status(200).send(getSuccessData("sent"));
                 const file = req.files[i];
                 if (file) {
                   var filePath = "";
