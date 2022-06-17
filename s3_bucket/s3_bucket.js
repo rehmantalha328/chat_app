@@ -18,6 +18,7 @@ const s3 = new AWS.S3({
 });
 
 let uploadFile = function (file) {
+  console.log("path",file.path);
   if (file && file.path) {
     const fileContent = fs.createReadStream(file.path);
     // Setting up S3 upload parameters
@@ -36,6 +37,7 @@ let uploadFile = function (file) {
 };
 
 let uploadThumbnail = function (file) {
+  console.log("filepath",file.thumbnailPath);
   if (file) {
     const fileContent = fs.createReadStream(file.thumbnailPath);
     // Setting up S3 upload parameters
