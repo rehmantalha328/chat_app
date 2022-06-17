@@ -1007,9 +1007,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${media_type}`,
+                      body: `Sent you ${mediaType}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1073,7 +1074,7 @@ router.post(
                   if (getFcmToken) {
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_body}`,
+                      body: `${message_body}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1137,7 +1138,7 @@ router.post(
                   if (getFcmToken) {
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_body}`,
+                      body: `${message_body}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1220,9 +1221,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
+                    let messageType = message_type.toLowerCase();
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_type}`,
+                      body: `Sent you ${messageType}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1320,7 +1322,7 @@ router.post(
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
-                    .on("end", async() => {
+                    .on("end", async () => {
                       let { Location } = await uploadThumbnail(file);
                       file.thumbnailLocation = Location;
                       console.log("end state");
@@ -1398,9 +1400,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${media_type}`,
+                      body: `Sent you ${mediaType}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1475,9 +1478,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${media_type}`,
+                      body: `Sent you ${mediaType}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1531,7 +1535,7 @@ router.post(
                 if (getFcmToken) {
                   SendNotification(getFcmToken, {
                     title: username,
-                    body: `Sent you ${message_body}`,
+                    body: `${message_body}`,
                   })
                     .then((res) => {
                       console.log(res, "done");
@@ -1579,7 +1583,7 @@ router.post(
                 if (getFcmToken) {
                   SendNotification(getFcmToken, {
                     title: username,
-                    body: `Sent you ${message_body}`,
+                    body: `${message_body}`,
                   })
                     .then((res) => {
                       console.log(res, "done");
@@ -1643,9 +1647,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
+                    let messageType = message_type.toLowerCase();
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `Sent you ${message_type}`,
+                      body: `Sent you ${messageType}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
