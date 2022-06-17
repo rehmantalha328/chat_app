@@ -1319,13 +1319,10 @@ router.post(
                     .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
-                      console.log("file",file);
                     })
-                    .on("end", async() => {
-                      let { Location } = await uploadThumbnail(file);
-                      file.thumbnailLocation = Location;
+                    .on("end", async () => {
                       console.log("end state");
-                      console.log("Thumbnaillocation", Location);
+                      console.log("Thumbnaillocation");
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1338,7 +1335,11 @@ router.post(
                       "media/"
                     );
                   let { Location } = await uploadFile(file);
-                  console.log("file Location", Location);
+                  if (Location) {
+                    let thumb = await uploadThumbnail(file);
+                    file.thumbnailLocation = thumb.Location;
+                    console.log("thumb aagya", file);
+                  }
                   media_data.push({
                     sender_id,
                     reciever_id,
