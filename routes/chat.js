@@ -1314,19 +1314,17 @@ router.post(
               for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 if (file) {
-                  const test = async()=>{
                   var filePath = "";
                   await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
-                      filePath = "media\\" + filenames[0];
+                      filePath = "media/" + filenames[0];
                       file.thumbnailPath = filePath;
                     })
-                    .on("end", async () => {
-                      let thumb = await uploadThumbnail(file);
-                      file.thumbnailLocation = thumb.Location;
-                      console.log("thumb aagya", file);
+                    .on("end", async() => {
+                      let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
                       console.log("end state");
-                      console.log("Thumbnaillocation");
+                      console.log("Thumbnaillocation", Location);
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1338,11 +1336,8 @@ router.post(
                       },
                       "media/"
                     );
-                  }
-                  if (file.thumbnailLocation === undefined) {
-                    await test();
-                  }
                   let { Location } = await uploadFile(file);
+                  console.log("file Location", Location);
                   media_data.push({
                     sender_id,
                     reciever_id,
