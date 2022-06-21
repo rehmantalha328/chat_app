@@ -345,5 +345,5 @@ router.post("/reportUser", trimRequest.all, async (req, res) => {
     return res.status(404).send(getError(error));
   }
 });
-// 
+
 module.exports = router;

@@ -1,0 +1,8 @@
+-- CreateEnum
+CREATE TYPE "LastSeen" AS ENUM ('EVERYONE', 'MY_CONTACTS', 'NOBODY');
+
+-- CreateEnum
+CREATE TYPE "ProfilePicture" AS ENUM ('EVERYONE', 'MY_CONTACTS', 'NOBODY');
+
+-- CreateEnum
+CREATE TYPE "About" AS ENUM ('EVERYONE', 'MY_CONTACTS', 'NOBODY');

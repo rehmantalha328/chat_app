@@ -32,6 +32,9 @@ model User {
   updated_at                    DateTime           @updatedAt
   online_status                 Boolean?           @default(false)
   online_status_time            DateTime?          @updatedAt
+  last_seen_show_to             LastSeen?          @default(EVERYONE)
+  profile_image_show_to         LastSeen?          @default(EVERYONE)
+  my_about_show_to              LastSeen?          @default(EVERYONE)
   primary_user_channel          groups[]           @relation("primary_user")
   secondary_user_channel        groups[]           @relation("secondary_user")
   i_send_messages               group_messages[]   @relation("user_sender")
@@ -170,4 +173,22 @@ enum MediaType {
   VIDEO
   PICTURE
   DOCUMENT
+}
+
+enum LastSeen {
+  EVERYONE
+  MY_CONTACTS
+  NOBODY
+}
+
+enum ProfilePicture {
+  EVERYONE
+  MY_CONTACTS
+  NOBODY
+}
+
+enum About {
+  EVERYONE
+  MY_CONTACTS
+  NOBODY
 }
