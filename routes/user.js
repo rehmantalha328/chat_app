@@ -143,6 +143,7 @@ router.post(
   }
 );
 
+// request_otp_for_change_number
 router.post(
   "/request_otp_for_change_number",
   trimRequest.all,
@@ -214,6 +215,7 @@ router.post(
   }
 );
 
+// change_number_verify_phone_otp
 router.post(
   "/change_number_verify_phone_otp",
   trimRequest.all,
