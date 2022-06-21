@@ -9,6 +9,7 @@ const {
   changePhoneNumberSendOtpValidation,
   blockUserValidation,
   reportuserValidation,
+  updatePrivacy,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -32,6 +33,7 @@ const {
   reportUser,
   unblockUser,
 } = require("../database_queries/blockUsers");
+const { PrivacyType } = require("@prisma/client");
 
 // add username
 router.post("/chkUsername", trimRequest.all, async (req, res) => {
@@ -145,17 +147,119 @@ router.post(
   }
 );
 
-// router.post("/update_to_show_last_seen",trimRequest.all, async(req,res)=>{
-//   try{
-//     const {user_id} = req.user;
-    
-//   }catch(error){
-//     if (error && error.message) {
-//       return res.status(404).send(getError(error.message));
-//     }
-//     return res.status(404).send(getError(error));
-//   }
-// })
+router.post("/update_last_seen_to_show", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = updatePrivacy(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { privacy_type } = value;
+    if (
+      privacy_type !== PrivacyType.EVERYONE &&
+      privacy_type !== PrivacyType.MY_CONTACTS &&
+      privacy_type !== PrivacyType.NOBODY
+    ) {
+      return res
+        .status(404)
+        .send(
+          getError(
+            `only ${PrivacyType.EVERYONE}, ${PrivacyType.MY_CONTACTS} and ${PrivacyType.NOBODY} settings are allowed`
+          )
+        );
+    }
+    const updatePrivacy = await prisma.user.update({
+      where:{
+        user_id,
+      },
+      data:{
+        last_seen_show_to: privacy_type,
+      },
+    });
+    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
+router.post("/update_profile_picture_to_show", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = updatePrivacy(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { privacy_type } = value;
+    if (
+      privacy_type !== PrivacyType.EVERYONE &&
+      privacy_type !== PrivacyType.MY_CONTACTS &&
+      privacy_type !== PrivacyType.NOBODY
+    ) {
+      return res
+        .status(404)
+        .send(
+          getError(
+            `only ${PrivacyType.EVERYONE}, ${PrivacyType.MY_CONTACTS} and ${PrivacyType.NOBODY} settings are allowed`
+          )
+        );
+    }
+    const updatePrivacy = await prisma.user.update({
+      where:{
+        user_id,
+      },
+      data:{
+        last_seen_show_to: privacy_type,
+      },
+    });
+    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
+router.post("/update_about_me_to_show", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = updatePrivacy(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { privacy_type } = value;
+    if (
+      privacy_type !== PrivacyType.EVERYONE &&
+      privacy_type !== PrivacyType.MY_CONTACTS &&
+      privacy_type !== PrivacyType.NOBODY
+    ) {
+      return res
+        .status(404)
+        .send(
+          getError(
+            `only ${PrivacyType.EVERYONE}, ${PrivacyType.MY_CONTACTS} and ${PrivacyType.NOBODY} settings are allowed`
+          )
+        );
+    }
+    const updatePrivacy = await prisma.user.update({
+      where:{
+        user_id,
+      },
+      data:{
+        last_seen_show_to: privacy_type,
+      },
+    });
+    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
 
 // request_otp_for_change_number
 router.post(
@@ -341,7 +445,7 @@ router.post("/reportUser", trimRequest.all, async (req, res) => {
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
-    const { reported_id,report_reason } = value;
+    const { reported_id, report_reason } = value;
     const isUserExists = await getUserFromId(reported_id);
     if (!isUserExists) {
       return res.status(404).send(getError("No user found"));
@@ -352,7 +456,7 @@ router.post("/reportUser", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("You have already reported this user"));
     }
-    const createReport = await reportUser(user_id, reported_id,report_reason);
+    const createReport = await reportUser(user_id, reported_id, report_reason);
     return res.status(200).send(getSuccessData("User reported successfully"));
   } catch (error) {
     if (error && error.message) {

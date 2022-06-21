@@ -2249,4 +2249,43 @@ router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   }
 });
 
+router.post("/deleteChat", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = deleteChatValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { group_id } = value;
+    const isGroupExists = await chkExistingGroup(group_id);
+    if (!isGroupExists) {
+      return res.status(404).send(getError("No group exists"));
+    }
+    const getMedia = await prisma.group_messages.findMany({
+      where: {
+        group_id,
+        message_type: MessageType.MEDIA,
+      },
+    });
+    for await (const media of getMedia) {
+      await deleteFile(media.attatchment);
+    }
+    const deleteMessages = await prisma.group_messages.deleteMany({
+      where: {
+        group_id,
+      },
+    });
+    const delGroup = await prisma.groups.delete({
+      where: {
+        group_id,
+      },
+    });
+    return res.status(200).send(getSuccessData("Chat deleted successfully"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(error);
+  }
+});
+
 module.exports = router;
