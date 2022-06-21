@@ -270,7 +270,7 @@ function chkWhoSeenInGroup(data) {
 
 function blockUserValidation(data) {
   const blockSchema = Joi.object({
-    blocker_id: Joi.string().required(),
+    blocked_id: Joi.string().required(),
   });
   return blockSchema.validate(data);
 }
