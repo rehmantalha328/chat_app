@@ -1,4 +1,4 @@
-const { MessageType } = require("@prisma/client");
+const { MessageType,PrivacyType } = require("@prisma/client");
 const Joi = require("joi");
 
 function emailValidation(data) {
@@ -88,6 +88,19 @@ function updateProfile(data) {
     birthday: Joi.string(),
   });
   return userProfileSchema.validate(data);
+}
+
+function updatePrivacy(data) {
+  const privacySchema = Joi.object({
+   privacy_type: Joi.string()
+   .valid(
+    PrivacyType.EVERYONE.toString(),
+    PrivacyType.MY_CONTACTS.toString(),
+    PrivacyType.NOBODY.toString(),
+   )
+   .required(),
+  });
+  return privacySchema.validate(data);
 }
 
 function emailPhoneAndOtpValidation(data) {
@@ -307,4 +320,5 @@ module.exports = {
   reportGroupValidation,
   reportuserValidation,
   groupMuteValidation,
+  updatePrivacy,
 };

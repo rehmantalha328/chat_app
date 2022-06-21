@@ -71,9 +71,11 @@ router.post("/getMyProfile", trimRequest.all, async (req, res) => {
         about_me: true,
         birthday: true,
         gender: true,
-        online_status: true,
-        online_status_time: true,
+        last_seen_show_to: true,
+        profile_image_show_to: true,
+        my_about_show_to: true,
         created_at: true,
+        updated_at: true,
       },
     });
     if (!getMyProfile) {
@@ -142,6 +144,18 @@ router.post(
     }
   }
 );
+
+// router.post("/update_to_show_last_seen",trimRequest.all, async(req,res)=>{
+//   try{
+//     const {user_id} = req.user;
+    
+//   }catch(error){
+//     if (error && error.message) {
+//       return res.status(404).send(getError(error.message));
+//     }
+//     return res.status(404).send(getError(error));
+//   }
+// })
 
 // request_otp_for_change_number
 router.post(
