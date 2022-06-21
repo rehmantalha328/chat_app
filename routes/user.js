@@ -420,8 +420,16 @@ router.get("/getMyBlockedOnes", trimRequest.all, async (req, res) => {
       },
       select: {
         user_i_block: {
-          include: {
-            blocked: true,
+          select:{
+            blocked:{
+              select:{
+                user_id: true,
+                username: true,
+                user_name: true,
+                profile_img: true,
+                created_at: true,
+              }
+            }
           },
           orderBy: {
             created_at: "desc",
