@@ -4,7 +4,6 @@ const { now } = require("mongoose");
 const timediff = require("timediff");
 const { getEnv } = require("../config");
 
-
 const getError = (error) => {
   return {
     error,
@@ -97,7 +96,30 @@ const deleteUploadedImage = (req) => {
     // }
     if (req.files) {
       req?.files?.forEach((file) => {
-        fs.unlinkSync(file.path);
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const deleteUploadedGalleryOrProfile = (req) => {
+  try {
+    if (req.files?.["profile"]) {
+      req?.files["profile"]?.forEach((file) => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+    }
+    if (req.files?.["gallery"]) {
+      req?.files["gallery"]?.forEach((file) => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
       });
     }
   } catch (error) {
@@ -142,8 +164,6 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-
-
 module.exports = {
   getError,
   getSuccessData,
@@ -155,4 +175,5 @@ module.exports = {
   timeExpired,
   getDistanceFromLatLonInKm,
   createAdminToken,
+  deleteUploadedGalleryOrProfile,
 };

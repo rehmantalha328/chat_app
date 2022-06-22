@@ -82,12 +82,20 @@ function updatePasswordValidation(data) {
 
 function updateProfile(data) {
   const userProfileSchema = Joi.object({
+    username: Joi.string(),
     user_name: Joi.string(),
     about_me: Joi.string(),
     gender: Joi.string(),
     birthday: Joi.string(),
   });
   return userProfileSchema.validate(data);
+}
+
+function deleteGalleryImagesValidation(data){
+  const deleteSchema = Joi.object({
+    image_id: Joi.string().required(),
+  });
+  return deleteSchema.validate(data);
 }
 
 function updatePrivacy(data) {
@@ -321,4 +329,5 @@ module.exports = {
   reportuserValidation,
   groupMuteValidation,
   updatePrivacy,
+  deleteGalleryImagesValidation,
 };

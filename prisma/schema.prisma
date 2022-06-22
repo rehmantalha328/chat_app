@@ -32,6 +32,7 @@ model User {
   updated_at                    DateTime           @updatedAt
   online_status                 Boolean?           @default(false)
   online_status_time            DateTime?          @updatedAt
+  my_gallery_pictures           User_gallery[]
   last_seen_show_to             PrivacyType?       @default(EVERYONE)
   profile_image_show_to         PrivacyType?       @default(EVERYONE)
   my_about_show_to              PrivacyType?       @default(EVERYONE)
@@ -48,6 +49,15 @@ model User {
   user_report_me                reportUser[]       @relation("reported")
   groups_i_report               groupReports[]     @relation("group_reporter")
   groups_i_mute                 group_mute[]       @relation("user_mute_group")
+}
+
+model User_gallery {
+  id          String    @id @default(cuid())
+  user_id     String?
+  picture_url String?
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @updatedAt
+  user        User?     @relation(fields: [user_id], references: [user_id])
 }
 
 model groups {

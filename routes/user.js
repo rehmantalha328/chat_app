@@ -10,6 +10,7 @@ const {
   blockUserValidation,
   reportuserValidation,
   updatePrivacy,
+  deleteGalleryImagesValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
@@ -17,13 +18,14 @@ const {
   createToken,
   deleteExistigImg,
   clean,
+  deleteUploadedGalleryOrProfile,
 } = require("../helper_functions/helpers");
 const {
   getUserFromphone,
   chkExistingUsername,
   getUserFromId,
 } = require("../database_queries/auth");
-const imageMulter = require("../middleWares/imageMulter");
+const imageMulter = require("../middleWares/profile_gallery_multer");
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const { fs } = require("file-system");
 const {
@@ -69,6 +71,17 @@ router.post("/getMyProfile", trimRequest.all, async (req, res) => {
         user_name: true,
         username: true,
         profile_img: true,
+        my_gallery_pictures: {
+          select: {
+            id: true,
+            picture_url: true,
+            created_at: true,
+            updated_at: true,
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
         phone: true,
         about_me: true,
         birthday: true,
@@ -92,6 +105,118 @@ router.post("/getMyProfile", trimRequest.all, async (req, res) => {
   }
 });
 
+// add gallery images
+router.post(
+  "/uploadGalleryImages",
+  [imageMulter, trimRequest.all],
+  async (req, res) => {
+    try {
+      const { user_id } = req.user;
+      const gallery = [];
+      if (req.file_error) {
+        deleteUploadedGalleryOrProfile(req);
+        return res.status(404).send(getError(req.file_error));
+      }
+      if (req.files["gallery"]?.length <= 0) {
+        deleteUploadedGalleryOrProfile(req);
+        return res
+          .status(404)
+          .send(getError("Please select atleast one picture"));
+      }
+      const getMyGalleryImages = await prisma.user.findMany({
+        where: {
+          user_id,
+        },
+        select: {
+          _count: {
+            select: {
+              my_gallery_pictures,
+            },
+          },
+        },
+      });
+      const uploadedImages = getMyGalleryImages[0]?._count.my_gallery_pictures;
+      const limit = 5;
+      const remainingImages = limit - uploadedImages;
+      const comingImages = req.files["gallery"]?.length;
+      const allowedImages = uploadedImages + comingImages;
+      if (allowedImages > 5) {
+        return res
+          .status(404)
+          .send(
+            getError(
+              `You have uploaded ${uploadedImages} images and your remaining images is ${remainingImages}`
+            )
+          );
+      }
+      if (req?.files?.["gallery"]) {
+        for (const file of req.files["gallery"]) {
+          if (file) {
+            const { Location } = await uploadFile(file);
+            const picture_url = Location;
+            gallery.push({
+              picture_url,
+              user_id,
+            });
+          }
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        }
+      }
+      const addGallery = await prisma.user_gallery.createMany({
+        data: gallery,
+      });
+      if (addGallery?.count > 0) {
+        return res.status(200).send(getSuccessData("Uploaded successful"));
+      }
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
+    }
+  }
+);
+
+// Delete gallery Images
+router.post("deletGalleryImages", trimRequest.all, async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { error, value } = deleteGalleryImagesValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const { image_id } = value;
+    const fetchMyUploadedImage = await prisma.user_gallery.findFirst({
+      where: {
+        id: image_id,
+        user_id,
+      },
+      select: {
+        picture_url: true,
+      },
+    });
+    if (!fetchMyUploadedImage) {
+      return res.status(404).send(getError("No picture found with this id"));
+    }
+    if (fetchMyUploadedImage.picture_url) {
+      await deleteFile(fetchMyUploadedImage?.picture_url);
+    }
+    await prisma.user_gallery.delete({
+      where: {
+        id: image_id,
+      },
+    });
+    return res.status(200).send(getSuccessData("Successfully delete"));
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
 // update User profile info
 router.post(
   "/updateUserProfile",
@@ -105,28 +230,39 @@ router.post(
         return res.status(404).send(getError(error.details[0].message));
       }
       if (req.file_error) {
-        deleteExistigImg(req);
+        deleteUploadedGalleryOrProfile(req);
         return res.status(404).send(getError(req.file_error));
       }
-      const { user_name: _user_name, about_me, gender, birthday } = value;
+      const {
+        user_name: _user_name,
+        username: _username,
+        about_me,
+        gender,
+        birthday,
+      } = value;
       const user_name = _user_name?.toLowerCase();
+      const username = _username?.toLowerCase();
+
       // s3 bucket for profile
-      if (req?.file) {
+      if (req?.files?.["profile"]) {
         const delPreviousImg = await deleteFile(myPrevImage);
-        const file = req?.file;
-        let { Location } = await uploadFile(file);
-        var profile_img = Location;
-        if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
+        for (const file of req.files["profile"]) {
+          let { Location } = await uploadFile(file);
+          var profile_img = Location;
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
         }
       }
       // END
+
       const updateUser = await prisma.user.update({
         where: {
           user_id,
         },
         data: {
           user_name,
+          username,
           about_me,
           gender,
           birthday,
@@ -169,14 +305,16 @@ router.post("/update_last_seen_to_show", trimRequest.all, async (req, res) => {
         );
     }
     const updatePrivacy = await prisma.user.update({
-      where:{
+      where: {
         user_id,
       },
-      data:{
+      data: {
         last_seen_show_to: privacy_type,
       },
     });
-    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
+    return res
+      .status(200)
+      .send(getSuccessData("Privacy setting updated successfully"));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
@@ -185,43 +323,49 @@ router.post("/update_last_seen_to_show", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/update_profile_picture_to_show", trimRequest.all, async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { error, value } = updatePrivacy(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const { privacy_type } = value;
-    if (
-      privacy_type !== PrivacyType.EVERYONE &&
-      privacy_type !== PrivacyType.MY_CONTACTS &&
-      privacy_type !== PrivacyType.NOBODY
-    ) {
+router.post(
+  "/update_profile_picture_to_show",
+  trimRequest.all,
+  async (req, res) => {
+    try {
+      const { user_id } = req.user;
+      const { error, value } = updatePrivacy(req.body);
+      if (error) {
+        return res.status(404).send(getError(error.details[0].message));
+      }
+      const { privacy_type } = value;
+      if (
+        privacy_type !== PrivacyType.EVERYONE &&
+        privacy_type !== PrivacyType.MY_CONTACTS &&
+        privacy_type !== PrivacyType.NOBODY
+      ) {
+        return res
+          .status(404)
+          .send(
+            getError(
+              `only ${PrivacyType.EVERYONE}, ${PrivacyType.MY_CONTACTS} and ${PrivacyType.NOBODY} settings are allowed`
+            )
+          );
+      }
+      const updatePrivacy = await prisma.user.update({
+        where: {
+          user_id,
+        },
+        data: {
+          last_seen_show_to: privacy_type,
+        },
+      });
       return res
-        .status(404)
-        .send(
-          getError(
-            `only ${PrivacyType.EVERYONE}, ${PrivacyType.MY_CONTACTS} and ${PrivacyType.NOBODY} settings are allowed`
-          )
-        );
+        .status(200)
+        .send(getSuccessData("Privacy setting updated successfully"));
+    } catch (error) {
+      if (error && error.message) {
+        return res.status(404).send(getError(error.message));
+      }
+      return res.status(404).send(getError(error));
     }
-    const updatePrivacy = await prisma.user.update({
-      where:{
-        user_id,
-      },
-      data:{
-        last_seen_show_to: privacy_type,
-      },
-    });
-    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
-  } catch (error) {
-    if (error && error.message) {
-      return res.status(404).send(getError(error.message));
-    }
-    return res.status(404).send(getError(error));
   }
-});
+);
 
 router.post("/update_about_me_to_show", trimRequest.all, async (req, res) => {
   try {
@@ -245,14 +389,16 @@ router.post("/update_about_me_to_show", trimRequest.all, async (req, res) => {
         );
     }
     const updatePrivacy = await prisma.user.update({
-      where:{
+      where: {
         user_id,
       },
-      data:{
+      data: {
         last_seen_show_to: privacy_type,
       },
     });
-    return res.status(200).send(getSuccessData("Privacy setting updated successfully"));
+    return res
+      .status(200)
+      .send(getSuccessData("Privacy setting updated successfully"));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
@@ -420,16 +566,16 @@ router.get("/getMyBlockedOnes", trimRequest.all, async (req, res) => {
       },
       select: {
         user_i_block: {
-          select:{
-            blocked:{
-              select:{
+          select: {
+            blocked: {
+              select: {
                 user_id: true,
                 username: true,
                 user_name: true,
                 profile_img: true,
                 created_at: true,
-              }
-            }
+              },
+            },
           },
           orderBy: {
             created_at: "desc",
