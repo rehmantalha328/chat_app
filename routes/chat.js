@@ -1765,11 +1765,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                groups_i_mute: {
-                  where: {
-                    user_id,
-                  },
-                },
+                // groups_i_mute: {
+                //   where: {
+                //     user_id,
+                //   },
+                // },
               },
             },
             group_messages: {
@@ -1837,11 +1837,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                groups_i_mute: {
-                  where: {
-                    user_id,
-                  },
-                },
+                // groups_i_mute: {
+                //   where: {
+                //     user_id,
+                //   },
+                // },
               },
             },
             group_messages: {
@@ -1865,11 +1865,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             is_group_chat: true,
             created_at: true,
             updated_at: true,
-            group_mutes: {
-              where: {
-                user_id,
-              },
-            },
+            // group_mutes: {
+            //   where: {
+            //     user_id,
+            //   },
+            // },
             group_messages: {
               // include: {
               //   reciever: true,
@@ -1909,11 +1909,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 is_group_chat: true,
                 created_at: true,
                 updated_at: true,
-                group_mutes: {
-                  where: {
-                    user_id,
-                  },
-                },
+                // group_mutes: {
+                //   where: {
+                //     user_id,
+                //   },
+                // },
                 group_messages: {
                   // include: {
                   //   reciever: true,
