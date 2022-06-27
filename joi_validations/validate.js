@@ -182,6 +182,7 @@ function getAllMembers(data) {
 
 function messageValidation(data) {
   const messageSchema = Joi.object({
+    reply_of: Joi.string(),
     is_group_chat: Joi.boolean().required(),
     reciever_id: Joi.when("is_group_chat", {
       is: false,

@@ -603,6 +603,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               message_body: true,
               message_type: true,
               media_type: true,
+              reply_of: true,
               media_caption: true,
               sender_id: true,
               reciever_id: true,
@@ -655,6 +656,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               message_type: true,
               media_caption: true,
               media_type: true,
+              reply_of: true,
               sender_id: true,
               reciever_id: true,
               seen: true,
@@ -766,6 +768,7 @@ router.post(
         media_type,
         media_caption,
         message_body,
+        reply_of,
       } = value;
       let media_data = [];
       let media = [];
@@ -948,6 +951,7 @@ router.post(
                   message_type,
                   attatchment: Location,
                   attatchment_name: file.originalname,
+                  reply_of,
                 });
                 media.push({
                   sender_id,
@@ -957,6 +961,7 @@ router.post(
                   message_type,
                   attatchment: Location,
                   attatchment_name: file.originalname,
+                  reply_of,
                   user_sender: user_sender_group,
                   message_time: new Date().toLocaleTimeString(),
                 });
@@ -976,6 +981,7 @@ router.post(
                 attatchment: media_data[i].attatchment,
                 message_type: media_data[i].message_type,
                 attatchment_name: media_data[i].attatchment_name,
+                reply_of: media[i].reply_of ? media_data[i].reply_of : null,
                 reciever: {
                   createMany: {
                     data: recieverData,
@@ -1003,7 +1009,7 @@ router.post(
               reciever[i].member.user_id
             );
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1034,6 +1040,7 @@ router.post(
               group_id,
               message_body,
               message_type,
+              reply_of,
               reciever: {
                 createMany: {
                   data: recieverData,
@@ -1054,6 +1061,7 @@ router.post(
             user_sender_group,
             reciever,
             message_body,
+            reply_of,
             (media = null),
             message_type,
             group_id
@@ -1068,7 +1076,7 @@ router.post(
               reciever[i].member.user_id
             );
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1098,6 +1106,7 @@ router.post(
               group_id,
               message_body,
               message_type,
+              reply_of,
               reciever: {
                 createMany: {
                   data: recieverData,
@@ -1118,6 +1127,7 @@ router.post(
             user_sender_group,
             reciever,
             message_body,
+            reply_of,
             (media = null),
             message_type,
             group_id
@@ -1132,7 +1142,7 @@ router.post(
               reciever[i].member.user_id
             );
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1170,12 +1180,14 @@ router.post(
                 contact_number: data.contact_number,
                 group_id,
                 message_type,
+                reply_of,
               });
               newContacts.push({
                 contact_name: data.contact_name,
                 contact_number: data.contact_number,
                 sender_id,
                 group_id,
+                reply_of,
                 user_sender: user_sender_group,
                 message_type,
                 message_time: new Date().toLocaleTimeString(),
@@ -1190,6 +1202,7 @@ router.post(
                 message_type: contacts[i].message_type,
                 contact_name: contacts[i].contact_name,
                 contact_number: contacts[i].contact_number,
+                reply_of: contacts[i].reply_of ? contacts[i].reply_of : null,
                 reciever: {
                   createMany: {
                     data: recieverData,
@@ -1217,7 +1230,7 @@ router.post(
               reciever[i].member.user_id
             );
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1320,13 +1333,12 @@ router.post(
                   await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
-                      file.thumbnailPath = filePath;
+                      let thumbnailPath = fs.createWriteStream(filePath);
+                      file.thumbnailPath = thumbnailPath.path;
                     })
                     .on("end", async () => {
-                      let { Location } = await uploadThumbnail(file);
-                      file.thumbnailLocation = Location;
                       console.log("end state");
-                      console.log("Thumbnaillocation", Location);
+                      console.log("Thumbnaillocation");
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1339,6 +1351,10 @@ router.post(
                       "media/"
                     );
                   let { Location } = await uploadFile(file);
+                  if (Location) {
+                    let { Location } = await uploadThumbnail(file);
+                      file.thumbnailLocation = Location;
+                  }
                   console.log("file Location", Location);
                   media_data.push({
                     sender_id,
@@ -1349,6 +1365,7 @@ router.post(
                     media_caption: media_caption ? media_caption : null,
                     media_type,
                     message_type,
+                    reply_of,
                     attatchment: Location,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
@@ -1364,6 +1381,7 @@ router.post(
                     media_type,
                     message_type,
                     attatchment: Location,
+                    reply_of,
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                     user_sender: user_sender_one_to_one,
@@ -1396,7 +1414,7 @@ router.post(
             );
             const isAllowed = await isNotificationAllowed(reciever_id);
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1432,6 +1450,7 @@ router.post(
                   message_type,
                   attatchment: Location,
                   attatchment_name: file.originalname,
+                  reply_of,
                 });
                 media.push({
                   sender_id,
@@ -1444,6 +1463,7 @@ router.post(
                   message_type,
                   attatchment: Location,
                   attatchment_name: file.originalname,
+                  reply_of,
                   user_sender: user_sender_one_to_one,
                   message_time: new Date().toLocaleTimeString(),
                 });
@@ -1474,7 +1494,7 @@ router.post(
             );
             const isAllowed = await isNotificationAllowed(reciever_id);
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1510,6 +1530,7 @@ router.post(
               group_id: chkChannel ? chkChannel.group_id : chkChannel.group_id,
               message_body,
               message_type,
+              reply_of,
             },
           });
 
@@ -1518,6 +1539,7 @@ router.post(
             user_sender_one_to_one,
             reciever_id,
             message_body,
+            reply_of,
             (media = null),
             message_type,
             chkChannel?.group_id
@@ -1529,7 +1551,7 @@ router.post(
           );
           const isAllowed = await isNotificationAllowed(reciever_id);
           if (!isNotificationsMute) {
-            if (isAllowed) {
+            if (isAllowed?.notifications === true) {
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
@@ -1566,6 +1588,7 @@ router.post(
             user_sender_one_to_one,
             reciever_id,
             message_body,
+            reply_of,
             (media = null),
             message_type,
             chkChannel?.group_id
@@ -1577,7 +1600,7 @@ router.post(
           );
           const isAllowed = await isNotificationAllowed(reciever_id);
           if (!isNotificationsMute) {
-            if (isAllowed) {
+            if (isAllowed?.notifications === true) {
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
@@ -1617,6 +1640,7 @@ router.post(
                   ? chkChannel.group_id
                   : chkChannel.group_id,
                 message_type,
+                reply_of,
               });
               newContacts.push({
                 contact_name: data.contact_name,
@@ -1627,6 +1651,7 @@ router.post(
                   ? chkChannel.group_id
                   : chkChannel.group_id,
                 message_type,
+                reply_of,
                 message_time: new Date().toLocaleTimeString(),
               });
             });
@@ -1643,7 +1668,7 @@ router.post(
             );
             const isAllowed = await isNotificationAllowed(reciever_id);
             if (!isNotificationsMute) {
-              if (isAllowed) {
+              if (isAllowed?.notifications === true) {
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
@@ -1744,6 +1769,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
+                groups_i_mute: {
+                  where: {
+                    user_id,
+                  },
+                },
               },
             },
             group_messages: {
@@ -1811,6 +1841,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
+                groups_i_mute: {
+                  where: {
+                    user_id,
+                  },
+                },
               },
             },
             group_messages: {
@@ -1834,7 +1869,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             is_group_chat: true,
             created_at: true,
             updated_at: true,
-
+            group_mutes: {
+              where: {
+                user_id,
+              },
+            },
             group_messages: {
               // include: {
               //   reciever: true,
@@ -1874,7 +1913,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 is_group_chat: true,
                 created_at: true,
                 updated_at: true,
-
+                group_mutes: {
+                  where: {
+                    user_id,
+                  },
+                },
                 group_messages: {
                   // include: {
                   //   reciever: true,
@@ -1907,7 +1950,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-
+      if (arr.reciever.groups_i_mute.length > 0) {
+        arr.reciever.i_mute_this_group = true;
+      } else {
+        arr.reciever.i_mute_this_group = false;
+      }
+      delete arr.reciever.groups_i_mute;
       if (
         arr.reciever.i_send_messages.length > 0 &&
         arr.reciever.i_recieve_messages.length > 0
@@ -1960,7 +2008,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-
+      if (ary.sender.groups_i_mute.length > 0) {
+        ary.sender.i_mute_this_group = true;
+      } else {
+        ary.sender.i_mute_this_group = false;
+      }
+      delete ary.sender.groups_i_mute;
       const obj = ary.sender;
       if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
         obj.is_chat_start = true;
@@ -1999,6 +2052,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     const my_created_groups = contacts.groups_i_created;
     const add = await Promise.all(
       my_created_groups?.map(async (data) => {
+        if (data.group_mutes.length > 0) {
+          data.i_mute_this_group = true;
+        } else {
+          data.i_mute_this_group = false;
+        }
+        delete data.group_mutes;
         data.last_message =
           data.group_messages.length > 0
             ? data.group_messages[0].message_body
@@ -2056,6 +2115,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
     const joined = await Promise.all(
       my_joined_groups.map(async (data) => {
+        if (data.group_mutes.length > 0) {
+          data.i_mute_this_group = true;
+        } else {
+          data.i_mute_this_group = false;
+        }
+        delete data.group_mutes;
         data.last_message =
           data.group_messages.length > 0
             ? data.group_messages[0].message_body

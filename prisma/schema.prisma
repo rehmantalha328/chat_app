@@ -109,6 +109,7 @@ model group_messages {
   reciever_id      String?            @db.VarChar(255)
   group_id         String?            @db.VarChar(255)
   message_body     String?            @db.VarChar(255)
+  reply_of         String?
   attatchment      String?
   thumbnail        String?
   attatchment_name String?
