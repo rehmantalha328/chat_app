@@ -2011,10 +2011,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete arr.reciever.user_blocked_me;
       if (arr.reciever?.groups_i_mute?.length > 0) {
         arr.reciever.i_mute_this_group = true;
-        delete arr.reciever.groups_i_mute;
+        // delete arr.reciever.groups_i_mute;
       } else {
         arr.reciever.i_mute_this_group = false;
-        delete arr.reciever.groups_i_mute;
+        // delete arr.reciever.groups_i_mute;
       }
       if (
         arr.reciever.i_send_messages.length > 0 &&
@@ -2072,10 +2072,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // delete ary.sender.user_i_block;
       if (ary.sender?.groups_i_mute?.length > 0) {
         ary.sender.i_mute_this_group = true;
-        delete ary.sender.groups_i_mute;
+        // delete ary.sender.groups_i_mute;
       } else {
         ary.sender.i_mute_this_group = false;
-        delete ary.sender.groups_i_mute;
+        // delete ary.sender.groups_i_mute;
       }
       const obj = ary.sender;
       if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
@@ -2117,7 +2117,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     const my_created_groups = contacts.groups_i_created;
     const add = await Promise.all(
       my_created_groups?.map(async (data) => {
-        if (data.group_mutes.length > 0) {
+        if (data.group_mutes?.length > 0) {
           data.i_mute_this_group = true;
           delete data.group_mutes;
         } else {
@@ -2181,7 +2181,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
     const joined = await Promise.all(
       my_joined_groups.map(async (data) => {
-        if (data.group_mutes.length > 0) {
+        if (data.group_mutes?.length > 0) {
           data.i_mute_this_group = true;
           delete data.group_mutes;
         } else {
