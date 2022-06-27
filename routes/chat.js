@@ -1353,9 +1353,8 @@ router.post(
                   let { Location } = await uploadFile(file);
                   if (Location) {
                     let { Location } = await uploadThumbnail(file);
-                      file.thumbnailLocation = Location;
+                    file.thumbnailLocation = Location;
                   }
-                  console.log("file Location", Location);
                   media_data.push({
                     sender_id,
                     reciever_id,
@@ -1370,7 +1369,6 @@ router.post(
                     attatchment_name: file.originalname,
                     thumbnail: file.thumbnailLocation,
                   });
-                  console.log("iam media_data in pushing state", media_data);
                   media.push({
                     sender_id,
                     reciever_id,
@@ -1393,11 +1391,9 @@ router.post(
                 }
               }
             }
-            console.log("media_data after all pushes", media_data);
             const createMessage = await prisma.group_messages.createMany({
               data: media_data,
             });
-            console.log("createMessage", createMessage);
             sendMediaMessage(
               sender_id,
               // user_sender_one_to_one,
@@ -1950,7 +1946,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-      if (arr.reciever.groups_i_mute.length > 0) {
+      if (arr.reciever.groups_i_mute?.length > 0) {
         arr.reciever.i_mute_this_group = true;
       } else {
         arr.reciever.i_mute_this_group = false;
@@ -2008,7 +2004,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-      if (ary.sender.groups_i_mute.length > 0) {
+      if (ary.sender.groups_i_mute?.length > 0) {
         ary.sender.i_mute_this_group = true;
       } else {
         ary.sender.i_mute_this_group = false;
@@ -2052,7 +2048,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     const my_created_groups = contacts.groups_i_created;
     const add = await Promise.all(
       my_created_groups?.map(async (data) => {
-        if (data.group_mutes.length > 0) {
+        if (data.group_mutes?.length > 0) {
           data.i_mute_this_group = true;
         } else {
           data.i_mute_this_group = false;
@@ -2115,7 +2111,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
     const joined = await Promise.all(
       my_joined_groups.map(async (data) => {
-        if (data.group_mutes.length > 0) {
+        if (data.group_mutes?.length > 0) {
           data.i_mute_this_group = true;
         } else {
           data.i_mute_this_group = false;
