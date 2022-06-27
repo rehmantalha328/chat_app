@@ -1958,11 +1958,14 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         arr.reciever.i_recieve_messages.length > 0
       ) {
         arr.reciever.is_chat_start = true;
+        delete arr.reciever.i_send_messages;
+        delete arr.reciever.i_recieve_messages;
       } else {
         arr.reciever.is_chat_start = false;
+        delete arr.reciever.i_send_messages;
+        delete arr.reciever.i_recieve_messages;
       }
-      delete arr.reciever.i_send_messages;
-      delete arr.reciever.i_recieve_messages;
+     
 
       const obj = arr.reciever;
       obj.last_message =
@@ -2015,11 +2018,13 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       const obj = ary.sender;
       if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
         obj.is_chat_start = true;
+        delete obj.i_send_messages;
+        delete obj.i_recieve_messages;
       } else {
         obj.is_chat_start = false;
+        delete obj.i_send_messages;
+        delete obj.i_recieve_messages;
       }
-      delete obj.i_send_messages;
-      delete obj.i_recieve_messages;
 
       obj.last_message =
         ary.group_messages.length > 0
