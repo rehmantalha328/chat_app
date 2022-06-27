@@ -1932,7 +1932,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
     });
 
-    const first = contacts.primary_user_channel;
+    const first = contacts?.primary_user_channel;
     const send = first?.map((arr) => {
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
@@ -1946,7 +1946,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-      if (arr.reciever.groups_i_mute.length > 0) {
+      if (arr.reciever.groups_i_mute?.length > 0) {
         arr.reciever.i_mute_this_group = true;
       } else {
         arr.reciever.i_mute_this_group = false;
@@ -1990,7 +1990,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return obj;
     });
 
-    const second = contacts.secondary_user_channel;
+    const second = contacts?.secondary_user_channel;
     const recieve = second?.map((ary) => {
       // if (ary.sender.user_i_block.length > 0) {
       //   ary.sender.is_user_i_block = true;
@@ -2004,7 +2004,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-      if (ary.sender.groups_i_mute.length > 0) {
+      if (ary.sender.groups_i_mute?.length > 0) {
         ary.sender.i_mute_this_group = true;
       } else {
         ary.sender.i_mute_this_group = false;
