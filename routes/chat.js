@@ -1946,11 +1946,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-      // if (arr.reciever.groups_i_mute?.length > 0) {
-      //   arr.reciever.i_mute_this_group = true;
-      // } else {
-      //   arr.reciever.i_mute_this_group = false;
-      // }
+      if (arr.reciever?.groups_i_mute?.length > 0) {
+        arr.reciever.i_mute_this_group = true;
+      } else {
+        arr.reciever.i_mute_this_group = false;
+      }
       // delete arr.reciever.groups_i_mute;
       if (
         arr.reciever.i_send_messages.length > 0 &&
@@ -2004,11 +2004,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-      // if (ary.sender.groups_i_mute?.length > 0) {
-      //   ary.sender.i_mute_this_group = true;
-      // } else {
-      //   ary.sender.i_mute_this_group = false;
-      // }
+      if (ary.sender?.groups_i_mute?.length > 0) {
+        ary.sender.i_mute_this_group = true;
+      } else {
+        ary.sender.i_mute_this_group = false;
+      }
       // delete ary.sender.groups_i_mute;
       const obj = ary.sender;
       if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
