@@ -1951,6 +1951,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         delete arr.reciever.groups_i_mute;
       } else {
         arr.reciever.i_mute_this_group = false;
+        delete arr.reciever.groups_i_mute;
       }
       if (
         arr.reciever.i_send_messages.length > 0 &&
@@ -2009,6 +2010,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         delete ary.sender.groups_i_mute;
       } else {
         ary.sender.i_mute_this_group = false;
+        delete ary.sender.groups_i_mute;
       }
       const obj = ary.sender;
       if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
@@ -2053,6 +2055,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           delete data.group_mutes;
         } else {
           data.i_mute_this_group = false;
+          delete data.group_mutes;
         }
         data.last_message =
           data.group_messages.length > 0
@@ -2116,6 +2119,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           delete data.group_mutes;
         } else {
           data.i_mute_this_group = false;
+          delete data.group_mutes;
         }
         data.last_message =
           data.group_messages.length > 0
