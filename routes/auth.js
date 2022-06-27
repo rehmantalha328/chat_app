@@ -178,7 +178,7 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError("Phone number is incorrect"));
     }
     if (getExistingUser?.password !== password) {
-      return res.status(404).send(getError("Passwword is incorrect"));
+      return res.status(404).send(getError("Password is incorrect"));
     }
     const updateFcm = await updateFcmToken(getExistingUser?.user_id, fcm_token);
     return res

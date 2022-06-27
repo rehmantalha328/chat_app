@@ -773,7 +773,7 @@ router.post(
       let media_data = [];
       let media = [];
       if (is_group_chat === true) {
-        const getUsersFromGroup = await prisma.groups.findFirst({
+        const isGroupExists = await prisma.groups.findFirst({
           where: {
             group_id,
           },
@@ -791,7 +791,7 @@ router.post(
             },
           },
         });
-        const reciever = getUsersFromGroup?.group_members?.filter(
+        const reciever = isGroupExists?.group_members?.filter(
           (user) => user?.member?.user_id !== sender_id
         );
         reciever?.forEach((data) => {
@@ -815,130 +815,135 @@ router.post(
                 )
               );
           }
-          // if (media_type === MediaType.VIDEO) {
-          //   // let thumbnailsPath = [];
-          //   let thumbnails = [];
-          //   if (req.files) {
-          //     for (const file of req.files) {
-          //       if (file) {
-          //         var filePath = "";
-          //         ffmpeg({ source: file.path })
-          //           .on("filenames", (filenames) => {
-          //             filePath = "public/" + filenames[0];
-          //             // thumbnailsPath.push({
-          //             //   filePath,
-          //             // });
-          //             console.log("Created file names", filenames);
-          //           })
-          //           .on("end", async () => {
-          //             console.log("here");
-          //             file.thumbnailPath = filePath;
-          //             let { Location } = await uploadThumbnail(file);
-          //             console.log("location",Location);
-          //             thumbnails.push({
-          //               Location,
-          //             });
-          //           })
-          //           .on("error", (err) => {
-          //             console.log("Error", err);
-          //           })
-          //           .takeScreenshots(
-          //             {
-          //               filename: `${v4()}`,
-          //               timemarks: [3],
-          //             },
-          //             "public/"
-          //           );
-          //         let { Location } = await uploadFile(file);
-          //         for (let i = 0; i < thumbnails.length; i++) {
-          //           media_data.push({
-          //             sender_id,
-          //             group_id,
-          //             media_caption: media_caption ? media_caption : null,
-          //             media_type,
-          //             message_type,
-          //             attatchment: Location,
-          //             attatchment_name: file.originalname,
-          //             thumbnail: thumbnails[i].Location,
-          //           });
-          //           media.push({
-          //             sender_id,
-          //             group_id,
-          //             media_caption: media_caption ? media_caption : null,
-          //             media_type,
-          //             message_type,
-          //             attatchment: Location,
-          //             attatchment_name: file.originalname,
-          //             thumbnail: thumbnails[i].Location,
-          //             user_sender: user_sender_group,
-          //             message_time: new Date().toLocaleTimeString(),
-          //           });
-          //         }
-          //       }
-          //       if (fs.existsSync(file.path)) {
-          //         fs.unlinkSync(file.path);
-          //       }
-          //     }
-          //   }
-          //   for (let i = 0; i < media_data?.length; i++) {
-          //     const addMedia = await prisma.group_messages.create({
-          //       data: {
-          //         sender_id: media_data[i].sender_id,
-          //         group_id: media_data[i].group_id,
-          //         media_caption: media_data[i].media_caption,
-          //         media_type: media_data[i].media_type,
-          //         attatchment: media_data[i].attatchment,
-          //         message_type: media_data[i].message_type,
-          //         attatchment_name: media_data[i].attatchment_name,
-          //         thumbnail: media_data[i].thumbnail,
-          //         reciever: {
-          //           createMany: {
-          //             data: recieverData,
-          //           },
-          //         },
-          //       },
-          //     });
-          //   }
-          //   const updateLastMessageTime = await prisma.groups.update({
-          //     where: {
-          //       group_id,
-          //     },
-          //     data: {
-          //       last_message_time: new Date(),
-          //     },
-          //   });
-          //   sendMediaMessageToGroup(sender_id, reciever, media);
-          //   // Notifications
-          //   // for (let i = 0; i < reciever.length; i++) {
-          //   //   const isNotificationsMute = await isGroupMuteFalse(
-          //   //     reciever[i].member.user_id,
-          //   //     group_id
-          //   //   );
-          //   //   const isAllowed = await isNotificationAllowed(
-          //   //     reciever[i].member.user_id
-          //   //   );
-          //   //   if (!isNotificationsMute) {
-          //   //     if (isAllowed) {
-          //   //       if (isAllowed?.is_private_chat_notifications === true) {
-          //   //         const getFcmToken = isAllowed?.fcm_token;
-          //   //         if (getFcmToken) {
-          //   //           SendNotification(getFcmToken, {
-          //   //             title: username,
-          //   //             body: `Sent you ${media_type}`,
-          //   //           })
-          //   //             .then((res) => {
-          //   //               console.log(res, "done");
-          //   //             })
-          //   //             .catch((error) => {
-          //   //               console.log(error, "Error sending notification");
-          //   //             });
-          //   //         }
-          //   //       }
-          //   //     }
-          //   //   }
-          //   // }
-          //   return res.status(200).send(getSuccessData("Sent successful"));
-          // }
+          if (media_type === MediaType.VIDEO) {
+            if (req.files) {
+              for (let i = 0; i < req.files.length; i++) {
+                const file = req.files[i];
+                if (file) {
+                  var filePath = "";
+                  await ffmpeg({ source: file.path })
+                    .on("filenames", async (filenames) => {
+                      filePath = "media/" + filenames[0];
+                      let thumbnailPath = fs.createWriteStream(filePath);
+                      file.thumbnailPath = thumbnailPath.path;
+                    })
+                    .on("end", async () => {
+                      console.log("end state");
+                      console.log("Thumbnaillocation");
+                    })
+                    .on("error", (err) => {
+                      console.log("error", err);
+                    })
+                    .takeScreenshots(
+                      {
+                        filename: `${v4()}`,
+                        timemarks: [3],
+                      },
+                      "media/"
+                    );
+                  let { Location } = await uploadFile(file);
+                  if (Location) {
+                    let { Location } = await uploadThumbnail(file);
+                    file.thumbnailLocation = Location;
+                  }
+                  media_data.push({
+                    sender_id,
+                    group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    reply_of,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    thumbnail: file.thumbnailLocation,
+                  });
+                  media.push({
+                    sender_id,
+                    group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    reply_of,
+                    attatchment_name: file.originalname,
+                    thumbnail: file.thumbnailLocation,
+                    user_sender: user_sender_one_to_one,
+                    message_time: new Date().toLocaleTimeString(),
+                  });
+                }
+                if (fs.existsSync(file.path)) {
+                  fs.unlinkSync(file.path);
+                }
+              }
+            }
+            for (let i = 0; i < media_data?.length; i++) {
+              const addMedia = await prisma.group_messages.create({
+                data: {
+                  sender_id: media_data[i].sender_id,
+                  group_id: media_data[i].group_id,
+                  media_caption: media_data[i].media_caption,
+                  media_type: media_data[i].media_type,
+                  attatchment: media_data[i].attatchment,
+                  message_type: media_data[i].message_type,
+                  attatchment_name: media_data[i].attatchment_name,
+                  thumbnail: media_data[i].thumbnail,
+                  reply_of: media[i].reply_of ? media_data[i].reply_of : null,
+                  reciever: {
+                    createMany: {
+                      data: recieverData,
+                    },
+                  },
+                },
+              });
+            }
+            const updateLastMessageTime = await prisma.groups.update({
+              where: {
+                group_id,
+              },
+              data: {
+                last_message_time: new Date(),
+              },
+            });
+            sendMediaMessageToGroup(sender_id, reciever, media);
+            // Notifications;
+            for (let i = 0; i < reciever.length; i++) {
+              const isNotificationsMute = await isGroupMuteFalse(
+                reciever[i].member.user_id,
+                group_id
+              );
+              const isAllowed = await isNotificationAllowed(
+                reciever[i].member.user_id
+              );
+              if (!isNotificationsMute) {
+                if (isAllowed) {
+                  if (isAllowed?.is_group_chat_notifications === true) {
+                    const getFcmToken = isAllowed?.fcm_token;
+                    if (getFcmToken) {
+                      SendNotification(
+                        getFcmToken,
+                        {
+                          title: isGroupExists?.group_name,
+                          body: username,
+                        },
+                        {
+                          profile_img: profile_img,
+                          message: `sent you ${media_type}`,
+                        }
+                      )
+                        .then((res) => {
+                          console.log(res, "done");
+                        })
+                        .catch((error) => {
+                          console.log(error, "Error sending notification");
+                        });
+                    }
+                  }
+                }
+              }
+            }
+            return res.status(200).send(getSuccessData("Sent successful"));
+          }
+
           if (req.files) {
             for (const file of req.files) {
               if (file) {
@@ -1010,14 +1015,21 @@ router.post(
             );
             if (!isNotificationsMute) {
               if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_private_chat_notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let mediaType = media_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${mediaType}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        profile_img: profile_img,
+                        message: `sent you ${media_type}`,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1077,13 +1089,20 @@ router.post(
             );
             if (!isNotificationsMute) {
               if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_private_chat_notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `${message_body}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        profile_img: profile_img,
+                        message: message_body,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1143,13 +1162,20 @@ router.post(
             );
             if (!isNotificationsMute) {
               if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_private_chat_notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `${message_body}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        profile_img: profile_img,
+                        message: message_body,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1231,14 +1257,21 @@ router.post(
             );
             if (!isNotificationsMute) {
               if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_private_chat_notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let messageType = message_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${messageType}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        profile_img: profile_img,
+                        message: `sent ${messageType}`,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1415,10 +1448,16 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let mediaType = media_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${mediaType}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent ${mediaType}`,
+                      },
+                      {
+                        profile_img: profile_img,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1495,10 +1534,16 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let mediaType = media_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${mediaType}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent ${mediaType}`,
+                      },
+                      {
+                        profile_img: profile_img,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1551,10 +1596,16 @@ router.post(
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
-                  SendNotification(getFcmToken, {
-                    title: username,
-                    body: `${message_body}`,
-                  })
+                  SendNotification(
+                    getFcmToken,
+                    {
+                      title: username,
+                      body: `${message_body}`,
+                    },
+                    {
+                      profile_img: profile_img,
+                    }
+                  )
                     .then((res) => {
                       console.log(res, "done");
                     })
@@ -1600,10 +1651,16 @@ router.post(
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
-                  SendNotification(getFcmToken, {
-                    title: username,
-                    body: `${message_body}`,
-                  })
+                  SendNotification(
+                    getFcmToken,
+                    {
+                      title: username,
+                      body: `${message_body}`,
+                    },
+                    {
+                      profile_img: profile_img,
+                    }
+                  )
                     .then((res) => {
                       console.log(res, "done");
                     })
@@ -1669,10 +1726,16 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let messageType = message_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent you ${messageType}`,
-                    })
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent you ${messageType}`,
+                      },
+                      {
+                        profile_img: profile_img,
+                      }
+                    )
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1965,7 +2028,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         delete arr.reciever.i_send_messages;
         delete arr.reciever.i_recieve_messages;
       }
-     
 
       const obj = arr.reciever;
       obj.last_message =
