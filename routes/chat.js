@@ -1765,11 +1765,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                // groups_i_mute: {
-                //   where: {
-                //     user_id,
-                //   },
-                // },
+                groups_i_mute: {
+                  where: {
+                    user_id,
+                  },
+                },
               },
             },
             group_messages: {
@@ -1837,11 +1837,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                // groups_i_mute: {
-                //   where: {
-                //     user_id,
-                //   },
-                // },
+                groups_i_mute: {
+                  where: {
+                    user_id,
+                  },
+                },
               },
             },
             group_messages: {
@@ -1865,11 +1865,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             is_group_chat: true,
             created_at: true,
             updated_at: true,
-            // group_mutes: {
-            //   where: {
-            //     user_id,
-            //   },
-            // },
+            group_mutes: {
+              where: {
+                user_id,
+              },
+            },
             group_messages: {
               // include: {
               //   reciever: true,
@@ -1909,11 +1909,11 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 is_group_chat: true,
                 created_at: true,
                 updated_at: true,
-                // group_mutes: {
-                //   where: {
-                //     user_id,
-                //   },
-                // },
+                group_mutes: {
+                  where: {
+                    user_id,
+                  },
+                },
                 group_messages: {
                   // include: {
                   //   reciever: true,
@@ -1932,7 +1932,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
     });
 
-    const first = contacts?.primary_user_channel;
+    const first = contacts.primary_user_channel;
     const send = first?.map((arr) => {
       // if (arr.reciever.user_i_block.length > 0) {
       //   arr.reciever.is_user_i_block = true;
@@ -1946,15 +1946,15 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-      // if (arr.reciever.groups_i_mute?.length > 0) {
-      //   arr.reciever.i_mute_this_group = true;
-      // } else {
-      //   arr.reciever.i_mute_this_group = false;
-      // }
-      // delete arr.reciever.groups_i_mute;
+      if (arr.reciever.groups_i_mute.length > 0) {
+        arr.reciever.i_mute_this_group = true;
+      } else {
+        arr.reciever.i_mute_this_group = false;
+      }
+      delete arr.reciever.groups_i_mute;
       if (
-        arr.reciever?.i_send_messages.length > 0 &&
-        arr.reciever?.i_recieve_messages.length > 0
+        arr.reciever.i_send_messages.length > 0 &&
+        arr.reciever.i_recieve_messages.length > 0
       ) {
         arr.reciever.is_chat_start = true;
       } else {
@@ -1990,7 +1990,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return obj;
     });
 
-    const second = contacts?.secondary_user_channel;
+    const second = contacts.secondary_user_channel;
     const recieve = second?.map((ary) => {
       // if (ary.sender.user_i_block.length > 0) {
       //   ary.sender.is_user_i_block = true;
@@ -2004,20 +2004,20 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-      // if (ary.sender.groups_i_mute?.length > 0) {
-      //   ary.sender.i_mute_this_group = true;
-      // } else {
-      //   ary.sender.i_mute_this_group = false;
-      // }
-      // delete ary.sender.groups_i_mute;
-      const obj = ary?.sender;
-      if (obj.i_send_messages?.length > 0 && obj.i_recieve_messages?.length > 0) {
+      if (ary.sender.groups_i_mute.length > 0) {
+        ary.sender.i_mute_this_group = true;
+      } else {
+        ary.sender.i_mute_this_group = false;
+      }
+      delete ary.sender.groups_i_mute;
+      const obj = ary.sender;
+      if (obj.i_send_messages.length > 0 && obj.i_recieve_messages.length > 0) {
         obj.is_chat_start = true;
       } else {
         obj.is_chat_start = false;
       }
-      delete obj?.i_send_messages;
-      delete obj?.i_recieve_messages;
+      delete obj.i_send_messages;
+      delete obj.i_recieve_messages;
 
       obj.last_message =
         ary.group_messages.length > 0
@@ -2045,15 +2045,15 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       return obj;
     });
 
-    const my_created_groups = contacts?.groups_i_created;
+    const my_created_groups = contacts.groups_i_created;
     const add = await Promise.all(
       my_created_groups?.map(async (data) => {
-        // if (data.group_mutes?.length > 0) {
-        //   data.i_mute_this_group = true;
-        // } else {
-        //   data.i_mute_this_group = false;
-        // }
-        // delete data.group_mutes;
+        if (data.group_mutes.length > 0) {
+          data.i_mute_this_group = true;
+        } else {
+          data.i_mute_this_group = false;
+        }
+        delete data.group_mutes;
         data.last_message =
           data.group_messages.length > 0
             ? data.group_messages[0].message_body
@@ -2088,7 +2088,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         return data;
       })
     );
-    const fourth = contacts?.groups_i_joined;
+    const fourth = contacts.groups_i_joined;
 
     const my_joined_groups = [];
 
@@ -2111,12 +2111,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
     });
     const joined = await Promise.all(
       my_joined_groups.map(async (data) => {
-        // if (data.group_mutes?.length > 0) {
-        //   data.i_mute_this_group = true;
-        // } else {
-        //   data.i_mute_this_group = false;
-        // }
-        // delete data.group_mutes;
+        if (data.group_mutes.length > 0) {
+          data.i_mute_this_group = true;
+        } else {
+          data.i_mute_this_group = false;
+        }
+        delete data.group_mutes;
         data.last_message =
           data.group_messages.length > 0
             ? data.group_messages[0].message_body
