@@ -1287,75 +1287,76 @@ router.post(
           // }
           return res.status(200).send(getSuccessData("sent successfull"));
         }
-        // if (message_type === MessageType.LOCATION) {
-        //   media_data = null;
-        //   deleteUploadedImage(req);
-        //   const createMessage = await prisma.group_messages.create({
-        //     data: {
-        //       sender_id,
-        //       group_id,
-        //       longitude,
-        //       latitude,
-        //       message_type,
-        //       reply_of,
-        //     },
-        //   });
-        //   const updateLastMessageTime = await prisma.groups.update({
-        //     where: {
-        //       group_id,
-        //     },
-        //     data: {
-        //       last_message_time: createMessage?.created_at,
-        //     },
-        //   });
-        //   sendMessageToGroup(
-        //     sender_id,
-        //     user_sender_group,
-        //     reciever,
-        //     message_body,
-        //     reply_of,
-        //     (media = null),
-        //     message_type,
-        //     group_id
-        //   );
-        //   // Notifications
-        //   // for (let i = 0; i < reciever.length; i++) {
-        //   //   const isNotificationsMute = await isGroupMuteFalse(
-        //   //     reciever[i].member.user_id,
-        //   //     group_id
-        //   //   );
-        //   //   const isAllowed = await isNotificationAllowed(
-        //   //     reciever[i].member.user_id
-        //   //   );
-        //   //   if (!isNotificationsMute) {
-        //   //     if (isAllowed?.notifications === true) {
-        //   //       if (isAllowed?.is_group_chat_notifications === true) {
-        //   //         const getFcmToken = isAllowed?.fcm_token;
-        //   //         if (getFcmToken) {
-        //   //           SendNotification(
-        //   //             getFcmToken,
-        //   //             {
-        //   //               title: isGroupExists?.group_name,
-        //   //               body: username,
-        //   //             },
-        //   //             {
-        //   //               profile_img: profile_img,
-        //   //               message: message_body,
-        //   //             }
-        //   //           )
-        //   //             .then((res) => {
-        //   //               console.log(res, "done");
-        //   //             })
-        //   //             .catch((error) => {
-        //   //               console.log(error, "Error sending notification");
-        //   //             });
-        //   //         }
-        //   //       }
-        //   //     }
-        //   //   }
-        //   // }
-        //   return res.status(200).send(getSuccessData(createMessage));
-        // }
+        if (message_type === MessageType.LOCATION) {
+          media_data = null;
+          deleteUploadedImage(req);
+          const createMessage = await prisma.group_messages.create({
+            data: {
+              sender_id,
+              group_id,
+              longitude,
+              latitude,
+              message_type,
+              reply_of,
+            },
+          });
+          const updateLastMessageTime = await prisma.groups.update({
+            where: {
+              group_id,
+            },
+            data: {
+              last_message_time: createMessage?.created_at,
+            },
+          });
+          sendMessageToGroup(
+            sender_id,
+            user_sender_group,
+            reciever,
+            longitude,
+            latitude,
+            reply_of,
+            (media = null),
+            message_type,
+            group_id
+          );
+          // Notifications
+          // for (let i = 0; i < reciever.length; i++) {
+          //   const isNotificationsMute = await isGroupMuteFalse(
+          //     reciever[i].member.user_id,
+          //     group_id
+          //   );
+          //   const isAllowed = await isNotificationAllowed(
+          //     reciever[i].member.user_id
+          //   );
+          //   if (!isNotificationsMute) {
+          //     if (isAllowed?.notifications === true) {
+          //       if (isAllowed?.is_group_chat_notifications === true) {
+          //         const getFcmToken = isAllowed?.fcm_token;
+          //         if (getFcmToken) {
+          //           SendNotification(
+          //             getFcmToken,
+          //             {
+          //               title: isGroupExists?.group_name,
+          //               body: username,
+          //             },
+          //             {
+          //               profile_img: profile_img,
+          //               message: message_body,
+          //             }
+          //           )
+          //             .then((res) => {
+          //               console.log(res, "done");
+          //             })
+          //             .catch((error) => {
+          //               console.log(error, "Error sending notification");
+          //             });
+          //         }
+          //       }
+          //     }
+          //   }
+          // }
+          return res.status(200).send(getSuccessData(createMessage));
+        }
       } else {
         // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {

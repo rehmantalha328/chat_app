@@ -59,7 +59,7 @@ router.post("/chkUsername", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/getMyProfile", trimRequest.all, async (req, res) => {
+router.get("/getMyProfile", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
     const getMyProfile = await prisma.user.findFirst({
@@ -82,6 +82,9 @@ router.post("/getMyProfile", trimRequest.all, async (req, res) => {
             created_at: "desc",
           },
         },
+        is_group_chat_notifications: true,
+        is_private_chat_notifications: true,
+        notifications: true,
         phone: true,
         about_me: true,
         birthday: true,

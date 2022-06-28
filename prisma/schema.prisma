@@ -115,6 +115,8 @@ model group_messages {
   attatchment_name String?
   contact_name     String?
   contact_number   String?
+  longitude        Float?
+  latitude         Float?
   media_type       MediaType?
   media_caption    String?
   seen             Boolean            @default(false)
