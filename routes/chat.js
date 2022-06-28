@@ -1312,12 +1312,12 @@ router.post(
             sender_id,
             user_sender_group,
             reciever,
-            longitude,
-            latitude,
             reply_of,
             (media = null),
             message_type,
-            group_id
+            group_id,
+            longitude,
+            latitude,
           );
           // Notifications
           // for (let i = 0; i < reciever.length; i++) {
@@ -1819,6 +1819,66 @@ router.post(
             //   }
             // }
             return res.status(200).send(getSuccessData("Sent successful"));
+          }
+          if (message_type === MessageType.LOCATION) {
+            media_data = null;
+            deleteUploadedImage(req);
+            const createMessage = await prisma.group_messages.create({
+              data: {
+                sender_id,
+                reciever_id,
+                group_id: chkChannel
+                  ? chkChannel.group_id
+                  : chkChannel.group_id,
+                longitude,
+                latitude,
+                message_type,
+              },
+            });
+            sendTextMessage(
+              sender_id,
+              user_sender_one_to_one,
+              reciever_id,
+              message_body,
+              reply_of,
+              (media = null),
+              message_type,
+              chkChannel?.group_id,
+              longitude,
+              latitude
+            );
+            // Notifications
+            // const isNotificationsMute = await isGroupMuteFalse(
+            //   reciever_id,
+            //   group_id
+            // );
+            // const isAllowed = await isNotificationAllowed(reciever_id);
+            // if (!isNotificationsMute) {
+            //   if (isAllowed?.notifications === true) {
+            //     if (isAllowed?.is_private_chat_notifications === true) {
+            //       const getFcmToken = isAllowed?.fcm_token;
+            //       if (getFcmToken) {
+            //         SendNotification(
+            //           getFcmToken,
+            //           {
+            //             title: username,
+            //             body: `${message_body}`,
+            //           },
+            //           {
+            //             profile_img: profile_img,
+            //           }
+            //         )
+            //           .then((res) => {
+            //             console.log(res, "done");
+            //           })
+            //           .catch((error) => {
+            //             console.log(error, "Error sending notification");
+            //           });
+            //       }
+            //     }
+            //   }
+            // }
+            return res.status(200).send(getSuccessData(createMessage));
           }
           return res
             .status(404)

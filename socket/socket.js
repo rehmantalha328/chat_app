@@ -104,7 +104,7 @@ const removeMember = (admin_id, member_id, group_id, is_removed_from_group) => {
   }
 };
 
-const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, message_type, group_id) => {
+const sendMessageToGroup = (sender_id, user_sender, reciever, message, reply_of, media, message_type, group_id,longitude,latitude) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     reciever?.forEach((user) => {
@@ -116,8 +116,11 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, me
           user_sender: user_sender,
           attatchment: media,
           message_body: message,
+          reply_of,
           message_type,
           group_id,
+          longitude,
+          latitude,
           message_time: new Date().toLocaleTimeString(),
         });
       }
@@ -125,7 +128,7 @@ const sendMessageToGroup = (sender_id, user_sender, reciever, message, media, me
   }
 };
 
-const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media, message_type, group_id) => {
+const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, reply_of, media, message_type, group_id, longitude,latitude) => {
   const chkSender = findSender(sender_id);
   if (chkSender) {
     const chkReciever = findReciever(reciever_id);
@@ -135,9 +138,12 @@ const sendTextMessage = (sender_id, user_sender, reciever_id, textMessage, media
         user_sender: user_sender,
         reciever_id,
         message_body: textMessage,
+        reply_of,
         attatchment: media,
         message_type,
         group_id,
+        longitude,
+        latitude,
         message_time: new Date().toLocaleTimeString(),
       });
     }
