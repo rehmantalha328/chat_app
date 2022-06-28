@@ -233,6 +233,14 @@ function messageValidation(data) {
       }),
       otherwise: Joi.string(),
     }),
+    longitude: Joi.when("message_type",{
+      is: MessageType.LOCATION.toString(),
+      then: Joi.number().required(),
+    }),
+    latitude: Joi.when("message_type",{
+      is: MessageType.LOCATION.toString(),
+      then: Joi.number().required(),
+    })
   });
   return messageSchema.validate(data);
 }
