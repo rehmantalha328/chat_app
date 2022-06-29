@@ -61,7 +61,7 @@ router.post("/chkUsername", trimRequest.all, async (req, res) => {
   }
 });
 
-router.post("/getMyProfile", trimRequest.all, async (req, res) => {
+router.get("/getMyProfile", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
     const getMyProfile = await prisma.user.findFirst({
