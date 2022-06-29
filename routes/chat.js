@@ -50,6 +50,9 @@ const {
   sendContactMessage,
   sendContactMessageToGroup,
   seenMessages,
+  muteSpecificChatNotification,
+  globallyMutePrivateChat,
+  globallyMuteGroupChat,
 } = require("../socket/socket");
 const imagemulter = require("../middleWares/imageMulter");
 const mediaMulter = require("../middleWares/media");
@@ -458,6 +461,11 @@ router.post(
             id: chkExistingMuteRecord?.id,
           },
         });
+        muteSpecificChatNotification(
+          user_id,
+          group_id,
+          (i_mute_this_group = false)
+        );
         return res
           .status(200)
           .send(getSuccessData("You have successfully unmuted this chat"));
@@ -468,6 +476,11 @@ router.post(
           group_id,
         },
       });
+      muteSpecificChatNotification(
+        user_id,
+        group_id,
+        (i_mute_this_group = true)
+      );
       return res
         .status(200)
         .send(getSuccessData("You have successfully muted this chat"));
@@ -495,6 +508,10 @@ router.post(
             is_private_chat_notifications: false,
           },
         });
+        globallyMutePrivateChat(
+          user_id,
+          (is_private_chat_notifications = false)
+        );
         return res
           .status(200)
           .send(
@@ -511,6 +528,7 @@ router.post(
           is_private_chat_notifications: true,
         },
       });
+      globallyMutePrivateChat(user_id, (is_private_chat_notifications = true));
       return res
         .status(200)
         .send(
@@ -542,6 +560,7 @@ router.post(
             is_group_chat_notifications: false,
           },
         });
+        globallyMuteGroupChat(user_id, (is_group_chat_notifications = false));
         return res
           .status(200)
           .send(
@@ -558,6 +577,7 @@ router.post(
           is_group_chat_notifications: true,
         },
       });
+      globallyMuteGroupChat(user_id, (is_group_chat_notifications = true));
       return res
         .status(200)
         .send(
@@ -1312,7 +1332,7 @@ router.post(
             message_type,
             group_id,
             longitude,
-            latitude,
+            latitude
           );
           // Notifications
           // for (let i = 0; i < reciever.length; i++) {
@@ -1515,13 +1535,10 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let mediaType = media_type.toLowerCase();
-                    SendNotification(
-                      getFcmToken,
-                      {
-                        title: username,
-                        body: `Sent ${mediaType}`,
-                      },
-                    )
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `Sent ${mediaType}`,
+                    })
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1598,13 +1615,10 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let mediaType = media_type.toLowerCase();
-                    SendNotification(
-                      getFcmToken,
-                      {
-                        title: username,
-                        body: `Sent ${mediaType}`,
-                      },
-                    )
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `Sent ${mediaType}`,
+                    })
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1657,13 +1671,10 @@ router.post(
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
-                  SendNotification(
-                    getFcmToken,
-                    {
-                      title: username,
-                      body: `${message_body}`,
-                    },
-                  )
+                  SendNotification(getFcmToken, {
+                    title: username,
+                    body: `${message_body}`,
+                  })
                     .then((res) => {
                       console.log(res, "done");
                     })
@@ -1709,13 +1720,10 @@ router.post(
               if (isAllowed?.is_private_chat_notifications === true) {
                 const getFcmToken = isAllowed?.fcm_token;
                 if (getFcmToken) {
-                  SendNotification(
-                    getFcmToken,
-                    {
-                      title: username,
-                      body: `${message_body}`,
-                    },
-                  )
+                  SendNotification(getFcmToken, {
+                    title: username,
+                    body: `${message_body}`,
+                  })
                     .then((res) => {
                       console.log(res, "done");
                     })
@@ -1781,13 +1789,10 @@ router.post(
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
                     let messageType = message_type.toLowerCase();
-                    SendNotification(
-                      getFcmToken,
-                      {
-                        title: username,
-                        body: `Sent you ${messageType}`,
-                      },
-                    )
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `Sent you ${messageType}`,
+                    })
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1838,13 +1843,10 @@ router.post(
                 if (isAllowed?.is_private_chat_notifications === true) {
                   const getFcmToken = isAllowed?.fcm_token;
                   if (getFcmToken) {
-                    SendNotification(
-                      getFcmToken,
-                      {
-                        title: username,
-                        body: `${message_body}`,
-                      },
-                    )
+                    SendNotification(getFcmToken, {
+                      title: username,
+                      body: `${message_body}`,
+                    })
                       .then((res) => {
                         console.log(res, "done");
                       })
@@ -1880,16 +1882,18 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
       select: {
         primary_user_channel: {
-          where:{
-            NOT:[{
-            reciever:{
-              user_blocked_me: {
-                some: {
-                  blocker_id: user_id,
+          where: {
+            NOT: [
+              {
+                reciever: {
+                  user_blocked_me: {
+                    some: {
+                      blocker_id: user_id,
+                    },
+                  },
                 },
               },
-            }
-          }]
+            ],
           },
           select: {
             reciever: {
@@ -1950,10 +1954,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            group_mutes:{
-              where:{
+            group_mutes: {
+              where: {
                 user_id,
-              }
+              },
             },
             group_messages: {
               orderBy: {
@@ -1963,16 +1967,18 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           },
         },
         secondary_user_channel: {
-          where:{
-            NOT:[{
-              sender:{
-                user_blocked_me: {
-                  some: {
-                    blocker_id: user_id,
+          where: {
+            NOT: [
+              {
+                sender: {
+                  user_blocked_me: {
+                    some: {
+                      blocker_id: user_id,
+                    },
                   },
                 },
-              }
-            }] 
+              },
+            ],
           },
           select: {
             sender: {
@@ -2033,10 +2039,10 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            group_mutes:{
-              where:{
+            group_mutes: {
+              where: {
                 user_id,
-              }
+              },
             },
             group_messages: {
               orderBy: {

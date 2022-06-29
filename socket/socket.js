@@ -218,6 +218,36 @@ const seenMessages = (reciever_id,sender_id)=>{
   }
 };
 
+const muteSpecificChatNotification = (user_id,group_id,i_mute_this_group) =>{
+  const chkUser = findSender(user_id);
+  if (chkUser) {
+      io.to(chkUser.socketId).emit("muteSpecificChatNotification", {
+        group_id,
+        i_mute_this_group,
+      });
+    }
+};
+
+const globallyMutePrivateChat = (user_id, is_private_chat_notifications) =>{
+  const chkUser = findSender(user_id);
+  if (chkUser) {
+      io.to(chkUser.socketId).emit("muteNotificationGloballyForPrivateChat", {
+        group_id,
+        is_private_chat_notifications,
+      });
+    }
+};
+
+const globallyMuteGroupChat = (user_id, is_group_chat_notifications) =>{
+  const chkUser = findSender(user_id);
+  if (chkUser) {
+      io.to(chkUser.socketId).emit("muteNotificationGloballyForGroupChat", {
+        group_id,
+        is_group_chat_notifications,
+      });
+    }
+};
+
 module.exports = {
   setUpSocket,
   sendTextMessage,
@@ -230,4 +260,7 @@ module.exports = {
   sendContactMessage,
   sendContactMessageToGroup,
   seenMessages,
+  muteSpecificChatNotification,
+  globallyMuteGroupChat,
+  globallyMutePrivateChat,
 };
