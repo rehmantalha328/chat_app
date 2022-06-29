@@ -500,12 +500,12 @@ router.post(
       if (old_phone !== myNumber) {
         return res.status(404).send(getError("Invalid Number"));
       }
+      const phone = "+" + clean(value.phone);
       if (old_phone === phone) {
         return res
           .status(404)
           .send(getError("New phone number must be different from old number"));
       }
-      const phone = "+" + clean(value.phone);
       // const existingOtp = await chkExistingOtp(old_phone, otp);
       // if (!existingOtp) {
       //   return res.status(404).send(getError("Otp doesn't match"));
