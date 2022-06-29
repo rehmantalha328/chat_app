@@ -37,6 +37,7 @@ const {
   unblockUser,
 } = require("../database_queries/blockUsers");
 const { PrivacyType } = require("@prisma/client");
+const { send_message } = require("../twilio/twilio");
 
 // add username
 router.post("/chkUsername", trimRequest.all, async (req, res) => {
