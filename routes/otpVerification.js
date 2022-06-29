@@ -8,18 +8,13 @@ const {
   chkExistingOtp,
 } = require("../database_queries/auth");
 const {
-  emailValidation,
   phoneAndOtpValidation,
   phoneValidation,
-  emailPhoneAndOtpValidation,
-  updateProfile,
-  changePhoneNumberValidation,
 } = require("../joi_validations/validate");
 const {
   getError,
   getSuccessData,
   clean,
-  timeExpired,
 } = require("../helper_functions/helpers");
 const { send_message } = require("../twilio/twilio");
 
@@ -59,11 +54,11 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         },
       });
     }
-    const messageSent = await send_message({
-      body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
-      number: phone,
-    });
-    if (messageSent) {
+    // const messageSent = await send_message({
+    //   body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
+    //   number: phone,
+    // });
+    // if (messageSent) {
       return res
         .status(200)
         .send(
@@ -71,9 +66,9 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
             "Otp sent to your phone, which is valid only for 5 minutes"
           )
         );
-    } else {
-      return res.status(404).send(getError("Please try again"));
-    }
+    // } else {
+    //   return res.status(404).send(getError("Please try again"));
+    // }
   } catch (err) {
     if (err && err.message) {
       return res.status(500).send(getError(err.message));
@@ -103,10 +98,10 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
         .status(404)
         .send(getError("This phone number is already verified"));
     }
-    const chkOtpExists = await chkExistingOtp(phone, otp);
-    if (!chkOtpExists) {
-      return res.status(404).send(getError("Invalid otp code"));
-    }
+    // const chkOtpExists = await chkExistingOtp(phone, otp);
+    // if (!chkOtpExists) {
+    //   return res.status(404).send(getError("Invalid otp code"));
+    // }
     await prisma.user.update({
       where: {
         user_id: PhoneExists?.user_id,
@@ -166,11 +161,11 @@ router.post(
       } else {
         return res.status(404).send(getError("Phone number doesn't exist"));
       }
-      const messageSent = await send_message({
-        body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
-        number: phone,
-      });
-      if (messageSent) {
+      // const messageSent = await send_message({
+      //   body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
+      //   number: phone,
+      // });
+      // if (messageSent) {
         return res
           .status(200)
           .send(
@@ -178,9 +173,9 @@ router.post(
               "Otp sent to your phone, which is valid only for 5 minutes"
             )
           );
-      } else {
-        return res.status(404).send(getError("Please try again"));
-      }
+      // } else {
+      //   return res.status(404).send(getError("Please try again"));
+      // }
     } catch (err) {
       if (err && err.message) {
         return res.status(500).send(getError(err.message));
@@ -210,10 +205,10 @@ router.post(
           .status(404)
           .send(getError("This phone number is not registered"));
       }
-      const existingOtp = await chkExistingOtp(phone, otp);
-      if (!existingOtp) {
-        return res.status(404).send(getError("Otp doesn't match"));
-      }
+      // const existingOtp = await chkExistingOtp(phone, otp);
+      // if (!existingOtp) {
+      //   return res.status(404).send(getError("Otp doesn't match"));
+      // }
       await prisma.user.update({
         where: {
           user_id: PhoneExists?.user_id,

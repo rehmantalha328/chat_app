@@ -908,41 +908,40 @@ router.post(
             });
             sendMediaMessageToGroup(sender_id, reciever, media);
             // Notifications;
-            // for (let i = 0; i < reciever.length; i++) {
-            //   const isNotificationsMute = await isGroupMuteFalse(
-            //     reciever[i].member.user_id,
-            //     group_id
-            //   );
-            //   const isAllowed = await isNotificationAllowed(
-            //     reciever[i].member.user_id
-            //   );
-            //   if (!isNotificationsMute) {
-            //     if (isAllowed) {
-            //       if (isAllowed?.is_group_chat_notifications === true) {
-            //         const getFcmToken = isAllowed?.fcm_token;
-            //         if (getFcmToken) {
-            //           SendNotification(
-            //             getFcmToken,
-            //             {
-            //               title: isGroupExists?.group_name,
-            //               body: username,
-            //             },
-            //             {
-            //               profile_img: profile_img,
-            //               message: `sent you ${media_type}`,
-            //             }
-            //           )
-            //             .then((res) => {
-            //               console.log(res, "done");
-            //             })
-            //             .catch((error) => {
-            //               console.log(error, "Error sending notification");
-            //             });
-            //         }
-            //       }
-            //     }
-            //   }
-            // }
+            for (let i = 0; i < reciever.length; i++) {
+              const isNotificationsMute = await isGroupMuteFalse(
+                reciever[i].member.user_id,
+                group_id
+              );
+              const isAllowed = await isNotificationAllowed(
+                reciever[i].member.user_id
+              );
+              if (!isNotificationsMute) {
+                if (isAllowed) {
+                  if (isAllowed?.is_group_chat_notifications === true) {
+                    const getFcmToken = isAllowed?.fcm_token;
+                    if (getFcmToken) {
+                      SendNotification(
+                        getFcmToken,
+                        {
+                          title: isGroupExists?.group_name,
+                          body: username,
+                        },
+                        {
+                          message: `sent you ${media_type}`,
+                        }
+                      )
+                        .then((res) => {
+                          console.log(res, "done");
+                        })
+                        .catch((error) => {
+                          console.log(error, "Error sending notification");
+                        });
+                    }
+                  }
+                }
+              }
+            }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
 
@@ -1007,42 +1006,41 @@ router.post(
           });
           sendMediaMessageToGroup(sender_id, reciever, media);
           // Notifications
-          // for (let i = 0; i < reciever.length; i++) {
-          //   const isNotificationsMute = await isGroupMuteFalse(
-          //     reciever[i].member.user_id,
-          //     group_id
-          //   );
-          //   const isAllowed = await isNotificationAllowed(
-          //     reciever[i].member.user_id
-          //   );
-          //   if (!isNotificationsMute) {
-          //     if (isAllowed?.notifications === true) {
-          //       if (isAllowed?.is_group_chat_notifications === true) {
-          //         const getFcmToken = isAllowed?.fcm_token;
-          //         if (getFcmToken) {
-          //           let mediaType = media_type.toLowerCase();
-          //           SendNotification(
-          //             getFcmToken,
-          //             {
-          //               title: isGroupExists?.group_name,
-          //               body: username,
-          //             },
-          //             {
-          //               profile_img: profile_img,
-          //               message: `sent you ${media_type}`,
-          //             }
-          //           )
-          //             .then((res) => {
-          //               console.log(res, "done");
-          //             })
-          //             .catch((error) => {
-          //               console.log(error, "Error sending notification");
-          //             });
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
+          for (let i = 0; i < reciever.length; i++) {
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever[i].member.user_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(
+              reciever[i].member.user_id
+            );
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        message: `sent you ${media_type}`,
+                      }
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData("sent successful"));
         }
         if (message_type === MessageType.TEXT) {
@@ -1081,41 +1079,40 @@ router.post(
             group_id
           );
           // Notifications
-          // for (let i = 0; i < reciever.length; i++) {
-          //   const isNotificationsMute = await isGroupMuteFalse(
-          //     reciever[i].member.user_id,
-          //     group_id
-          //   );
-          //   const isAllowed = await isNotificationAllowed(
-          //     reciever[i].member.user_id
-          //   );
-          //   if (!isNotificationsMute) {
-          //     if (isAllowed?.notifications === true) {
-          //       if (isAllowed?.is_group_chat_notifications === true) {
-          //         const getFcmToken = isAllowed?.fcm_token;
-          //         if (getFcmToken) {
-          //           SendNotification(
-          //             getFcmToken,
-          //             {
-          //               title: isGroupExists?.group_name,
-          //               body: username,
-          //             },
-          //             {
-          //               profile_img: profile_img,
-          //               message: message_body,
-          //             }
-          //           )
-          //             .then((res) => {
-          //               console.log(res, "done");
-          //             })
-          //             .catch((error) => {
-          //               console.log(error, "Error sending notification");
-          //             });
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
+          for (let i = 0; i < reciever.length; i++) {
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever[i].member.user_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(
+              reciever[i].member.user_id
+            );
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        message: message_body,
+                      }
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.LINK) {
@@ -1154,41 +1151,40 @@ router.post(
             group_id
           );
           // Notifications
-          // for (let i = 0; i < reciever.length; i++) {
-          //   const isNotificationsMute = await isGroupMuteFalse(
-          //     reciever[i].member.user_id,
-          //     group_id
-          //   );
-          //   const isAllowed = await isNotificationAllowed(
-          //     reciever[i].member.user_id
-          //   );
-          //   if (!isNotificationsMute) {
-          //     if (isAllowed?.notifications === true) {
-          //       if (isAllowed?.is_group_chat_notifications === true) {
-          //         const getFcmToken = isAllowed?.fcm_token;
-          //         if (getFcmToken) {
-          //           SendNotification(
-          //             getFcmToken,
-          //             {
-          //               title: isGroupExists?.group_name,
-          //               body: username,
-          //             },
-          //             {
-          //               profile_img: profile_img,
-          //               message: message_body,
-          //             }
-          //           )
-          //             .then((res) => {
-          //               console.log(res, "done");
-          //             })
-          //             .catch((error) => {
-          //               console.log(error, "Error sending notification");
-          //             });
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
+          for (let i = 0; i < reciever.length; i++) {
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever[i].member.user_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(
+              reciever[i].member.user_id
+            );
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        message: message_body,
+                      }
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.CONTACT) {
@@ -1249,42 +1245,41 @@ router.post(
           });
           sendContactMessageToGroup(sender_id, reciever, newContacts);
           // Notifications
-          // for (let i = 0; i < reciever.length; i++) {
-          //   const isNotificationsMute = await isGroupMuteFalse(
-          //     reciever[i].member.user_id,
-          //     group_id
-          //   );
-          //   const isAllowed = await isNotificationAllowed(
-          //     reciever[i].member.user_id
-          //   );
-          //   if (!isNotificationsMute) {
-          //     if (isAllowed?.notifications === true) {
-          //       if (isAllowed?.is_group_chat_notifications === true) {
-          //         const getFcmToken = isAllowed?.fcm_token;
-          //         if (getFcmToken) {
-          //           let messageType = message_type.toLowerCase();
-          //           SendNotification(
-          //             getFcmToken,
-          //             {
-          //               title: isGroupExists?.group_name,
-          //               body: username,
-          //             },
-          //             {
-          //               profile_img: profile_img,
-          //               message: `sent ${messageType}`,
-          //             }
-          //           )
-          //             .then((res) => {
-          //               console.log(res, "done");
-          //             })
-          //             .catch((error) => {
-          //               console.log(error, "Error sending notification");
-          //             });
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
+          for (let i = 0; i < reciever.length; i++) {
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever[i].member.user_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(
+              reciever[i].member.user_id
+            );
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    let messageType = message_type.toLowerCase();
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        message: `sent ${messageType}`,
+                      }
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData("sent successfull"));
         }
         if (message_type === MessageType.LOCATION) {
@@ -1509,37 +1504,34 @@ router.post(
               media
             );
             // Notifications
-            // const isNotificationsMute = await isGroupMuteFalse(
-            //   reciever_id,
-            //   group_id
-            // );
-            // const isAllowed = await isNotificationAllowed(reciever_id);
-            // if (!isNotificationsMute) {
-            //   if (isAllowed?.notifications === true) {
-            //     if (isAllowed?.is_private_chat_notifications === true) {
-            //       const getFcmToken = isAllowed?.fcm_token;
-            //       if (getFcmToken) {
-            //         let mediaType = media_type.toLowerCase();
-            //         SendNotification(
-            //           getFcmToken,
-            //           {
-            //             title: username,
-            //             body: `Sent ${mediaType}`,
-            //           },
-            //           {
-            //             profile_img: profile_img,
-            //           }
-            //         )
-            //           .then((res) => {
-            //             console.log(res, "done");
-            //           })
-            //           .catch((error) => {
-            //             console.log(error, "Error sending notification");
-            //           });
-            //       }
-            //     }
-            //   }
-            // }
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent ${mediaType}`,
+                      },
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           if (req.files) {
@@ -1595,37 +1587,34 @@ router.post(
           );
           if (createMessage?.count > 0) {
             // Notifications
-            // const isNotificationsMute = await isGroupMuteFalse(
-            //   reciever_id,
-            //   group_id
-            // );
-            // const isAllowed = await isNotificationAllowed(reciever_id);
-            // if (!isNotificationsMute) {
-            //   if (isAllowed?.notifications === true) {
-            //     if (isAllowed?.is_private_chat_notifications === true) {
-            //       const getFcmToken = isAllowed?.fcm_token;
-            //       if (getFcmToken) {
-            //         let mediaType = media_type.toLowerCase();
-            //         SendNotification(
-            //           getFcmToken,
-            //           {
-            //             title: username,
-            //             body: `Sent ${mediaType}`,
-            //           },
-            //           {
-            //             profile_img: profile_img,
-            //           }
-            //         )
-            //           .then((res) => {
-            //             console.log(res, "done");
-            //           })
-            //           .catch((error) => {
-            //             console.log(error, "Error sending notification");
-            //           });
-            //       }
-            //     }
-            //   }
-            // }
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    let mediaType = media_type.toLowerCase();
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent ${mediaType}`,
+                      },
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           deleteUploadedImage(req);
@@ -1658,36 +1647,33 @@ router.post(
             chkChannel?.group_id
           );
           // Notifications
-          // const isNotificationsMute = await isGroupMuteFalse(
-          //   reciever_id,
-          //   group_id
-          // );
-          // const isAllowed = await isNotificationAllowed(reciever_id);
-          // if (!isNotificationsMute) {
-          //   if (isAllowed?.notifications === true) {
-          //     if (isAllowed?.is_private_chat_notifications === true) {
-          //       const getFcmToken = isAllowed?.fcm_token;
-          //       if (getFcmToken) {
-          //         SendNotification(
-          //           getFcmToken,
-          //           {
-          //             title: username,
-          //             body: `${message_body}`,
-          //           },
-          //           {
-          //             profile_img: profile_img,
-          //           }
-          //         )
-          //           .then((res) => {
-          //             console.log(res, "done");
-          //           })
-          //           .catch((error) => {
-          //             console.log(error, "Error sending notification");
-          //           });
-          //       }
-          //     }
-          //   }
-          // }
+          const isNotificationsMute = await isGroupMuteFalse(
+            reciever_id,
+            group_id
+          );
+          const isAllowed = await isNotificationAllowed(reciever_id);
+          if (!isNotificationsMute) {
+            if (isAllowed?.notifications === true) {
+              if (isAllowed?.is_private_chat_notifications === true) {
+                const getFcmToken = isAllowed?.fcm_token;
+                if (getFcmToken) {
+                  SendNotification(
+                    getFcmToken,
+                    {
+                      title: username,
+                      body: `${message_body}`,
+                    },
+                  )
+                    .then((res) => {
+                      console.log(res, "done");
+                    })
+                    .catch((error) => {
+                      console.log(error, "Error sending notification");
+                    });
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.LINK) {
@@ -1713,36 +1699,33 @@ router.post(
             chkChannel?.group_id
           );
           // Notifications
-          // const isNotificationsMute = await isGroupMuteFalse(
-          //   reciever_id,
-          //   group_id
-          // );
-          // const isAllowed = await isNotificationAllowed(reciever_id);
-          // if (!isNotificationsMute) {
-          //   if (isAllowed?.notifications === true) {
-          //     if (isAllowed?.is_private_chat_notifications === true) {
-          //       const getFcmToken = isAllowed?.fcm_token;
-          //       if (getFcmToken) {
-          //         SendNotification(
-          //           getFcmToken,
-          //           {
-          //             title: username,
-          //             body: `${message_body}`,
-          //           },
-          //           {
-          //             profile_img: profile_img,
-          //           }
-          //         )
-          //           .then((res) => {
-          //             console.log(res, "done");
-          //           })
-          //           .catch((error) => {
-          //             console.log(error, "Error sending notification");
-          //           });
-          //       }
-          //     }
-          //   }
-          // }
+          const isNotificationsMute = await isGroupMuteFalse(
+            reciever_id,
+            group_id
+          );
+          const isAllowed = await isNotificationAllowed(reciever_id);
+          if (!isNotificationsMute) {
+            if (isAllowed?.notifications === true) {
+              if (isAllowed?.is_private_chat_notifications === true) {
+                const getFcmToken = isAllowed?.fcm_token;
+                if (getFcmToken) {
+                  SendNotification(
+                    getFcmToken,
+                    {
+                      title: username,
+                      body: `${message_body}`,
+                    },
+                  )
+                    .then((res) => {
+                      console.log(res, "done");
+                    })
+                    .catch((error) => {
+                      console.log(error, "Error sending notification");
+                    });
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData(createMessage));
         }
         if (message_type === MessageType.CONTACT) {
@@ -1787,37 +1770,34 @@ router.post(
           sendContactMessage(sender_id, reciever_id, newContacts);
           if (createContactMessage?.count > 0) {
             // Notifications
-            // const isNotificationsMute = await isGroupMuteFalse(
-            //   reciever_id,
-            //   group_id
-            // );
-            // const isAllowed = await isNotificationAllowed(reciever_id);
-            // if (!isNotificationsMute) {
-            //   if (isAllowed?.notifications === true) {
-            //     if (isAllowed?.is_private_chat_notifications === true) {
-            //       const getFcmToken = isAllowed?.fcm_token;
-            //       if (getFcmToken) {
-            //         let messageType = message_type.toLowerCase();
-            //         SendNotification(
-            //           getFcmToken,
-            //           {
-            //             title: username,
-            //             body: `Sent you ${messageType}`,
-            //           },
-            //           {
-            //             profile_img: profile_img,
-            //           }
-            //         )
-            //           .then((res) => {
-            //             console.log(res, "done");
-            //           })
-            //           .catch((error) => {
-            //             console.log(error, "Error sending notification");
-            //           });
-            //       }
-            //     }
-            //   }
-            // }
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    let messageType = message_type.toLowerCase();
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `Sent you ${messageType}`,
+                      },
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
           if (message_type === MessageType.LOCATION) {
@@ -1848,36 +1828,33 @@ router.post(
               latitude
             );
             // Notifications
-            // const isNotificationsMute = await isGroupMuteFalse(
-            //   reciever_id,
-            //   group_id
-            // );
-            // const isAllowed = await isNotificationAllowed(reciever_id);
-            // if (!isNotificationsMute) {
-            //   if (isAllowed?.notifications === true) {
-            //     if (isAllowed?.is_private_chat_notifications === true) {
-            //       const getFcmToken = isAllowed?.fcm_token;
-            //       if (getFcmToken) {
-            //         SendNotification(
-            //           getFcmToken,
-            //           {
-            //             title: username,
-            //             body: `${message_body}`,
-            //           },
-            //           {
-            //             profile_img: profile_img,
-            //           }
-            //         )
-            //           .then((res) => {
-            //             console.log(res, "done");
-            //           })
-            //           .catch((error) => {
-            //             console.log(error, "Error sending notification");
-            //           });
-            //       }
-            //     }
-            //   }
-            // }
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(reciever_id);
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_private_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: username,
+                        body: `${message_body}`,
+                      },
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
             return res.status(200).send(getSuccessData(createMessage));
           }
           return res
@@ -1903,6 +1880,17 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       },
       select: {
         primary_user_channel: {
+          where:{
+            NOT:[{
+            reciever:{
+              user_blocked_me: {
+                some: {
+                  blocker_id: user_id,
+                },
+              },
+            }
+          }]
+          },
           select: {
             reciever: {
               select: {
@@ -1960,12 +1948,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                groups_i_mute: {
-                  where: {
-                    user_id,
-                  },
-                },
               },
+            },
+            group_mutes:{
+              where:{
+                user_id,
+              }
             },
             group_messages: {
               orderBy: {
@@ -1975,6 +1963,17 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
           },
         },
         secondary_user_channel: {
+          where:{
+            NOT:[{
+              sender:{
+                user_blocked_me: {
+                  some: {
+                    blocker_id: user_id,
+                  },
+                },
+              }
+            }] 
+          },
           select: {
             sender: {
               select: {
@@ -2032,12 +2031,12 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                     ],
                   },
                 },
-                groups_i_mute: {
-                  where: {
-                    user_id,
-                  },
-                },
               },
+            },
+            group_mutes:{
+              where:{
+                user_id,
+              }
             },
             group_messages: {
               orderBy: {
@@ -2141,7 +2140,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete arr.reciever.user_i_block;
       // delete arr.reciever.user_blocked_me;
-      if (arr.reciever?.groups_i_mute?.length > 0) {
+      if (arr.group_mutes?.length > 0) {
         arr.reciever.i_mute_this_group = true;
         // delete arr.reciever.groups_i_mute;
       } else {
@@ -2202,7 +2201,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
       // }
       // delete ary.sender.user_blocked_me;
       // delete ary.sender.user_i_block;
-      if (ary.sender?.groups_i_mute?.length > 0) {
+      if (ary.group_mutes?.length > 0) {
         ary.sender.i_mute_this_group = true;
         // delete ary.sender.groups_i_mute;
       } else {
