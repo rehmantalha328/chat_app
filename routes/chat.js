@@ -498,7 +498,7 @@ router.post(
   trimRequest.all,
   async (req, res) => {
     try {
-      const { user_id, is_private_chat_notifications } = req.user;
+      let { user_id, is_private_chat_notifications } = req.user;
       if (is_private_chat_notifications === true) {
         const mutePrivateChatNotifications = await prisma.user.update({
           where: {
@@ -550,7 +550,7 @@ router.post(
   trimRequest.all,
   async (req, res) => {
     try {
-      const { user_id, is_group_chat_notifications } = req.user;
+      let { user_id, is_group_chat_notifications } = req.user;
       if (is_group_chat_notifications === true) {
         const mutePrivateChatNotifications = await prisma.user.update({
           where: {
