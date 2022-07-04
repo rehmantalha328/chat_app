@@ -24,7 +24,7 @@ const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const imagemulter = require("../middleWares/profile_gallery_multer");
 const { fs } = require("file-system");
 
-// SIMPLE SIGNUP USER
+// Update user password after verification of otp
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   try {
     const { error, value } = updatePasswordValidation(req.body);

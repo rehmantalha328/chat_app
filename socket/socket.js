@@ -9,6 +9,7 @@ const {
 } = require("./users");
 const { getError, getSuccessData } = require("../helper_functions/helpers");
 
+// There is socket connection established and there is connection & disconnection
 const setUpSocket = (server) => {
   io = socketio(server);
   io.on("connect", (socket) => {
@@ -53,8 +54,10 @@ const setUpSocket = (server) => {
     });
   });
 };
+// End this section
 
-const newGroupCreated = (groupMembers, creator_id, creator_name, group_name, group_id, group_image, created_at, is_group_chat) => {
+// These are all emitter for front-end to emit data in socket
+const newGroupCreated = (groupMembers, creator_id, group_name, group_id, group_image, created_at, is_group_chat) => {
   const chkCreator = findSender(creator_id);
   if (chkCreator) {
     groupMembers?.forEach((user) => {
@@ -247,6 +250,7 @@ const globallyMuteGroupChat = (user_id, is_group_chat_notifications) =>{
       });
     }
 };
+// End Emitters
 
 module.exports = {
   setUpSocket,

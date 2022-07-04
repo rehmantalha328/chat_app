@@ -12,6 +12,7 @@ const {
 const { chkExistingGroup } = require("../database_queries/chat");
 const { chkAlreadyReportedGroup, reportGroup } = require("../database_queries/groupReport");
 
+// Report Groups
 router.post("/reportGroup", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;

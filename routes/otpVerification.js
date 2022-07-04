@@ -18,6 +18,7 @@ const {
 } = require("../helper_functions/helpers");
 const { send_message } = require("../twilio/twilio");
 
+// Send otp on phone for registration process
 router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = phoneValidation(req.body);
@@ -77,6 +78,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
   }
 });
 
+// Verify registration for signup process
 router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   const { error, value } = phoneAndOtpValidation(req.body);
   if (error) return res.status(404).send(getError(error.details[0].message));
@@ -119,6 +121,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
   }
 });
 
+// Send otp for forgot password
 router.post(
   "/request_forgotPassword_phone_otp",
   trimRequest.all,
@@ -185,6 +188,7 @@ router.post(
   }
 );
 
+// Verify otp for forgot password
 router.post(
   "/forgotpassowrd_verify_phone_otp",
   trimRequest.all,

@@ -1,0 +1,13 @@
+1-  We use express.js framework to build this application
+2-  We use postreSQL for database
+3-  We use prisma ORM for querying the database
+4-  We use socket.io to prevent the re-rendering of screen
+5-  We use socket.io to build chat module
+6-  We use S3 bucket for storing user media as well chat media in S3 Bucket
+7-  We use firebase push notifications in this app
+8-  We use twillio API for sending otp on phone numbers
+9-  we use Joi for validation purposes
+10- we build custom chat including one-to-one & group chat
+11- To prevent the repeatition of same code we made helper functions and use them on needed module
+12- we use multer for file handling
+13- We use JWT for authentication purposes

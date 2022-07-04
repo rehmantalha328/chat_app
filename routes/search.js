@@ -50,6 +50,7 @@ router.get("/searchAllUsers", [trimRequest.all], async (req, res) => {
   }
 });
 
+// Get my groups my chatmates and all registered users in this API
 router.get("/getMyAllData", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;

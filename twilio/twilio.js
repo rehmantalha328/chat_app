@@ -1,5 +1,4 @@
 const { getEnv } = require("../config");
-
 const accountSid = getEnv("TWILIO_ACCOUNT_SID");
 const authToken = getEnv("TWILIO_AUTH_TOKEN");
 const myNumber = getEnv("MY_NUMBER");

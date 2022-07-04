@@ -39,7 +39,7 @@ const {
 const { PrivacyType } = require("@prisma/client");
 const { send_message } = require("../twilio/twilio");
 
-// add username
+// Check username available or already registered
 router.post("/chkUsername", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = chkUsername(req.body);
@@ -61,6 +61,7 @@ router.post("/chkUsername", trimRequest.all, async (req, res) => {
   }
 });
 
+// Get my profile data
 router.get("/getMyProfile", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -110,7 +111,7 @@ router.get("/getMyProfile", trimRequest.all, async (req, res) => {
   }
 });
 
-// add gallery images
+// Upload gallery images
 router.post(
   "/uploadGalleryImages",
   [imageMulter, trimRequest.all],
@@ -288,6 +289,7 @@ router.post(
   }
 );
 
+// Update privacy of last_seen show to whom?
 router.post("/update_last_seen_to_show", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -328,6 +330,7 @@ router.post("/update_last_seen_to_show", trimRequest.all, async (req, res) => {
   }
 });
 
+// update privacy for profile photo whom to show?
 router.post(
   "/update_profile_picture_to_show",
   trimRequest.all,
@@ -372,6 +375,7 @@ router.post(
   }
 );
 
+// update privacy for about me that whom to show?
 router.post("/update_about_me_to_show", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -528,6 +532,7 @@ router.post(
   }
 );
 
+// Block & unblock users
 router.post("/blockUser", trimRequest.all, async (req, res) => {
   try {
     const blocker_id = req.user.user_id;
@@ -562,6 +567,7 @@ router.post("/blockUser", trimRequest.all, async (req, res) => {
   }
 });
 
+// Get my blocked users list
 router.get("/getMyBlockedOnes", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -597,6 +603,7 @@ router.get("/getMyBlockedOnes", trimRequest.all, async (req, res) => {
   }
 });
 
+// Report User
 router.post("/reportUser", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;

@@ -4,7 +4,6 @@ class Prisma_Client {
   static prismaClient = new PrismaClient({});
 
   static setupPrisma() {
-    // this.prismaClient = new PrismaClient({});
     console.log("here in prisma static declaration");
   }
 }

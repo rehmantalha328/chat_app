@@ -117,11 +117,6 @@ router.post(
           group_name: groupName,
           is_group_chat,
           group_image: group_picture,
-          // group_members: {
-          //   createMany: {
-          //     data: groupMembers,
-          //   },
-          // },
         },
       });
       req.body.member_id.forEach((ids) => {
@@ -150,7 +145,6 @@ router.post(
           data: groupMembers,
         });
       }
-      // const last_message = `${creator_name} added you in the group`;
       newGroupCreated(
         groupMembers,
         group_creator_id,
@@ -158,9 +152,6 @@ router.post(
         groupName,
         createGroup?.group_id,
         group_picture,
-        // createGroup?.last_message !== null
-        //   ? createGroup?.last_message
-        //   : last_message,
         createGroup?.last_message_time,
         is_group_chat
       );
@@ -201,6 +192,7 @@ router.post(
         return res.status(404).send(getError("Group doesn't exists"));
       }
       if (isGroupExists?.is_group_chat !== true) {
+        deleteExistigImg(req);
         return res
           .status(404)
           .send(getError("Sorry you cannot update one-to-one group chat"));
@@ -237,6 +229,7 @@ router.post(
   }
 );
 
+// Fetch all members in group
 router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = getAllMembers(req.body);
@@ -262,6 +255,7 @@ router.post("/getMembersInGroup", trimRequest.all, async (req, res) => {
   }
 });
 
+// Add members in the group
 router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
   try {
     const admin_id = req?.user?.user_id;
@@ -342,6 +336,7 @@ router.post("/addMembersInGroup", trimRequest.all, async (req, res) => {
   }
 });
 
+// Remove members from group
 router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
   try {
     const admin_id = req?.user?.user_id;
@@ -404,6 +399,7 @@ router.post("/removeMembersFromGroup", trimRequest.all, async (req, res) => {
   }
 });
 
+// Leave group
 router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -434,6 +430,7 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   }
 });
 
+// Mute Notifications for private chat globally
 router.post(
   "/mute_specific_group_and_private_chat",
   trimRequest.all,
@@ -493,6 +490,7 @@ router.post(
   }
 );
 
+// Mute Notification for all private and group chats specifically
 router.post(
   "/mute_notifications_for_all_private_chats",
   trimRequest.all,
@@ -545,6 +543,7 @@ router.post(
   }
 );
 
+// Mute Notifications for group chat globally
 router.post(
   "/mute_notifications_for_all_group_chats",
   trimRequest.all,
@@ -594,6 +593,7 @@ router.post(
   }
 );
 
+// Fetch my chat
 router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   try {
     const sender_id = req.user.user_id;
@@ -651,8 +651,6 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
           },
         },
       });
-      // const get = fetchGroupMessages?.group_messages;
-      // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
       return res
         .status(200)
         .send(getSuccessData(fetchGroupMessages.group_messages));
@@ -688,7 +686,6 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
               user_sender: {
                 select: {
                   user_id: true,
-                  // username: true,
                   profile_img: true,
                   online_status: true,
                   online_status_time: true,
@@ -703,8 +700,6 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
           },
         },
       });
-      // const get = getMessages?.group_messages;
-      // const msgs = _.orderBy(get, ["created_at"], ["desc"]);
       return res
         .status(200)
         .send(getSuccessData(fetchGroupMessages.group_messages));
@@ -717,6 +712,7 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
   }
 });
 
+// Make messages seen in groups
 router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
   try {
     let reciever_id = req?.user?.user_id;
@@ -755,6 +751,7 @@ router.post("/seen_messages_in_group", trimRequest.all, async (req, res) => {
   }
 });
 
+// Send Messages API for group & private chats
 router.post(
   "/sendMessages",
   [mediaMulter, trimRequest.all],
@@ -794,7 +791,9 @@ router.post(
       } = value;
       let media_data = [];
       let media = [];
+      // This section is for group chat
       if (is_group_chat === true) {
+        // Check if group exists or not
         const isGroupExists = await prisma.groups.findFirst({
           where: {
             group_id,
@@ -813,6 +812,7 @@ router.post(
             },
           },
         });
+        // Getting all members excepting me of existing group for sending group message to them
         const reciever = isGroupExists?.group_members?.filter(
           (user) => user?.member?.user_id !== sender_id
         );
@@ -822,6 +822,7 @@ router.post(
             group_id,
           });
         });
+        // This section is for sending media in group chat
         if (message_type === MessageType.MEDIA) {
           if (
             media_type != MediaType.AUDIO &&
@@ -1024,6 +1025,7 @@ router.post(
               last_message_time: new Date(),
             },
           });
+          // This is socket listener for sending media in group
           sendMediaMessageToGroup(sender_id, reciever, media);
           // Notifications
           for (let i = 0; i < reciever.length; i++) {
@@ -1063,6 +1065,7 @@ router.post(
           }
           return res.status(200).send(getSuccessData("sent successful"));
         }
+        // This section is for sending text message in group chat
         if (message_type === MessageType.TEXT) {
           media_data = null;
           deleteUploadedImage(req);
@@ -1088,6 +1091,7 @@ router.post(
               last_message_time: createMessage?.created_at,
             },
           });
+          // This is socket listener for text message
           sendMessageToGroup(
             sender_id,
             user_sender_group,
@@ -1135,6 +1139,7 @@ router.post(
           }
           return res.status(200).send(getSuccessData(createMessage));
         }
+        // This section is for sending links in group chat
         if (message_type === MessageType.LINK) {
           media_data = null;
           deleteUploadedImage(req);
@@ -1160,6 +1165,7 @@ router.post(
               last_message_time: createMessage?.created_at,
             },
           });
+          // This is socket listener for sending link in group chat
           sendMessageToGroup(
             sender_id,
             user_sender_group,
@@ -1207,6 +1213,7 @@ router.post(
           }
           return res.status(200).send(getSuccessData(createMessage));
         }
+        // This section is for sending contact in group chat
         if (message_type === MessageType.CONTACT) {
           media = null;
           let contacts = [];
@@ -1263,6 +1270,7 @@ router.post(
               last_message_time: new Date(),
             },
           });
+          // Socket listener for sending contacts in group chat
           sendContactMessageToGroup(sender_id, reciever, newContacts);
           // Notifications
           for (let i = 0; i < reciever.length; i++) {
@@ -1302,6 +1310,7 @@ router.post(
           }
           return res.status(200).send(getSuccessData("sent successfull"));
         }
+        // This section for sending location in group chat
         if (message_type === MessageType.LOCATION) {
           media_data = null;
           deleteUploadedImage(req);
@@ -1323,6 +1332,7 @@ router.post(
               last_message_time: createMessage?.created_at,
             },
           });
+          // This is socket listener for sending location in group
           sendMessageToGroup(
             sender_id,
             user_sender_group,
@@ -1335,44 +1345,45 @@ router.post(
             latitude
           );
           // Notifications
-          // for (let i = 0; i < reciever.length; i++) {
-          //   const isNotificationsMute = await isGroupMuteFalse(
-          //     reciever[i].member.user_id,
-          //     group_id
-          //   );
-          //   const isAllowed = await isNotificationAllowed(
-          //     reciever[i].member.user_id
-          //   );
-          //   if (!isNotificationsMute) {
-          //     if (isAllowed?.notifications === true) {
-          //       if (isAllowed?.is_group_chat_notifications === true) {
-          //         const getFcmToken = isAllowed?.fcm_token;
-          //         if (getFcmToken) {
-          //           SendNotification(
-          //             getFcmToken,
-          //             {
-          //               title: isGroupExists?.group_name,
-          //               body: username,
-          //             },
-          //             {
-          //               profile_img: profile_img,
-          //               message: message_body,
-          //             }
-          //           )
-          //             .then((res) => {
-          //               console.log(res, "done");
-          //             })
-          //             .catch((error) => {
-          //               console.log(error, "Error sending notification");
-          //             });
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
+          for (let i = 0; i < reciever.length; i++) {
+            const isNotificationsMute = await isGroupMuteFalse(
+              reciever[i].member.user_id,
+              group_id
+            );
+            const isAllowed = await isNotificationAllowed(
+              reciever[i].member.user_id
+            );
+            if (!isNotificationsMute) {
+              if (isAllowed?.notifications === true) {
+                if (isAllowed?.is_group_chat_notifications === true) {
+                  const getFcmToken = isAllowed?.fcm_token;
+                  if (getFcmToken) {
+                    SendNotification(
+                      getFcmToken,
+                      {
+                        title: isGroupExists?.group_name,
+                        body: username,
+                      },
+                      {
+                        message: `Sent ${message_type}`,
+                      }
+                    )
+                      .then((res) => {
+                        console.log(res, "done");
+                      })
+                      .catch((error) => {
+                        console.log(error, "Error sending notification");
+                      });
+                  }
+                }
+              }
+            }
+          }
           return res.status(200).send(getSuccessData(createMessage));
         }
       } else {
+        // This section is for sending messages in one-to-one chats
+        // First checking user blocks or not to the reciever  
         // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {
         //     blocker_id: sender_id,
@@ -1845,7 +1856,7 @@ router.post(
                   if (getFcmToken) {
                     SendNotification(getFcmToken, {
                       title: username,
-                      body: `${message_body}`,
+                      body: `Sent ${message_type}`,
                     })
                       .then((res) => {
                         console.log(res, "done");
@@ -1873,6 +1884,7 @@ router.post(
   }
 );
 
+// Fetch all one-to-one chat list & all my joined or created groups
 router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   try {
     const user_id = req.user.user_id;
@@ -2057,11 +2069,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             group_id: true,
             group_image: true,
             group_description: true,
-            // last_message: true,
             last_message_time: true,
-            // last_message_id: true,
-            // last_message_sender: true,
-            // last_message_sender_id: true,
             is_group_chat: true,
             created_at: true,
             updated_at: true,
@@ -2071,9 +2079,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
               },
             },
             group_messages: {
-              // include: {
-              //   reciever: true,
-              // },
               orderBy: {
                 created_at: "desc",
               },
@@ -2101,11 +2106,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 group_id: true,
                 group_image: true,
                 group_description: true,
-                // last_message: true,
                 last_message_time: true,
-                // last_message_id: true,
-                // last_message_sender: true,
-                // last_message_sender_id: true,
                 is_group_chat: true,
                 created_at: true,
                 updated_at: true,
@@ -2115,9 +2116,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                   },
                 },
                 group_messages: {
-                  // include: {
-                  //   reciever: true,
-                  // },
                   orderBy: {
                     created_at: "desc",
                   },
@@ -2290,7 +2288,6 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
             count++;
           }
         }
-        // console.log("count", count);
         data.un_seen_counter = count;
         return data;
       })
@@ -2305,11 +2302,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
         group_id: ary?.group?.group_id,
         group_image: ary?.group?.group_image,
         group_description: ary?.group?.group_description,
-        // last_message: ary?.group?.last_message,
         last_message_time: ary?.group?.last_message_time,
-        // last_message_id: ary?.group?.last_message_id,
-        // last_message_sender: ary?.group?.last_message_sender,
-        // last_message_sender_id: ary?.group?.last_message_sender_id,
         is_group_chat: ary?.group?.is_group_chat,
         created_at: ary?.group?.created_at,
         updated_at: ary?.group?.updated_at,
@@ -2369,6 +2362,7 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
   }
 });
 
+// Make messages seen for one-one-chats
 router.post("/seen_messages", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = seenMessagesValidation(req.body);
@@ -2408,6 +2402,7 @@ router.post("/seen_messages", trimRequest.all, async (req, res) => {
   }
 });
 
+// Check who seen my sent message in groups
 router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = chkWhoSeenInGroup(req.body);
@@ -2457,6 +2452,7 @@ router.post("/WhoSeenMessagesInGroup", trimRequest.all, async (req, res) => {
   }
 });
 
+// Get all users whom i send messages or they send me messages
 router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   try {
     const { user_id } = req?.user;
@@ -2518,6 +2514,7 @@ router.get("/getMyChatMates", trimRequest.all, async (req, res) => {
   }
 });
 
+// Delete chat
 router.post("/deleteChat", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = deleteChatValidation(req.body);
