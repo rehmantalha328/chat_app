@@ -527,7 +527,7 @@ router.post(
         },
       });
       globallyMutePrivateChat(user_id, (is_private_chat_notifications = true));
-      return res  
+      return res
         .status(200)
         .send(
           getSuccessData(
@@ -1383,7 +1383,7 @@ router.post(
         }
       } else {
         // This section is for sending messages in one-to-one chats
-        // First checking user blocks or not to the reciever  
+        // First checking user blocks or not to the reciever
         // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {
         //     blocker_id: sender_id,
@@ -1461,7 +1461,7 @@ router.post(
                 const file = req.files[i];
                 if (file) {
                   var filePath = "";
-                  await ffmpeg({ source: file.path })
+                  ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
@@ -1483,8 +1483,8 @@ router.post(
                     );
                   let { Location } = await uploadFile(file);
                   if (Location) {
-                    let { Location } = await uploadThumbnail(file);
-                    file.thumbnailLocation = Location;
+                    let thumbnail = await uploadThumbnail(file);
+                    file.thumbnailLocation = thumbnail.Location;
                   }
                   media_data.push({
                     sender_id,
@@ -1516,6 +1516,9 @@ router.post(
                     user_sender: user_sender_one_to_one,
                     message_time: new Date().toLocaleTimeString(),
                   });
+                }
+                if (fs.existsSync(file.thumbnailPath)) {
+                  fs.unlinkSync(file.thumbnailPath);
                 }
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
