@@ -235,7 +235,6 @@ const globallyMutePrivateChat = (user_id, is_private_chat_notifications) =>{
   const chkUser = findSender(user_id);
   if (chkUser) {
       io.to(chkUser.socketId).emit("muteNotificationGloballyForPrivateChat", {
-        group_id,
         is_private_chat_notifications,
       });
     }
@@ -245,7 +244,6 @@ const globallyMuteGroupChat = (user_id, is_group_chat_notifications) =>{
   const chkUser = findSender(user_id);
   if (chkUser) {
       io.to(chkUser.socketId).emit("muteNotificationGloballyForGroupChat", {
-        group_id,
         is_group_chat_notifications,
       });
     }

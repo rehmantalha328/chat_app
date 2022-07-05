@@ -430,7 +430,7 @@ router.post("/leaveGroup", trimRequest.all, async (req, res) => {
   }
 });
 
-// Mute Notifications for private chat globally
+// Mute Notification for all private and group chats specifically
 router.post(
   "/mute_specific_group_and_private_chat",
   trimRequest.all,
@@ -490,7 +490,7 @@ router.post(
   }
 );
 
-// Mute Notification for all private and group chats specifically
+// Mute Notifications for private chat globally
 router.post(
   "/mute_notifications_for_all_private_chats",
   trimRequest.all,
@@ -527,7 +527,7 @@ router.post(
         },
       });
       globallyMutePrivateChat(user_id, (is_private_chat_notifications = true));
-      return res
+      return res  
         .status(200)
         .send(
           getSuccessData(
