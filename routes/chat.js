@@ -527,7 +527,7 @@ router.post(
         },
       });
       globallyMutePrivateChat(user_id, (is_private_chat_notifications = true));
-      return res
+      return res  
         .status(200)
         .send(
           getSuccessData(
@@ -1383,7 +1383,7 @@ router.post(
         }
       } else {
         // This section is for sending messages in one-to-one chats
-        // First checking user blocks or not to the reciever
+        // First checking user blocks or not to the reciever  
         // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {
         //     blocker_id: sender_id,
@@ -1467,7 +1467,7 @@ router.post(
                       let thumbnailPath = await fs.createWriteStream(filePath);
                       file.thumbnailPath = thumbnailPath.path;
                     })
-                    .on("end", () => {
+                    .on("end", async () => {
                       console.log("end state");
                       console.log("Thumbnaillocation");
                     })
@@ -1478,14 +1478,13 @@ router.post(
                       {
                         filename: `${v4()}`,
                         timemarks: [3],
-                        count: 3,
                       },
                       "media/"
                     );
                   let { Location } = await uploadFile(file);
                   if (Location) {
-                    let thumbnail = await uploadThumbnail(file);
-                    file.thumbnailLocation = thumbnail.Location;
+                    let { Location } = await uploadThumbnail(file);
+                    file.thumbnailLocation = Location;
                   }
                   media_data.push({
                     sender_id,
@@ -1518,11 +1517,11 @@ router.post(
                     message_time: new Date().toLocaleTimeString(),
                   });
                 }
-                if (fs.existsSync(file.thumbnailPath)) {
-                  fs.unlinkSync(file.thumbnailPath);
-                }
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
+                }
+                if (fs.existsSync(file.thumbnailPath)) {
+                  fs.unlinkSync(file.thumbnailPath);
                 }
               }
             }
