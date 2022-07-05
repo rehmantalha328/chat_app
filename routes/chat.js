@@ -1485,6 +1485,7 @@ router.post(
                   if (Location) {
                     let { Location } = await uploadThumbnail(file);
                     file.thumbnailLocation = Location;
+                    console.log("File with Thumbnail",file);
                   }
                   media_data.push({
                     sender_id,
