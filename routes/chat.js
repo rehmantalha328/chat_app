@@ -1461,13 +1461,13 @@ router.post(
                 const file = req.files[i];
                 if (file) {
                   var filePath = "";
-                  ffmpeg({ source: file.path })
+                  await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
                       filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
                       file.thumbnailPath = thumbnailPath.path;
                     })
-                    .on("end", async () => {
+                    .on("end", () => {
                       console.log("end state");
                       console.log("Thumbnaillocation");
                     })
