@@ -44,7 +44,7 @@ let uploadThumbnail = function (file) {
       Key: v4(), // File name you want to save as in S3
       Body: fileContent,
       ContentEncoding: "base64",
-      ContentType: "image/png",
+      ContentType: "png",
       ACL: "public-read",
     };
     // Uploading files to the bucket
