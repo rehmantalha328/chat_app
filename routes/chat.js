@@ -1478,6 +1478,7 @@ router.post(
                       {
                         filename: `${v4()}`,
                         timemarks: [3],
+                        count: 3,
                       },
                       "media/"
                     );
