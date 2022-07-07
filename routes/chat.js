@@ -17,6 +17,7 @@ const {
   leaveGroupValidation,
   updateGroupInfoValidate,
   groupMuteValidation,
+  deleteChatValidation,
 } = require("../joi_validations/validate");
 const {
   chkMessageChannel,

@@ -300,6 +300,13 @@ function reportuserValidation(data){
   return reportUserSchema.validate(data);
 }
 
+function deleteChatValidation(data){
+  const delChatSchema = Joi.object({
+    group_id: Joi.string().required(),
+  });
+  return delChatSchema.validate(data);
+}
+
 function reportGroupValidation(data){
   const reportGroupSchema = Joi.object({
     report_reason: Joi.string().required(),
@@ -307,8 +314,7 @@ function reportGroupValidation(data){
   });
   return reportGroupSchema.validate(data);
 }
-
-
+ 
 
 module.exports = {
   emailValidation,
@@ -339,4 +345,5 @@ module.exports = {
   groupMuteValidation,
   updatePrivacy,
   deleteGalleryImagesValidation,
+  deleteChatValidation,
 };
