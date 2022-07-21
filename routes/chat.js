@@ -1461,10 +1461,10 @@ router.post(
               for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 if (file) {
-                  var filePath = "";
                   await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
-                      filePath = "media/" + filenames[0];
+                      console.log("filenames",filenames);
+                      let filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
                       file.thumbnailPath = thumbnailPath.path;
                     })

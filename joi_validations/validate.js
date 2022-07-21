@@ -58,9 +58,11 @@ function changePhoneNumberValidation(data) {
 function signUpValidation(data) {
   const signupschema = Joi.object({
     phone: Joi.string().required(),
-    username: Joi.string().required(),
+    username: Joi.string(),
+    about_me: Joi.string(),
     password: Joi.string().min(6).required(),
     fcm_token: Joi.string().required(),
+    group_ids: Joi.array(),
   });
   return signupschema.validate(data);
 }

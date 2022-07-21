@@ -63,6 +63,39 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   }
 });
 
+router.post("/getGroups", trimRequest.all, async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const test = await prisma.groups.findMany({
+      where: {
+        last_message_time: {
+          gte: sevenDaysAgo,
+        },
+      },
+      include: {
+        group_members: true,
+        group_messages: true,
+      },
+    });
+    for (const allGroups of test) {
+      if (
+        (allGroups?.group_members?.length === 2 ||
+          allGroups?.group_members?.length >= 200) &&
+        (allGroups?.group_messages?.length === 2 ||
+          allGroups?.group_messages?.length >= 200)
+      ) {
+        return res.status(200).send(getSuccessData(allGroups));
+      }
+      return res.status(200).send(getSuccessData("No data"));
+    }
+  } catch (error) {
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
@@ -75,11 +108,9 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       deleteUploadedGalleryOrProfile(req);
       return res.status(404).send(getError(req.file_error));
     }
-    // if (!req.file) {
-    //   deleteExistigImg(req);
-    //   return res.status(404).send(getError("Please Select Your Profile."));
-    // }
-    const { username: _username, password, fcm_token } = value;
+    const { username: _username, password, fcm_token, about_me } = value;
+    const groups = [];
+
     const phone = "+" + clean(value.phone);
     const username = _username.toLowerCase();
     const gallery = [];
@@ -100,15 +131,15 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     }
 
     // s3 bucket for profile
-    if (req?.files?.["profile"]) {
-      for (const file of req.files["profile"]) {
-        let { Location } = await uploadFile(file);
-        var profile_picture = Location;
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      }
-    }
+    // if (req?.files?.["profile"]) {
+    //   for (const file of req.files["profile"]) {
+    //     let { Location } = await uploadFile(file);
+    //     var profile_picture = Location;
+    //     if (fs.existsSync(file.path)) {
+    //       fs.unlinkSync(file.path);
+    //     }
+    //   }
+    // }
     // END
 
     // s3 bucket for gallery
@@ -133,8 +164,9 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       data: {
         password,
         username,
+        about_me,
         is_registered: true,
-        profile_img: profile_picture,
+        // profile_img: profile_picture,
         fcm_token,
         my_gallery_pictures: {
           createMany: {
@@ -143,16 +175,28 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
         },
       },
     });
+
+    // Section for adding in suggested groups while creating account
+    if (req?.body?.group_ids) {
+      req.body.group_id?.forEach((data) => {
+        groups.push({
+          member_id: createUser?.user_id,
+          group_id: data.group_id,
+        });
+      });
+    }
+    const addToGroups = await prisma.group_members.createMany({
+      data: groups,
+    });
+
     if (!createUser) {
       deleteUploadedGalleryOrProfile(req);
-      deleteFile(profile_picture);
       return res
         .status(404)
         .send(getError("There is some issue please try again later"));
     }
     return res.status(200).send(getSuccessData(await createToken(createUser)));
   } catch (catchError) {
-    deleteFile(profile_picture);
     deleteUploadedGalleryOrProfile(req);
     if (catchError && catchError.message) {
       return res.status(404).send(getError(catchError.message));
