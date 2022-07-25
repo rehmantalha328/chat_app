@@ -68,6 +68,7 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
   try {
     const membersMinLength = 2;
     const minGroupMessageLength = 2;
+    const groups = [];
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const test = await prisma.groups.findMany({
       where: {
@@ -81,12 +82,23 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
         group_messages: true,
       },
     });
-    const allGroups = test?.filter((data)=>data.group_type !== GroupType.OFFICIAL);
-    if (allGroups?.length <= 0) {
+    const allGroups = test?.filter(
+      (data) => data.group_type !== GroupType.OFFICIAL
+    );
+    allGroups.forEach((data) => {
+      groups.push({
+        data,
+      });
+    });
+    const sorted = groups.filter(
+      (data) =>
+        data.data.group_members.length >= membersMinLength &&
+        data.data.group_messages.length >= minGroupMessageLength
+    );
+    if (sorted?.length <= 0) {
       return res.status(200).send(getSuccessData("No data"));
     }
-    return res.status(200).send(getSuccessData(allGroups));
-
+    return res.status(200).send(getSuccessData(sorted));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
