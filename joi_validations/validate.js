@@ -61,7 +61,7 @@ function signUpValidation(data) {
     username: Joi.string(),
     about_me: Joi.string(),
     password: Joi.string().min(6).required(),
-    fcm_token: Joi.string().required(),
+    fcm_token: Joi.string(),
     group_ids: Joi.array(),
   });
   return signupschema.validate(data);
