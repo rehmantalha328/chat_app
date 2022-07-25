@@ -71,6 +71,9 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const test = await prisma.groups.findMany({
       where: {
+        NOT:[{
+          group_type: GroupType.OFFICIAL,
+        }],
         last_message_time: {
           gte: sevenDaysAgo,
         },
