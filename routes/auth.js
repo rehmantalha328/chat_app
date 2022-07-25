@@ -23,6 +23,7 @@ const {
 const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const imagemulter = require("../middleWares/profile_gallery_multer");
 const { fs } = require("file-system");
+const { GroupType } = require("@prisma/client");
 
 // Update user password after verification of otp
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
@@ -65,6 +66,8 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
 
 router.post("/getGroups", trimRequest.all, async (req, res) => {
   try {
+    const membersMinLength = 2;
+    const minGroupMessageLength = 2;
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const test = await prisma.groups.findMany({
       where: {
@@ -78,11 +81,12 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
       },
     });
     for (const allGroups of test) {
+      console.log(allGroups?.group_members?.length);
       if (
-        (allGroups?.group_members?.length === 2 ||
-          allGroups?.group_members?.length >= 200) &&
-        (allGroups?.group_messages?.length === 2 ||
-          allGroups?.group_messages?.length >= 200)
+        allGroups?.group_members?.length === membersMinLength ||
+        allGroups?.group_members?.length >= membersMinLength ||
+        allGroups?.group_messages?.length === minGroupMessageLength ||
+        allGroups?.group_messages?.length >= minGroupMessageLength
       ) {
         return res.status(200).send(getSuccessData(allGroups));
       }
@@ -166,7 +170,6 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
         username,
         about_me,
         is_registered: true,
-        // profile_img: profile_picture,
         fcm_token,
         my_gallery_pictures: {
           createMany: {
@@ -175,10 +178,22 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
         },
       },
     });
-
+    // Find Official Defigram group
+    const newsGroup = await prisma.groups.findFirst({
+      where: {
+        group_type: GroupType.OFFICIAL,
+      },
+    });
+    // Add user in official group of defigram by default
+    const adUserToNewsChannel = await prisma.group_members.create({
+      data: {
+        member_id: createUser?.user_id,
+        group_id: newsGroup?.group_id,
+      },
+    });
     // Section for adding in suggested groups while creating account
     if (req?.body?.group_ids) {
-      req.body.group_id?.forEach((data) => {
+      req.body.group_ids?.forEach((data) => {
         groups.push({
           member_id: createUser?.user_id,
           group_id: data.group_id,

@@ -2559,4 +2559,21 @@ router.post("/deleteChat", trimRequest.all, async (req, res) => {
   }
 });
 
+// Make chats favourite
+router.post("/makeChatsFavourite", trimRequest.all, async(req,res)=>{
+  try{
+    const {error,value} = favouriteChatValidation(req.body);
+    if (error) {
+      return res.status(404).send(getError(error.details[0].message));
+    }
+    const {group_id, message_id} = value;
+
+  }catch(error){
+    if (error && error.message) {
+      return res.status(404).send(getError(error.message));
+    }
+    return res.status(404).send(getError(error));
+  }
+});
+
 module.exports = router;

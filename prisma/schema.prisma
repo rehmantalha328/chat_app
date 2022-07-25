@@ -12,7 +12,9 @@ datasource db {
 
 model User {
   user_id                       String             @id @default(cuid())
-  phone                         String?            @db.VarChar(255)
+  name                          String?            @db.VarChar(255)
+  email                         String?            @db.VarChar(255)
+  role                          UserRole?
   username                      String?            @db.VarChar(255)
   user_name                     String?            @db.VarChar(255)
   about_me                      String?
@@ -69,6 +71,7 @@ model groups {
   sender_id           String?          @db.VarChar(255)
   reciever_id         String?          @db.VarChar(255)
   is_group_chat       Boolean          @default(false)
+  group_type          GroupType?
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
   last_message_time   DateTime?
@@ -192,4 +195,15 @@ enum PrivacyType {
   EVERYONE
   MY_CONTACTS
   NOBODY
+}
+
+enum GroupType {
+  PROJECT
+  AMA
+  GENERAL
+  OFFICIAL
+}
+
+enum UserRole {
+  ADMIN
 }
