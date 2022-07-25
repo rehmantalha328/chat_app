@@ -71,11 +71,6 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const test = await prisma.groups.findMany({
       where: {
-        // NOT: [
-        //   {
-        //     group_type: GroupType.OFFICIAL,
-        //   },
-        // ],
         is_group_chat: true,
         last_message_time: {
           gte: sevenDaysAgo,
@@ -86,22 +81,11 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
         group_messages: true,
       },
     });
-    // for (const allGroups of test) {
-    //   console.log(allGroups?.group_members?.length);
-    //   if (
-    //     allGroups?.group_members?.length === membersMinLength ||
-    //     allGroups?.group_members?.length >= membersMinLength ||
-    //     allGroups?.group_messages?.length === minGroupMessageLength ||
-    //     allGroups?.group_messages?.length >= minGroupMessageLength
-    //   ) {
-    //     return res.status(200).send(getSuccessData(allGroups));
-    //   }
-    //   return res.status(200).send(getSuccessData("No data"));
-    // }
-    if (test?.length <= 0) {
+    const allGroups = test?.filter((data)=>data.group_type !== GroupType.OFFICIAL);
+    if (allGroups?.length <= 0) {
       return res.status(200).send(getSuccessData("No data"));
     }
-    return res.status(200).send(getSuccessData(test));
+    return res.status(200).send(getSuccessData(allGroups));
 
   } catch (error) {
     if (error && error.message) {
