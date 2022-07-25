@@ -138,6 +138,9 @@ router.post(
       })();
 
       const PhoneExists = await getUserFromphone(phone);
+      if (!PhoneExists) {
+        return res.status(404).send(getError("Phone number doesn't exist"));
+      }
       if (
         PhoneExists.Otp_verified == true &&
         PhoneExists?.is_registered == true
