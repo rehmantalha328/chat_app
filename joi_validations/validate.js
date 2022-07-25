@@ -58,7 +58,7 @@ function changePhoneNumberValidation(data) {
 function signUpValidation(data) {
   const signupschema = Joi.object({
     phone: Joi.string().required(),
-    username: Joi.string(),
+    username: Joi.string().required(),
     about_me: Joi.string(),
     password: Joi.string().min(6).required(),
     fcm_token: Joi.string(),
