@@ -17,6 +17,7 @@ model User {
   role                          UserRole?
   username                      String?            @db.VarChar(255)
   user_name                     String?            @db.VarChar(255)
+  phone                         String?            @db.VarChar(255)
   about_me                      String?
   gender                        String?
   birthday                      String?
