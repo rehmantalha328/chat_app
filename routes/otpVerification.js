@@ -201,9 +201,7 @@ router.post(
       const phone = "+" + clean(value.phone);
       const PhoneExists = await getUserFromphone(phone);
       if (
-        !PhoneExists &&
-        !PhoneExists.Otp_verified == true &&
-        !PhoneExists.is_registered == true
+        PhoneExists?.Otp_verified !== true && PhoneExists?.is_registered !== true && !PhoneExists
       ) {
         return res
           .status(404)
