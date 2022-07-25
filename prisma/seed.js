@@ -5,7 +5,7 @@ const { GroupType, UserRole } = require("@prisma/client");
 const seedDatabase = async () => {
   const addAdminRecord = await prisma.user.create({
     data: {
-      name: "ADMIN",
+      username: "ADMIN",
       email: "defigram_admin@defigram.com",
       password: "123456",
       role: UserRole.ADMIN,
