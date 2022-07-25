@@ -71,9 +71,11 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const test = await prisma.groups.findMany({
       where: {
-        NOT:[{
-          group_type: GroupType.OFFICIAL,
-        }],
+        NOT: [
+          {
+            group_type: GroupType.OFFICIAL,
+          },
+        ],
         last_message_time: {
           gte: sevenDaysAgo,
         },
@@ -93,6 +95,9 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
       ) {
         return res.status(200).send(getSuccessData(allGroups));
       }
+      return res.status(200).send(getSuccessData("No data"));
+    }
+    if (test?.length <= 0) {
       return res.status(200).send(getSuccessData("No data"));
     }
   } catch (error) {
