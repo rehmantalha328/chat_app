@@ -70,35 +70,42 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
     const minGroupMessageLength = 2;
     const groups = [];
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const test = await prisma.groups.findMany({
+    const getAllGroups = await prisma.groups.findMany({
       where: {
         is_group_chat: true,
         last_message_time: {
           gte: sevenDaysAgo,
         },
       },
+      orderBy:{
+        created_at: 'desc',
+      },
       include: {
         group_members: true,
         group_messages: true,
       },
     });
-    const allGroups = test?.filter(
+    const allGroups = getAllGroups?.filter(
       (data) => data.group_type !== GroupType.OFFICIAL
     );
     allGroups.forEach((data) => {
       groups.push({
-        data,
+        allGroupData: data,
       });
     });
-    const sorted = groups.filter(
+    const getSortedGroups = groups.filter(
       (data) =>
-        data.data.group_members.length >= membersMinLength &&
-        data.data.group_messages.length >= minGroupMessageLength
+        data.allGroupData.group_members.length >= membersMinLength &&
+        data.allGroupData.group_messages.length >= minGroupMessageLength,
     );
-    if (sorted?.length <= 0) {
+    getSortedGroups?.forEach((data)=>{
+      delete data.allGroupData.group_members;
+      delete data.allGroupData.group_messages;
+    });
+    if (getSortedGroups?.length <= 0) {
       return res.status(200).send(getSuccessData("No data"));
     }
-    return res.status(200).send(getSuccessData(sorted));
+    return res.status(200).send(getSuccessData(getSortedGroups));
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
