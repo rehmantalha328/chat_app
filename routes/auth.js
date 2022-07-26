@@ -210,7 +210,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       req.body.group_ids?.forEach((data) => {
         groups.push({
           member_id: createUser?.user_id,
-          group_id: data.group_id,
+          group_id: data,
         });
       });
     }
