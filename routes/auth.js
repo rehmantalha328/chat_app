@@ -98,10 +98,10 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
         data.allGroupData.group_members.length >= membersMinLength &&
         data.allGroupData.group_messages.length >= minGroupMessageLength,
     );
-    // getSortedGroups?.forEach((data)=>{
-    //   delete data.allGroupData.group_members;
-    //   delete data.allGroupData.group_messages;
-    // });
+    getSortedGroups?.forEach((data)=>{
+      // delete data.allGroupData.group_members;
+      delete data.allGroupData.group_messages;
+    });
     if (getSortedGroups?.length <= 0) {
       return res.status(200).send(getSuccessData("No data"));
     }
