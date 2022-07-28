@@ -528,7 +528,7 @@ router.post(
         },
       });
       globallyMutePrivateChat(user_id, (is_private_chat_notifications = true));
-      return res  
+      return res
         .status(200)
         .send(
           getSuccessData(
@@ -966,105 +966,109 @@ router.post(
             }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
-
-          if (req.files) {
-            for (const file of req.files) {
-              if (file) {
-                let { Location } = await uploadFile(file);
-                media_data.push({
-                  sender_id,
-                  group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: Location,
-                  attatchment_name: file.originalname,
-                  reply_of,
-                });
-                media.push({
-                  sender_id,
-                  group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: Location,
-                  attatchment_name: file.originalname,
-                  reply_of,
-                  user_sender: user_sender_group,
-                  message_time: new Date().toLocaleTimeString(),
-                });
-              }
-              if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
+          if (
+            message_type === MessageType.MEDIA &&
+            media_type !== MediaType.VIDEO
+          ) {
+            if (req.files) {
+              for (const file of req.files) {
+                if (file) {
+                  let { Location } = await uploadFile(file);
+                  media_data.push({
+                    sender_id,
+                    group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    reply_of,
+                  });
+                  media.push({
+                    sender_id,
+                    group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    reply_of,
+                    user_sender: user_sender_group,
+                    message_time: new Date().toLocaleTimeString(),
+                  });
+                }
+                if (fs.existsSync(file.path)) {
+                  fs.unlinkSync(file.path);
+                }
               }
             }
-          }
-          for (let i = 0; i < media_data?.length; i++) {
-            const addMedia = await prisma.group_messages.create({
-              data: {
-                sender_id: media_data[i].sender_id,
-                group_id: media_data[i].group_id,
-                media_caption: media_data[i].media_caption,
-                media_type: media_data[i].media_type,
-                attatchment: media_data[i].attatchment,
-                message_type: media_data[i].message_type,
-                attatchment_name: media_data[i].attatchment_name,
-                reply_of: media[i].reply_of ? media_data[i].reply_of : null,
-                reciever: {
-                  createMany: {
-                    data: recieverData,
+            for (let i = 0; i < media_data?.length; i++) {
+              const addMedia = await prisma.group_messages.create({
+                data: {
+                  sender_id: media_data[i].sender_id,
+                  group_id: media_data[i].group_id,
+                  media_caption: media_data[i].media_caption,
+                  media_type: media_data[i].media_type,
+                  attatchment: media_data[i].attatchment,
+                  message_type: media_data[i].message_type,
+                  attatchment_name: media_data[i].attatchment_name,
+                  reply_of: media[i].reply_of ? media_data[i].reply_of : null,
+                  reciever: {
+                    createMany: {
+                      data: recieverData,
+                    },
                   },
                 },
+              });
+            }
+            const updateLastMessageTime = await prisma.groups.update({
+              where: {
+                group_id,
+              },
+              data: {
+                last_message_time: new Date(),
               },
             });
-          }
-          const updateLastMessageTime = await prisma.groups.update({
-            where: {
-              group_id,
-            },
-            data: {
-              last_message_time: new Date(),
-            },
-          });
-          // This is socket listener for sending media in group
-          sendMediaMessageToGroup(sender_id, reciever, media);
-          // Notifications
-          for (let i = 0; i < reciever.length; i++) {
-            const isNotificationsMute = await isGroupMuteFalse(
-              reciever[i].member.user_id,
-              group_id
-            );
-            const isAllowed = await isNotificationAllowed(
-              reciever[i].member.user_id
-            );
-            if (!isNotificationsMute) {
-              if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_group_chat_notifications === true) {
-                  const getFcmToken = isAllowed?.fcm_token;
-                  if (getFcmToken) {
-                    let mediaType = media_type.toLowerCase();
-                    SendNotification(
-                      getFcmToken,
-                      {
-                        title: isGroupExists?.group_name,
-                        body: username,
-                      },
-                      {
-                        message: `sent you ${media_type}`,
-                      }
-                    )
-                      .then((res) => {
-                        console.log(res, "done");
-                      })
-                      .catch((error) => {
-                        console.log(error, "Error sending notification");
-                      });
+            // This is socket listener for sending media in group
+            sendMediaMessageToGroup(sender_id, reciever, media);
+            // Notifications
+            for (let i = 0; i < reciever.length; i++) {
+              const isNotificationsMute = await isGroupMuteFalse(
+                reciever[i].member.user_id,
+                group_id
+              );
+              const isAllowed = await isNotificationAllowed(
+                reciever[i].member.user_id
+              );
+              if (!isNotificationsMute) {
+                if (isAllowed?.notifications === true) {
+                  if (isAllowed?.is_group_chat_notifications === true) {
+                    const getFcmToken = isAllowed?.fcm_token;
+                    if (getFcmToken) {
+                      let mediaType = media_type.toLowerCase();
+                      SendNotification(
+                        getFcmToken,
+                        {
+                          title: isGroupExists?.group_name,
+                          body: username,
+                        },
+                        {
+                          message: `sent you ${media_type}`,
+                        }
+                      )
+                        .then((res) => {
+                          console.log(res, "done");
+                        })
+                        .catch((error) => {
+                          console.log(error, "Error sending notification");
+                        });
+                    }
                   }
                 }
               }
             }
+            return res.status(200).send(getSuccessData("sent successful"));
           }
-          return res.status(200).send(getSuccessData("sent successful"));
         }
         // This section is for sending text message in group chat
         if (message_type === MessageType.TEXT) {
@@ -1384,7 +1388,7 @@ router.post(
         }
       } else {
         // This section is for sending messages in one-to-one chats
-        // First checking user blocks or not to the reciever  
+        // First checking user blocks or not to the reciever
         // const isBlock = await prisma.blockProfile.findFirst({
         //   where: {
         //     blocker_id: sender_id,
@@ -1463,7 +1467,7 @@ router.post(
                 if (file) {
                   await ffmpeg({ source: file.path })
                     .on("filenames", async (filenames) => {
-                      console.log("filenames",filenames);
+                      console.log("filenames", filenames);
                       let filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
                       file.thumbnailPath = thumbnailPath.path;
@@ -1486,7 +1490,7 @@ router.post(
                   if (Location) {
                     let { Location } = await uploadThumbnail(file);
                     file.thumbnailLocation = Location;
-                    console.log("File with Thumbnail",file);
+                    console.log("File with Thumbnail", file);
                   }
                   media_data.push({
                     sender_id,
@@ -1567,90 +1571,95 @@ router.post(
             }
             return res.status(200).send(getSuccessData("Sent successful"));
           }
-          if (req.files) {
-            for (const file of req.files) {
-              if (file) {
-                let { Location } = await uploadFile(file);
-                media_data.push({
-                  sender_id,
-                  reciever_id,
-                  group_id: chkChannel
-                    ? chkChannel.group_id
-                    : chkChannel.group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: Location,
-                  attatchment_name: file.originalname,
-                  reply_of,
-                });
-                media.push({
-                  sender_id,
-                  reciever_id,
-                  group_id: chkChannel
-                    ? chkChannel.group_id
-                    : chkChannel.group_id,
-                  media_caption: media_caption ? media_caption : null,
-                  media_type,
-                  message_type,
-                  attatchment: Location,
-                  attatchment_name: file.originalname,
-                  reply_of,
-                  user_sender: user_sender_one_to_one,
-                  message_time: new Date().toLocaleTimeString(),
-                });
-              }
-              if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
-              }
-            }
-          }
-          const createMessage = await prisma.group_messages.createMany({
-            data: media_data,
-          });
-
-          sendMediaMessage(
-            sender_id,
-            // user_sender_one_to_one,
-            reciever_id,
-            // media,
-            // message_type,
-            // chkChannel?.group_id
-            media
-          );
-          if (createMessage?.count > 0) {
-            // Notifications
-            const isNotificationsMute = await isGroupMuteFalse(
-              reciever_id,
-              group_id
-            );
-            const isAllowed = await isNotificationAllowed(reciever_id);
-            if (!isNotificationsMute) {
-              if (isAllowed?.notifications === true) {
-                if (isAllowed?.is_private_chat_notifications === true) {
-                  const getFcmToken = isAllowed?.fcm_token;
-                  if (getFcmToken) {
-                    let mediaType = media_type.toLowerCase();
-                    SendNotification(getFcmToken, {
-                      title: username,
-                      body: `Sent ${mediaType}`,
-                    })
-                      .then((res) => {
-                        console.log(res, "done");
-                      })
-                      .catch((error) => {
-                        console.log(error, "Error sending notification");
-                      });
-                  }
+          if (
+            message_type === MessageType.MEDIA &&
+            media_type !== MediaType.VIDEO
+          ) {
+            if (req.files) {
+              for (const file of req.files) {
+                if (file) {
+                  let { Location } = await uploadFile(file);
+                  media_data.push({
+                    sender_id,
+                    reciever_id,
+                    group_id: chkChannel
+                      ? chkChannel.group_id
+                      : chkChannel.group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    reply_of,
+                  });
+                  media.push({
+                    sender_id,
+                    reciever_id,
+                    group_id: chkChannel
+                      ? chkChannel.group_id
+                      : chkChannel.group_id,
+                    media_caption: media_caption ? media_caption : null,
+                    media_type,
+                    message_type,
+                    attatchment: Location,
+                    attatchment_name: file.originalname,
+                    reply_of,
+                    user_sender: user_sender_one_to_one,
+                    message_time: new Date().toLocaleTimeString(),
+                  });
+                }
+                if (fs.existsSync(file.path)) {
+                  fs.unlinkSync(file.path);
                 }
               }
             }
-            return res.status(200).send(getSuccessData("Sent successful"));
+            const createMessage = await prisma.group_messages.createMany({
+              data: media_data,
+            });
+
+            sendMediaMessage(
+              sender_id,
+              // user_sender_one_to_one,
+              reciever_id,
+              // media,
+              // message_type,
+              // chkChannel?.group_id
+              media
+            );
+            if (createMessage?.count > 0) {
+              // Notifications
+              const isNotificationsMute = await isGroupMuteFalse(
+                reciever_id,
+                group_id
+              );
+              const isAllowed = await isNotificationAllowed(reciever_id);
+              if (!isNotificationsMute) {
+                if (isAllowed?.notifications === true) {
+                  if (isAllowed?.is_private_chat_notifications === true) {
+                    const getFcmToken = isAllowed?.fcm_token;
+                    if (getFcmToken) {
+                      let mediaType = media_type.toLowerCase();
+                      SendNotification(getFcmToken, {
+                        title: username,
+                        body: `Sent ${mediaType}`,
+                      })
+                        .then((res) => {
+                          console.log(res, "done");
+                        })
+                        .catch((error) => {
+                          console.log(error, "Error sending notification");
+                        });
+                    }
+                  }
+                }
+              }
+              return res.status(200).send(getSuccessData("Sent successful"));
+            }
+            deleteUploadedImage(req);
+            return res
+              .status(404)
+              .send(getSuccessData("Issue in sending message"));
           }
-          deleteUploadedImage(req);
-          return res
-            .status(404)
-            .send(getSuccessData("Issue in sending message"));
         }
         if (message_type === MessageType.TEXT) {
           media_data = null;
@@ -2560,15 +2569,14 @@ router.post("/deleteChat", trimRequest.all, async (req, res) => {
 });
 
 // Make chats favourite
-router.post("/makeChatsFavourite", trimRequest.all, async(req,res)=>{
-  try{
-    const {error,value} = favouriteChatValidation(req.body);
+router.post("/makeChatsFavourite", trimRequest.all, async (req, res) => {
+  try {
+    const { error, value } = favouriteChatValidation(req.body);
     if (error) {
       return res.status(404).send(getError(error.details[0].message));
     }
-    const {group_id, message_id} = value;
-
-  }catch(error){
+    const { group_id, message_id } = value;
+  } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
     }
