@@ -1470,11 +1470,16 @@ router.post(
                       console.log("filenames", filenames);
                       let filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
+                      if (thumbnailPath) {
+                        fs.close(fd, function (err) {
+                          console.log("File closed");
+                          console.log(buffer.toString());
+                        });
+                      }
                       file.thumbnailPath = thumbnailPath.path;
                     })
                     .on("end", async () => {
                       console.log("end state");
-                      console.log("Thumbnaillocation");
                     })
                     .on("error", (err) => {
                       console.log("error", err);
@@ -1526,9 +1531,9 @@ router.post(
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
                 }
-                if (fs.existsSync(file.thumbnailPath)) {
-                  fs.unlinkSync(file.thumbnailPath);
-                }
+                // if (fs.existsSync(file.thumbnailPath)) {
+                //   fs.unlinkSync(file.thumbnailPath);
+                // }
               }
             }
             const createMessage = await prisma.group_messages.createMany({
