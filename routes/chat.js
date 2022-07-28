@@ -1470,12 +1470,6 @@ router.post(
                       console.log("filenames", filenames);
                       let filePath = "media/" + filenames[0];
                       let thumbnailPath = await fs.createWriteStream(filePath);
-                      if (thumbnailPath) {
-                        fs.close(fd, function (err) {
-                          console.log("File closed");
-                          console.log(buffer.toString());
-                        });
-                      }
                       file.thumbnailPath = thumbnailPath.path;
                     })
                     .on("end", async () => {
