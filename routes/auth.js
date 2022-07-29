@@ -118,7 +118,6 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
-    console.log("files::::",req.files["gallery"]);
     const { error, value } = signUpValidation(req.body);
     if (error) {
       deleteUploadedGalleryOrProfile(req);
@@ -161,9 +160,6 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     //   }
     // }
     // END
-    if (!req.files["gallery"]) {
-      return res.status(404).send(getError("Gallery is Required"));
-    }
     // s3 bucket for gallery
     if (req?.files?.["gallery"]) {
       for (const file of req.files["gallery"]) {
