@@ -49,7 +49,7 @@ const createAdminToken = (admin) => {
       role: admin.role,
       created_at: admin.created_at,
     },
-    getEnv("ADMIN_JWT_SECERET"),
+    getEnv("ADMIN_JWT_SECRET"),
     {
       expiresIn: "7d",
     }

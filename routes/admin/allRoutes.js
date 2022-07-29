@@ -5,7 +5,39 @@ const prisma = Prisma_Client.prismaClient;
 
 router.post("/getAllRegisteredUsers", trimRequest.all, async (req, res) => {
   try {
-    
+    let { user_id } = req.user;
+    let admin_id = user_id;
+    const getAllUsers = await prisma.user.findMany({
+      where: {
+        NOT: [
+          {
+            user_id: admin_id,
+          },
+        ],
+        is_registered: true,
+      },
+      select: {
+        user_id: true,
+        username: true,
+        user_name: true,
+        birthday: true,
+        about_me: true,
+        phone: true,
+        gender: true,
+        online_status: true,
+        online_status_time: true,
+        created_at: true,
+        my_gallery_pictures: {
+          select: {
+            picture_url: true,
+            created_at: true,
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
+      },
+    });
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));
