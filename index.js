@@ -55,7 +55,7 @@ app.use("/api", verify, [chat, search, userAllActions, groupBlockReport]);
 // END
 
 // Authenticated Admin Routes
-app.use("admin/api", Adminverify, [AdminAccessRoutes]);
+app.use("/admin/api", Adminverify, [AdminAccessRoutes]);
 // END
 
 server.listen(PORT, async () => {
