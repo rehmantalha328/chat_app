@@ -46,7 +46,7 @@ app.use("/api", [otpVerification, signUpUser]);
 // END
 
 // Admin Authentication
-app.use("/adminAuth/api", [AdminAuth]);
+app.use("/adminAuthentication/api", [AdminAuth]);
 // END
 
 // Authenticated Routes
