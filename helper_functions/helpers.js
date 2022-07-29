@@ -44,11 +44,10 @@ const createToken = async (user) => {
 const createAdminToken = (admin) => {
   return jwt.sign(
     {
-      admin_id: admin.admin_id,
-      admin_email: admin.admin_email,
+      admin_id: admin.user_id,
+      admin_email: admin.email,
       role: admin.role,
       created_at: admin.created_at,
-      updated_at: admin.updated_at,
     },
     getEnv("ADMIN_JWT_SECERET"),
     {

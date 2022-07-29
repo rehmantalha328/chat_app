@@ -1,4 +1,4 @@
-const { MessageType,PrivacyType } = require("@prisma/client");
+const { MessageType, PrivacyType } = require("@prisma/client");
 const Joi = require("joi");
 
 function emailValidation(data) {
@@ -68,6 +68,14 @@ function signUpValidation(data) {
   return signupschema.validate(data);
 }
 
+function adminAuthValidation(data) {
+  const validationSchema = Joi.object({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  });
+  return validationSchema.validate(data);
+}
+
 function chkUsername(data) {
   const usernameschema = Joi.object({
     user_name: Joi.string().required(),
@@ -94,7 +102,7 @@ function updateProfile(data) {
   return userProfileSchema.validate(data);
 }
 
-function deleteGalleryImagesValidation(data){
+function deleteGalleryImagesValidation(data) {
   const deleteSchema = Joi.object({
     image_id: Joi.string().required(),
   });
@@ -103,13 +111,13 @@ function deleteGalleryImagesValidation(data){
 
 function updatePrivacy(data) {
   const privacySchema = Joi.object({
-   privacy_type: Joi.string()
-   .valid(
-    PrivacyType.EVERYONE.toString(),
-    PrivacyType.MY_CONTACTS.toString(),
-    PrivacyType.NOBODY.toString(),
-   )
-   .required(),
+    privacy_type: Joi.string()
+      .valid(
+        PrivacyType.EVERYONE.toString(),
+        PrivacyType.MY_CONTACTS.toString(),
+        PrivacyType.NOBODY.toString()
+      )
+      .required(),
   });
   return privacySchema.validate(data);
 }
@@ -169,7 +177,7 @@ function leaveGroupValidation(data) {
   return leaveGroupSchema.validate(data);
 }
 
-function groupMuteValidation(data){
+function groupMuteValidation(data) {
   const groupMuteSchema = Joi.object({
     group_id: Joi.string().required(),
   });
@@ -236,14 +244,14 @@ function messageValidation(data) {
       }),
       otherwise: Joi.string(),
     }),
-    longitude: Joi.when("message_type",{
+    longitude: Joi.when("message_type", {
       is: MessageType.LOCATION.toString(),
       then: Joi.number().required(),
     }),
-    latitude: Joi.when("message_type",{
+    latitude: Joi.when("message_type", {
       is: MessageType.LOCATION.toString(),
       then: Joi.number().required(),
-    })
+    }),
   });
   return messageSchema.validate(data);
 }
@@ -295,7 +303,7 @@ function blockUserValidation(data) {
   return blockSchema.validate(data);
 }
 
-function reportuserValidation(data){
+function reportuserValidation(data) {
   const reportUserSchema = Joi.object({
     reported_id: Joi.string().required(),
     report_reason: Joi.string().required(),
@@ -303,21 +311,20 @@ function reportuserValidation(data){
   return reportUserSchema.validate(data);
 }
 
-function deleteChatValidation(data){
+function deleteChatValidation(data) {
   const delChatSchema = Joi.object({
     group_id: Joi.string().required(),
   });
   return delChatSchema.validate(data);
 }
 
-function reportGroupValidation(data){
+function reportGroupValidation(data) {
   const reportGroupSchema = Joi.object({
     report_reason: Joi.string().required(),
     group_id: Joi.string().required(),
   });
   return reportGroupSchema.validate(data);
 }
- 
 
 module.exports = {
   emailValidation,
@@ -349,4 +356,5 @@ module.exports = {
   updatePrivacy,
   deleteGalleryImagesValidation,
   deleteChatValidation,
+  adminAuthValidation,
 };
