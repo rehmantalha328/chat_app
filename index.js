@@ -13,6 +13,8 @@ const chat = require("./routes/chat");
 const search = require("./routes/search");
 const userAllActions = require("./routes/user");
 const groupBlockReport = require("./routes/groupReports");
+const AdminAuth = require("./routes/admin/admin_auth");
+const AdminAccessRoutes = require("./routes/admin/allRoutes");
 // END
 
 // Importing JWT Verification
@@ -43,8 +45,16 @@ app.use(express.static(__dirname + "public/"));
 app.use("/api", [otpVerification, signUpUser]);
 // END
 
+// Admin Authentication
+app.use("/adminAuth/api", [AdminAuth]);
+// END
+
 // Authenticated Routes
 app.use("/api", verify, [chat, search, userAllActions, groupBlockReport]);
+// END
+
+// Authenticated Admin Routes
+app.use("admin/api", verify, [chat, search, userAllActions, groupBlockReport]);
 // END
 
 server.listen(PORT, async () => {

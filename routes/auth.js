@@ -118,6 +118,7 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
+    console.log("files::::",req.files["gallery"]);
     const { error, value } = signUpValidation(req.body);
     if (error) {
       deleteUploadedGalleryOrProfile(req);
