@@ -103,7 +103,7 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
       delete data.allGroupData.group_messages;
     });
     if (getSortedGroups?.length <= 0) {
-      return res.status(200).send(getSuccessData("No data"));
+      return res.status(200).send(getSuccessData(getSortedGroups));
     }
     return res.status(200).send(getSuccessData(getSortedGroups));
   } catch (error) {
