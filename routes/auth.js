@@ -77,8 +77,8 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
           gte: sevenDaysAgo,
         },
       },
-      orderBy:{
-        created_at: 'desc',
+      orderBy: {
+        created_at: "desc",
       },
       include: {
         group_members: true,
@@ -96,9 +96,9 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
     const getSortedGroups = groups.filter(
       (data) =>
         data.allGroupData.group_members.length >= membersMinLength &&
-        data.allGroupData.group_messages.length >= minGroupMessageLength,
+        data.allGroupData.group_messages.length >= minGroupMessageLength
     );
-    getSortedGroups?.forEach((data)=>{
+    getSortedGroups?.forEach((data) => {
       // delete data.allGroupData.group_members;
       delete data.allGroupData.group_messages;
     });
@@ -159,7 +159,9 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     //   }
     // }
     // END
-
+    if (!req.files["gallery"]) {
+      return res.status(404).send(getError("Gallery is Required"));
+    }
     // s3 bucket for gallery
     if (req?.files?.["gallery"]) {
       for (const file of req.files["gallery"]) {
