@@ -3,7 +3,7 @@ const trimRequest = require("trim-request");
 const Prisma_Client = require("../../prisma_client/_prisma");
 const prisma = Prisma_Client.prismaClient;
 
-router.post("/getAllRegisteredUsers", trimRequest.all, async (req, res) => {
+router.get("/getAllRegisteredUsers", trimRequest.all, async (req, res) => {
   try {
     let { user_id } = req.user;
     let admin_id = user_id;
