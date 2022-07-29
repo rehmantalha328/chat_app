@@ -64,6 +64,7 @@ router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
   }
 });
 
+// Get all suggested groups at the time of signup
 router.post("/getGroups", trimRequest.all, async (req, res) => {
   try {
     const membersMinLength = 2;
@@ -236,7 +237,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   }
 });
 
-// SIMPLE LOGIN
+// SIMPLE LOGIN 
 router.post("/simpleLogin", trimRequest.all, async (req, res) => {
   try {
     const { error, value } = loginUser(req.body);
