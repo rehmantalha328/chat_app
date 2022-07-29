@@ -62,7 +62,7 @@ function signUpValidation(data) {
     about_me: Joi.string(),
     password: Joi.string().min(6).required(),
     fcm_token: Joi.string(),
-    // group_ids: Joi.array(),
+    group_ids: Joi.array()
     // gallery: Joi.array(),
   });
   return signupschema.validate(data);

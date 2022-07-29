@@ -118,6 +118,7 @@ router.post("/getGroups", trimRequest.all, async (req, res) => {
 // signUp USER //
 router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
   try {
+    console.log("req.body",req.body);
     const { error, value } = signUpValidation(req.body);
     if (error) {
       deleteUploadedGalleryOrProfile(req);
@@ -207,6 +208,7 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
     });
     // Section for adding in suggested groups while creating account
     if (req?.body?.group_ids) {
+      console.log(req.body.group_ids);
       req.body.group_ids?.forEach((data) => {
         groups.push({
           member_id: createUser?.user_id,
