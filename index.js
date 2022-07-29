@@ -19,6 +19,7 @@ const AdminAccessRoutes = require("./routes/admin/allRoutes");
 
 // Importing JWT Verification
 const verify = require("./middleWares/authMiddleWare");
+const Adminverify = require("./middleWares/admin_middleware/adminAuth");
 // END
 
 // Setup Scoket
@@ -54,7 +55,7 @@ app.use("/api", verify, [chat, search, userAllActions, groupBlockReport]);
 // END
 
 // Authenticated Admin Routes
-app.use("admin/api", verify, [chat, search, userAllActions, groupBlockReport]);
+app.use("admin/api", Adminverify, [AdminAccessRoutes]);
 // END
 
 server.listen(PORT, async () => {
