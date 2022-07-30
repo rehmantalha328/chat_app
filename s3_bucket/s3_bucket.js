@@ -37,7 +37,7 @@ let uploadFile = function (file) {
 
 let uploadThumbnail = async function (file) {
     if (file && file.thumbnailPath) {
-      const fileContent = await fs.createReadStream(file.path);
+      const fileContent = await fs.createReadStream(file.thumbnailPath);
       // Setting up S3 upload parameters
       const params = {
         Bucket: BUCKET_NAME,
