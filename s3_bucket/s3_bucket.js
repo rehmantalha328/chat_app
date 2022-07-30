@@ -35,22 +35,22 @@ let uploadFile = function (file) {
   return {};
 };
 
-let uploadThumbnail = function (file) {
-  if (file) {
-    const fileContent = fs.createReadStream(file.thumbnailPath);
-    // Setting up S3 upload parameters
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: v4(), // File name you want to save as in S3
-      Body: fileContent,
-      ContentEncoding: "base64",
-      ContentType: "image/png",
-      ACL: "public-read",
-    };
-    // Uploading files to the bucket
-    return s3.upload(params).promise();
-  }
-  return {};
+let uploadThumbnail = async function (file) {
+    if (file && file.thumbnailPath) {
+      const fileContent = await fs.createReadStream(file.path);
+      // Setting up S3 upload parameters
+      const params = {
+        Bucket: BUCKET_NAME,
+        Key: v4(), // File name you want to save as in S3
+        Body: fileContent,
+        ContentEncoding: "base64",
+        ContentType: file?.mimetype,
+        ACL: "public-read",
+      };
+      // Uploading files to the bucket
+      return await s3.upload(params).promise();
+    }
+    return {};
 };
 
 const deleteFile = (fileUrl) => {

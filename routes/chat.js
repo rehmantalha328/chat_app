@@ -1525,9 +1525,9 @@ router.post(
                 if (fs.existsSync(file.path)) {
                   fs.unlinkSync(file.path);
                 }
-                // if (fs.existsSync(file.thumbnailPath)) {
-                //   fs.unlinkSync(file.thumbnailPath);
-                // }
+                if (fs.existsSync(file.thumbnailPath)) {
+                  fs.unlinkSync(file.thumbnailPath);
+                }
               }
             }
             const createMessage = await prisma.group_messages.createMany({
