@@ -693,8 +693,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            skip: offset * 25,
-            take: 25,
+            // skip: offset * 25,
+            // take: 25,
             orderBy: {
               created_at: "desc",
             },
