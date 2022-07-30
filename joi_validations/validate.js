@@ -259,7 +259,7 @@ function messageValidation(data) {
 function fetchMessageValidation(data) {
   const groupChatChkSchema = Joi.object({
     is_group_chat: Joi.boolean().required(),
-    page: Joi.number().integer(),
+    // page: Joi.number().integer(),
     reciever_id: Joi.when("is_group_chat", {
       is: false,
       then: Joi.string().required(),

@@ -603,8 +603,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
       return res.status(404).send(getError(error.details[0].message));
     }
     const { is_group_chat, reciever_id, group_id, page } = value;
-    const offset = page >= 1 ? parseInt(page) - 1 : 0;
-    console.log("page value", offset);
+    // const offset = page >= 1 ? parseInt(page) - 1 : 0;
+    // console.log("page value", offset);
     if (is_group_chat == true) {
       const getGroup = await chkExistingGroup(group_id);
       if (!getGroup) {
@@ -644,8 +644,8 @@ router.post("/fetchMyMessages", trimRequest.all, async (req, res) => {
                 },
               },
             },
-            skip: offset * 25,
-            take: 25,
+            // skip: offset * 25,
+            // take: 25,
             orderBy: {
               created_at: "desc",
             },
