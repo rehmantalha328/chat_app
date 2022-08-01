@@ -1926,6 +1926,17 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 user_id: true,
                 username: true,
                 profile_img: true,
+                my_gallery_pictures: {
+                  select: {
+                    id: true,
+                    picture_url: true,
+                    created_at: true,
+                    updated_at: true,
+                  },
+                  orderBy: {
+                    created_at: "desc",
+                  },
+                },
                 phone: true,
                 online_status: true,
                 online_status_time: true,
@@ -2012,6 +2023,17 @@ router.get("/get_message_contacts", trimRequest.all, async (req, res) => {
                 username: true,
                 phone: true,
                 profile_img: true,
+                my_gallery_pictures: {
+                  select: {
+                    id: true,
+                    picture_url: true,
+                    created_at: true,
+                    updated_at: true,
+                  },
+                  orderBy: {
+                    created_at: "desc",
+                  },
+                },
                 online_status: true,
                 online_status_time: true,
                 // user_i_block: {
