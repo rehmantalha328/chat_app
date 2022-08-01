@@ -139,15 +139,15 @@ router.post("/signUpUser", [trimRequest.all, imagemulter], async (req, res) => {
       deleteUploadedGalleryOrProfile(req);
       return res
         .status(404)
-        .send(getError("User with this phone doesn't exists"));
+        .send(getError("This Phone Number is not registered."));
     }
     if (getExistingUser?.Otp_verified == false) {
       deleteUploadedGalleryOrProfile(req);
-      return res.status(404).send(getError("Please verify otp first"));
+      return res.status(404).send(getError("Please verify OTP first"));
     }
     if (getExistingUser?.is_registered == true) {
       deleteUploadedGalleryOrProfile(req);
-      return res.status(404).send(getError("This user already exists"));
+      return res.status(404).send(getError("This user is already exists"));
     }
 
     // s3 bucket for profile
@@ -247,10 +247,10 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     const phone = "+" + clean(value.phone);
     const getExistingUser = await getUserFromphone(phone);
     if (!getExistingUser) {
-      return res.status(404).send(getError("Invalid phone or password"));
+      return res.status(404).send(getError("Sorry, the user can't be found. Try to login again"));
     }
     if (getExistingUser?.phone !== phone) {
-      return res.status(404).send(getError("Phone number is incorrect"));
+      return res.status(404).send(getError("This Phone Number is not registered."));
     }
     if (getExistingUser?.password !== password) {
       return res.status(404).send(getError("Password is incorrect"));

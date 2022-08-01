@@ -35,7 +35,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         PhoneExists.Otp_verified == true &&
         PhoneExists.is_registered == true
       ) {
-        return res.status(404).send(getError("Phone number already exists"));
+        return res.status(404).send(getError("Sorry this phone number is already taken"));
       } else {
         await prisma.user.update({
           where: {
@@ -64,7 +64,7 @@ router.post("/request_phone_otp", trimRequest.all, async (req, res) => {
         .status(200)
         .send(
           getSuccessData(
-            "Otp sent to your phone, which is valid only for 5 minutes"
+            "OTP sent"
           )
         );
     } else {
@@ -90,7 +90,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
     if (!PhoneExists) {
       return res
         .status(404)
-        .send(getError("No otp issued on this phone number"));
+        .send(getError("This Phone Number is not registered."));
     }
     if (
       PhoneExists?.Otp_verified == true &&
@@ -98,11 +98,11 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
     ) {
       return res
         .status(404)
-        .send(getError("This phone number is already verified"));
+        .send(getError("Sorry this phone number is already taken"));
     }
     const chkOtpExists = await chkExistingOtp(phone, otp);
     if (!chkOtpExists) {
-      return res.status(404).send(getError("Invalid otp code"));
+      return res.status(404).send(getError("Sorry otp does not match"));
     }
     await prisma.user.update({
       where: {
@@ -112,7 +112,7 @@ router.post("/verify_phone_otp", trimRequest.all, async (req, res) => {
         Otp_verified: true,
       },
     });
-    return res.status(200).send(getSuccessData("Phone successfully verified"));
+    return res.status(200).send(getSuccessData("Phone verified successfully"));
   } catch (err) {
     if (err && err.message) {
       return res.status(500).send(getError(err.message));
@@ -139,7 +139,7 @@ router.post(
 
       const PhoneExists = await getUserFromphone(phone);
       if (!PhoneExists) {
-        return res.status(404).send(getError("Phone number doesn't exist"));
+        return res.status(404).send(getError("This Phone Number is not registered."));
       }
       if (
         PhoneExists.Otp_verified == true &&
@@ -165,7 +165,7 @@ router.post(
           },
         });
       } else {
-        return res.status(404).send(getError("Phone number doesn't exist"));
+        return res.status(404).send(getError("This Phone Number is not registered."));
       }
       const messageSent = await send_message({
         body: `Dear user, Your otp is ${random}, which is valid only for 5 minutes.`,
@@ -176,7 +176,7 @@ router.post(
           .status(200)
           .send(
             getSuccessData(
-              "Otp sent to your phone, which is valid only for 5 minutes"
+              "OTP sent"
             )
           );
       } else {
@@ -208,11 +208,11 @@ router.post(
       ) {
         return res
           .status(404)
-          .send(getError("This phone number is not registered"));
+          .send(getError("This Phone Number is not registered."));
       }
       const existingOtp = await chkExistingOtp(phone, otp);
       if (!existingOtp) {
-        return res.status(404).send(getError("Otp doesn't match"));
+        return res.status(404).send(getError("Sorry otp does not match"));
       }
       await prisma.user.update({
         where: {
@@ -224,7 +224,7 @@ router.post(
       });
       return res
         .status(200)
-        .send(getSuccessData("Phone successfully verified"));
+        .send(getSuccessData("Phone verified successfully"));
     } catch (err) {
       if (err && err.message) {
         return res.status(500).send(getError(err.message));
