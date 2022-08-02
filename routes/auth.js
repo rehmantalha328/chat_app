@@ -24,6 +24,7 @@ const { uploadFile, deleteFile } = require("../s3_bucket/s3_bucket");
 const imagemulter = require("../middleWares/profile_gallery_multer");
 const { fs } = require("file-system");
 const { GroupType } = require("@prisma/client");
+const { AdminApproval } = require("@prisma/client");
 
 // Update user password after verification of otp
 router.post("/UpdatePassword", [trimRequest.all], async (req, res) => {
@@ -255,6 +256,10 @@ router.post("/simpleLogin", trimRequest.all, async (req, res) => {
     if (getExistingUser?.password !== password) {
       return res.status(404).send(getError("Password is incorrect"));
     }
+    if (getExistingUser?.admin_approval !== AdminApproval.APPROVED) {
+      return res.status(404).send(getError("You are blocked by admin"));
+    }
+
     const updateFcm = await updateFcmToken(getExistingUser?.user_id, fcm_token);
     return res
       .status(200)

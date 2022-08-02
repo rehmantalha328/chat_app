@@ -39,6 +39,7 @@ model User {
   last_seen_show_to             PrivacyType?       @default(EVERYONE)
   profile_image_show_to         PrivacyType?       @default(EVERYONE)
   my_about_show_to              PrivacyType?       @default(EVERYONE)
+  admin_approval                AdminApproval      @default(APPROVED)
   primary_user_channel          groups[]           @relation("primary_user")
   secondary_user_channel        groups[]           @relation("secondary_user")
   i_send_messages               group_messages[]   @relation("user_sender")
@@ -207,4 +208,9 @@ enum GroupType {
 
 enum UserRole {
   ADMIN
+}
+
+enum AdminApproval{
+  APPROVED
+  BLOCKED
 }

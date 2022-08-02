@@ -8,6 +8,13 @@ function emailValidation(data) {
   return emailSchema.validate(data);
 }
 
+function blockUserByAdminValidate(data){
+  const blockUserSchema = Joi.object({
+    user_id: Joi.string().required(),
+  });
+  return blockUserSchema.validate(data);
+}
+
 function loginUser(data) {
   const loginSchema = Joi.object({
     phone: Joi.string().required(),
@@ -259,7 +266,7 @@ function messageValidation(data) {
 function fetchMessageValidation(data) {
   const groupChatChkSchema = Joi.object({
     is_group_chat: Joi.boolean().required(),
-    // page: Joi.number().integer(),
+    page: Joi.number().integer(),
     reciever_id: Joi.when("is_group_chat", {
       is: false,
       then: Joi.string().required(),
@@ -357,4 +364,5 @@ module.exports = {
   deleteGalleryImagesValidation,
   deleteChatValidation,
   adminAuthValidation,
+  blockUserByAdminValidate,
 };
