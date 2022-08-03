@@ -8,16 +8,10 @@ const send_message = async ({ body, number }) => {
   // return true;
   try {
     return await client.messages.create({
-      body,
-      from: "DEFIGRAM",
-      to: number,
+    //  Code goes here
     });
   } catch (Error) {
-    return client.messages.create({
-      body,
-      from: myNumber,
-      to: number,
-    });
+    // Code goes here
   }
 };
 

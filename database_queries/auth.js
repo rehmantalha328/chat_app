@@ -3,61 +3,19 @@ const prisma = Prisma_Client.prismaClient;
 
 function getUserFromId(id) {
   return prisma.user.findFirst({
-    where: {
-      user_id: id,
-    },
+    // code goes here
   });
 }
 
 function getUserFromphone(phone) {
   return prisma.user.findFirst({
-    where: {
-      phone,
-    },
+    // code goes here
   });
 }
 
-function chkExistingUserName(username) {
-  return prisma.user.findFirst({
-    where: {
-      username,
-    },
-  });
-}
 
-function chkExistingOtp(phone, otp) {
-  return prisma.user.findFirst({
-    where: {
-      phone,
-      Otp: otp,
-    },
-  });
-}
-
-function chkExistingUsername(username) {
-  return prisma.user.findFirst({
-    where: {
-      username,
-    },
-  });
-}
-
-function updateFcmToken(user_id,fcm_token) {
-  return prisma.user.update({
-    where: {
-      user_id,
-    },
-    data: {
-      fcm_token,
-    },
-  });
-}
 
 module.exports = {
   getUserFromphone,
   getUserFromId,
-  chkExistingUserName,
-  chkExistingOtp,
-  chkExistingUsername,
-  updateFcmToken,
 };

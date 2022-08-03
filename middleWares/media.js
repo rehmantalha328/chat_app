@@ -5,16 +5,8 @@ const { v4 } = require("uuid");
 
 const multerStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        let path = "media/";
-        if (!fs.existsSync(path)) {
-          fs.mkdirSync(path);
-          cb(null, "media/");
-        }
-        cb(null, "media/");
     },
     filename: (req, file, cb) => {
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `${v4()}-${Date.now()}.${ext}`);
     },
 });
     

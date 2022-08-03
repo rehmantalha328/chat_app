@@ -15,22 +15,7 @@ const { chkAlreadyReportedGroup, reportGroup } = require("../database_queries/gr
 // Report Groups
 router.post("/reportGroup", trimRequest.all, async (req, res) => {
   try {
-    const { user_id } = req.user;
-    const { error, value } = reportGroupValidation(req.body);
-    if (error) {
-      return res.status(404).send(getError(error.details[0].message));
-    }
-    const {group_id,report_reason} = value;
-    const isGroupExists = await chkExistingGroup(group_id);
-    if (!isGroupExists) {
-        return res.status(404).send(getError("Group doesn't exists"));
-    }
-    const isAlreadyReported = await chkAlreadyReportedGroup(group_id,user_id);
-    if (isAlreadyReported) {
-        return res.status(404).send(getError("You already reported this group"));
-    }
-    const createReport = await reportGroup(group_id,user_id,report_reason);
-    return res.status(200).send(getSuccessData("Group reported successfully"));
+    // Code goes here
   } catch (error) {
     if (error && error.message) {
       return res.status(404).send(getError(error.message));

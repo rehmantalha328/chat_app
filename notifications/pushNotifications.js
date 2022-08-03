@@ -1,6 +1,6 @@
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./defigram-7bc1c-firebase-adminsdk-jpzkf-15a1b448f4.json");
+var serviceAccount = require("");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -22,4 +22,5 @@ const SendNotification = (
     });
 };
 
+// This module is for sending notifications to client side
 module.exports = { SendNotification };

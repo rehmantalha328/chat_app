@@ -7,16 +7,7 @@ module.exports = async function (req, res, next) {
   const token = req.header("Authorization");
   if (!token) return res.status(404).send(getError("Access Denied"));
   try {
-    const verified = jwt.verify(token, getEnv("JWT_SECRET"));
-    const { _id: id } = verified;
-    const user = await getUserFromId(id);
-    if (!user)
-      return res
-        .status(404)
-        .send(getError("Unauthorized..! Please refresh your token."));
-    // console.log(user);
-    req.user = user;
-    next();
+    // Authentication using JWT code goes here
   } catch (err) {
     if (err & err.message) {
       return res.status(404).send(getError(err.message));

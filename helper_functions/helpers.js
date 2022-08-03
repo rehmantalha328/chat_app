@@ -29,10 +29,7 @@ const clean = (str) => {
 const createToken = async (user) => {
   return jwt.sign(
     {
-      _id: user.user_id,
-      username: user.username,
-      phone: user.phone,
-      profile_img: user.profile_img,
+      // sign token code goes here
     },
     getEnv("JWT_SECRET"),
     {
@@ -44,10 +41,8 @@ const createToken = async (user) => {
 const createAdminToken = (admin) => {
   return jwt.sign(
     {
-      admin_id: admin.user_id,
-      admin_email: admin.email,
-      role: admin.role,
-      created_at: admin.created_at,
+      // sign token code goes here
+      
     },
     getEnv("ADMIN_JWT_SECRET"),
     {
@@ -83,85 +78,13 @@ const timeExpired = ({
 
 const deleteUploadedImage = (req) => {
   try {
-    // if (req.files?.["profile"]) {
-    //   req?.files["profile"]?.forEach((file) => {
-    //     fs.unlinkSync(file.path);
-    //   });
-    // }
-    // if (req.files?.["gallery"]) {
-    //   req?.files["gallery"]?.forEach((file) => {
-    //     fs.unlinkSync(file.path);
-    //   });
-    // }
-    if (req.files) {
-      req?.files?.forEach((file) => {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      });
-    }
+  //  del image from local destination code goes here
   } catch (error) {
     console.log(error);
   }
 };
 
-const deleteUploadedGalleryOrProfile = (req) => {
-  try {
-    if (req.files?.["profile"]) {
-      req?.files["profile"]?.forEach((file) => {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      });
-    }
-    if (req.files?.["gallery"]) {
-      req?.files["gallery"]?.forEach((file) => {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      });
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
 
-const deleteSingleImage = (req) => {
-  try {
-    const path = req?.file?.path;
-    fs.unlinkSync(path);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const deleteExistigImg = (req) => {
-  try {
-    const path = req?.file?.path;
-    fs.unlinkSync(path);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2 - lat1); // deg2rad below
-  var dLon = deg2rad(lon2 - lon1);
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI / 180);
-}
 
 module.exports = {
   getError,
@@ -169,10 +92,6 @@ module.exports = {
   clean,
   createToken,
   deleteUploadedImage,
-  deleteSingleImage,
-  deleteExistigImg,
   timeExpired,
-  getDistanceFromLatLonInKm,
   createAdminToken,
-  deleteUploadedGalleryOrProfile,
 };

@@ -12,41 +12,21 @@ AWS.config.update({
 });
 
 const s3 = new AWS.S3({
-  region: AWS.config.region,
-  accessKeyId: ID,
-  secretAccessKey: SECRET,
+  // Code goes here of configuration s3 bucket
 });
 
 let uploadFile = function (file) {
   if (file && file.path) {
-    const fileContent = fs.createReadStream(file.path);
-    // Setting up S3 upload parameters
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: v4(), // File name you want to save as in S3
-      Body: fileContent,
-      ContentEncoding: "base64",
-      ContentType: file?.mimetype,
-      ACL: "public-read",
+    // Upload file code goes here
     };
     // Uploading files to the bucket
     return s3.upload(params).promise();
-  }
   return {};
 };
 
 let uploadThumbnail = async function (file) {
     if (file && file.thumbnailPath) {
-      const fileContent = await fs.createReadStream(file.thumbnailPath);
-      // Setting up S3 upload parameters
-      const params = {
-        Bucket: BUCKET_NAME,
-        Key: v4(), // File name you want to save as in S3
-        Body: fileContent,
-        ContentEncoding: "base64",
-        ContentType: "image/jpg",
-        ACL: "public-read",
-      };
+    //  uploading file code goes here
       // Uploading files to the bucket
       return await s3.upload(params).promise();
     }
@@ -55,13 +35,9 @@ let uploadThumbnail = async function (file) {
 
 const deleteFile = (fileUrl) => {
   if (fileUrl) {
-    const splitedFileUrl = fileUrl.split("/");
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: splitedFileUrl[splitedFileUrl.length - 1], // File name you want to save as in S3
+    // remove objects from s3
     };
     return s3.deleteObject(params).promise();
-  }
   return {};
 };
 

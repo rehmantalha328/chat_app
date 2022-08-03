@@ -5,24 +5,17 @@ class Mailer {
   static transporter = null;
   static setupTransporter() {
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: getEnv("MAIL_USERNAME"),
-        pass: getEnv("MAIL_PASSWORD"),
-      },
+      // Code goes here
     });
   }
   static async sendMail(reciver_email, subject, text) {
     await this.transporter.sendMail({
       from: {
-        name: getEnv("MAIL_FROM_NAME"),
-        address: getEnv("MAIL_FROM_ADDRESS"),
+        // Code goes here
       },
-      to: reciver_email,
-      subject,
-      text,
+      to: {
+        // Code goes here
+      },
     });
   }
 }

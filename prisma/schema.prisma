@@ -10,207 +10,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// These are all database models
 model User {
-  user_id                       String             @id @default(cuid())
-  name                          String?            @db.VarChar(255)
-  email                         String?            @db.VarChar(255)
-  role                          UserRole?
-  username                      String?            @db.VarChar(255)
-  user_name                     String?            @db.VarChar(255)
-  phone                         String?            @db.VarChar(255)
-  about_me                      String?
-  gender                        String?
-  birthday                      String?
-  password                      String?            @db.VarChar(255)
-  Otp                           Int?
-  Otp_verified                  Boolean?           @default(false)
-  forgot_password_otp_verify    Boolean?           @default(false)
-  profile_img                   String?            @db.VarChar(255)
-  is_registered                 Boolean?           @default(false)
-  notifications                 Boolean?           @default(true)
-  is_private_chat_notifications Boolean?           @default(true)
-  is_group_chat_notifications   Boolean?           @default(true)
-  fcm_token                     String?
-  created_at                    DateTime           @default(now())
-  updated_at                    DateTime           @updatedAt
-  online_status                 Boolean?           @default(false)
-  online_status_time            DateTime?          @updatedAt
-  my_gallery_pictures           User_gallery[]
-  last_seen_show_to             PrivacyType?       @default(EVERYONE)
-  profile_image_show_to         PrivacyType?       @default(EVERYONE)
-  my_about_show_to              PrivacyType?       @default(EVERYONE)
-  admin_approval                AdminApproval      @default(APPROVED)
-  primary_user_channel          groups[]           @relation("primary_user")
-  secondary_user_channel        groups[]           @relation("secondary_user")
-  i_send_messages               group_messages[]   @relation("user_sender")
-  i_recieve_messages            group_messages[]   @relation("user_reciever")
-  groups_i_joined               group_members[]    @relation("member")
-  groups_i_created              groups[]           @relation("creator")
-  i_recieve_messages_in_group   message_reciever[] @relation("reciever_in_group")
-  user_i_block                  blockProfile[]     @relation("blocker")
-  user_blocked_me               blockProfile[]     @relation("blocked")
-  user_i_report                 reportUser[]       @relation("reporter")
-  user_report_me                reportUser[]       @relation("reported")
-  groups_i_report               groupReports[]     @relation("group_reporter")
-  groups_i_mute                 group_mute[]       @relation("user_mute_group")
 }
 
 model User_gallery {
-  id          String    @id @default(cuid())
-  user_id     String?
-  picture_url String?
-  created_at  DateTime? @default(now())
-  updated_at  DateTime? @updatedAt
-  user        User?     @relation(fields: [user_id], references: [user_id])
 }
 
 model groups {
-  group_id            String           @id @default(cuid())
-  group_name          String?          @db.VarChar(255)
-  group_image         String?          @db.VarChar(255)
-  group_description   String?          @db.VarChar(255)
-  group_creator_id    String?          @db.VarChar(255)
-  sender_id           String?          @db.VarChar(255)
-  reciever_id         String?          @db.VarChar(255)
-  is_group_chat       Boolean          @default(false)
-  group_type          GroupType?
-  created_at          DateTime         @default(now())
-  updated_at          DateTime         @updatedAt
-  last_message_time   DateTime?
-  sender              User?            @relation(fields: [sender_id], references: [user_id], name: "primary_user")
-  reciever            User?            @relation(fields: [reciever_id], references: [user_id], name: "secondary_user")
-  group_members       group_members[]
-  group_messages      group_messages[]
-  group_creator       User?            @relation(fields: [group_creator_id], references: [user_id], name: "creator")
-  total_group_reports groupReports[]   @relation("reported_group")
-  group_mutes         group_mute[]     @relation("muted_group")
 }
 
 model group_mute {
-  id         String   @id @default(cuid())
-  group_id   String?
-  user_id    String?
-  user       User?    @relation(fields: [user_id], references: [user_id], name: "user_mute_group")
-  group      groups?  @relation(fields: [group_id], references: [group_id], name: "muted_group")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
 }
 
 model group_members {
-  id           String   @id @default(cuid())
-  member_id    String   @db.VarChar(255)
-  group_id     String
-  is_admin     Boolean  @default(false)
-  is_sub_admin Boolean  @default(false)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  member       User     @relation(fields: [member_id], references: [user_id], name: "member")
-  group        groups   @relation(fields: [group_id], references: [group_id])
 }
 
 model group_messages {
-  id               String             @id @default(cuid())
-  sender_id        String?            @db.VarChar(255)
-  reciever_id      String?            @db.VarChar(255)
-  group_id         String?            @db.VarChar(255)
-  message_body     String?            @db.VarChar(255)
-  reply_of         String?
-  attatchment      String?
-  thumbnail        String?
-  attatchment_name String?
-  contact_name     String?
-  contact_number   String?
-  longitude        Float?
-  latitude         Float?
-  media_type       MediaType?
-  media_caption    String?
-  seen             Boolean            @default(false)
-  message_type     MessageType?       @default(TEXT)
-  created_at       DateTime           @default(now())
-  updated_at       DateTime           @updatedAt
-  user_sender      User?              @relation(fields: [sender_id], references: [user_id], name: "user_sender")
-  user_reciever    User?              @relation(fields: [reciever_id], references: [user_id], name: "user_reciever")
-  groups           groups?            @relation(fields: [group_id], references: [group_id])
-  reciever         message_reciever[]
 }
 
 model message_reciever {
-  id          String          @id @default(cuid())
-  message_id  String?         @db.VarChar(255)
-  reciever_id String?         @db.VarChar(255)
-  group_id    String?
-  seen        Boolean         @default(false)
-  created_at  DateTime        @default(now())
-  updated_at  DateTime        @updatedAt
-  reciever    User?           @relation(fields: [reciever_id], references: [user_id], name: "reciever_in_group")
-  message     group_messages? @relation(fields: [message_id], references: [id])
 }
 
 model blockProfile {
-  id         String   @id @default(cuid())
-  blocker_id String?
-  blocked_id String?
-  blocked    User?    @relation(fields: [blocked_id], references: [user_id], name: "blocked")
-  blocker    User?    @relation(fields: [blocker_id], references: [user_id], name: "blocker")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
 }
 
 model reportUser {
-  id            String   @id @default(cuid())
-  reporter_id   String?
-  reported_id   String?
-  report_reason String?
-  reported      User?    @relation(fields: [reported_id], references: [user_id], name: "reported")
-  reporter      User?    @relation(fields: [reporter_id], references: [user_id], name: "reporter")
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-}
-
-model groupReports {
-  id            String   @id @default(cuid())
-  reporter_id   String?
-  group_id      String?
-  report_reason String?
-  reporter      User?    @relation(fields: [reporter_id], references: [user_id], name: "group_reporter")
-  group         groups?  @relation(fields: [group_id], references: [group_id], name: "reported_group")
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
 }
 
 enum MessageType {
-  TEXT
-  LINK
-  MEDIA
-  CONTACT
-  LOCATION
 }
 
 enum MediaType {
-  AUDIO
-  VIDEO
-  PICTURE
-  DOCUMENT
 }
 
 enum PrivacyType {
-  EVERYONE
-  MY_CONTACTS
-  NOBODY
 }
 
 enum GroupType {
-  PROJECT
-  AMA
-  GENERAL
-  OFFICIAL
 }
 
 enum UserRole {
-  ADMIN
 }
 
 enum AdminApproval{
-  APPROVED
-  BLOCKED
 }

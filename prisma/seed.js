@@ -4,26 +4,11 @@ const { GroupType, UserRole } = require("@prisma/client");
 
 const seedDatabase = async () => {
   const addAdminRecord = await prisma.user.create({
-    data: {
-      username: "ADMIN",
-      email: "defigram_admin@defigram.com",
-      password: "123456",
-      role: UserRole.ADMIN,
-    },
+    // code goes here
   });
   const createOfficialGroup = await prisma.groups.create({
     data: {
-      is_group_chat: true,
-      group_name: "Defigram.io News Channel",
-      group_type: GroupType.OFFICIAL,
-      last_message_time: new Date(),
-      group_creator_id: addAdminRecord?.user_id,
-      group_members: {
-        create: {
-          member_id: addAdminRecord?.user_id,
-          is_admin: true,
-        },
-      },
+      // code goes here
     },
   });
 };
@@ -36,3 +21,5 @@ seedDatabase()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+// This module is for seeding the database
